@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пролетарский завод - внутренний портал</title>
+
+    {% load static %}
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    <!-- Bootstrap -->
+    <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="pz-header">
+    <div class="pz-blue-line"></div>
+    <div class="pz-logo">
+        <a href="/machines">
+            <img src="{% static 'img/pzLogo.png' %}" alt>
+        </a>
+    </div>
+    <div class="pz-logo-osk">
+        <a href="http://www.aoosk.ru">
+            <img src="{% static 'img/OSKLogo.png' %}" alt>
+        </a>
+    </div>
+</div>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" id="toggle-slidebar" href="#">
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+            </a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="{% url 'login' %}" id="login_as">
+                        <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}" id="logout">
+                        <span class="glyphicon glyphicon-log-out"></span> Выход
+                    </a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{% url 'login' %}" id="login">
+                        <span class="glyphicon glyphicon-log-in"></span> Вход</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<div id="wrapper" class="toggled">
+        <div id="sidebar-wrapper">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand"><a href="#">Start menu</a> </li>
+                <li class="sidebar-brand"><a href="#">Dashboard</a> </li>
+            </ul>
+        </div>
+    <div id="page-content-wrapper">
+        <div class="container-fluid text-center">
+            {% block content %}
+            {% endblock content %}
+        </div>
+    </div>
+</div>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<!--script src="'bootstrap/js/bootstrap.min.js"></--script-->
+{% bootstrap_javascript %}
+{% bootstrap_messages %}
+</body>
+</html>
