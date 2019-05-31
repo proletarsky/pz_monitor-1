@@ -5,5 +5,6 @@ from machines import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^accounts/', include('django.contrib.auth.urls')),
-    url(r'^newdata', views.api_new_data),
+    url(r'^newdata/', views.RawDataUploadView.as_view()),
+    # url(r'^newdata/', views.api_new_data),
 ]
