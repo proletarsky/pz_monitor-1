@@ -7,5 +7,11 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://127.0.0.1:5432/pzmonitor</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="pzmonitor@192.168.7.75" uuid="f972ad6b-974c-4932-b0d3-1b0fe307fc27">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://192.168.7.75:5432/pzmonitor</jdbc-url>
+    </data-source>
   </component>
 </project>

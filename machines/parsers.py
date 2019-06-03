@@ -7,7 +7,9 @@ class CoordinatorDataParser(BaseParser):
     media_type = 'application/x-www-form-urlencoded'
 
     def parse(self, stream, media_type=None, parser_context=None):
-        data = unquote(stream.read())
+        bytes = stream.read()
+        print('########## %s #########', bytes)
+        data = unquote(str(bytes))
         elements = None
         try:
             rawstrings = data.split('\n')[1:]
