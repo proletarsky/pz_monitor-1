@@ -8,8 +8,8 @@ class CoordinatorDataParser(BaseParser):
 
     def parse(self, stream, media_type=None, parser_context=None):
         bytes = stream.read()
-        print('########## %s #########', bytes)
-        data = unquote(str(bytes))
+        strbytes = str(bytes)
+        data = unquote(strbytes)
         elements = None
         try:
             rawstrings = data.split('\n')[1:]

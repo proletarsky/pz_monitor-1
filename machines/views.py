@@ -35,11 +35,13 @@ class RawDataUploadView(APIView):
 
     def post(self, request, format=None):
         data = request.data
+        ip = request.META.get('REMOTE_ADDR')
         for data_line in data:
             rawdata = RawData(mac_address=data_line['mac_address'],
                               channel=data_line['channel'],
                               value=data_line['value'],
-                              date=data_line['time'])
+                              date=data_line['time'],
+                              ip=ip)
             rawdata.save()
         return Response(status=status.HTTP_201_CREATED)
 
