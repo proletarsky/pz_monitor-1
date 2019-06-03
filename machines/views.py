@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import re
-import json
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
-from models import Equipment, RawData
+from django.views.generic import ListView
+from .models import Equipment, RawData
 from serializers import RawDataSerializer
 from .forms import ReasonForm
 from rest_framework import routers, serializers, viewsets, response, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
 from .parsers import CoordinatorDataParser
+from .filters import EquipmentFilter
 
 
 # @api_view(['POST'])
@@ -46,11 +43,21 @@ class RawDataUploadView(APIView):
             rawdata.save()
         return Response(status=status.HTTP_201_CREATED)
 
+
 # Create your views here.
 class RawDataViewSet(viewsets.ModelViewSet):
     queryset = RawData.objects.all()
     serializer_class = RawDataSerializer
 
+
+class EqipmentFilteredListView(ListView):
+    model = Equipment
+    template_name = 'machines/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = EquipmentFilter(self.request.GET, queryset=self.get_queryset())
+        return context
 
 def index(request):
     equipment_list = Equipment.objects.all()

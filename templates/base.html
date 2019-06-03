@@ -30,7 +30,7 @@
         </a>
     </div>
     <div class="pz-logo-osk">
-        <a href="http://www.aoosk.ru">
+        <a href="http://www.aoosk.ru" target="_blank">
             <img src="{% static 'img/OSKLogo.png' %}" alt>
         </a>
     </div>
@@ -41,6 +41,10 @@
             <a class="navbar-brand" id="toggle-slidebar" href="#">
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
             </a>
+            <ul class="nav navbar-nav navbar-left">
+                {% block navbar %}
+                {% endblock navbar %}
+            </ul>
         </div>
         <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
@@ -63,14 +67,22 @@
         </ul>
     </div>
 </nav>
-
+<!--Боковая панель с меню-->
 <div id="wrapper" class="toggled">
         <div id="sidebar-wrapper">
             <ul class="sidebar-nav">
-                <li class="sidebar-brand"><a href="#">Start menu</a> </li>
-                <li class="sidebar-brand"><a href="#">Dashboard</a> </li>
+                <li class="sidebar-brand">
+                    <a href="/machines"><span class="glyphicon glyphicon-scale"></span> Оборудование</a>
+                </li>
+                {% block sidebar %}
+                {% endblock sidebar %}
+                <li class="sidebar-brand">
+                    <a href="http://www.proletarsky.ru" target="_blank">Официальный сайт</a></li>
+                <li class="sidebar-brand">
+                    <a href="http://phonebook.proletarsky.ru" target="_blank">Телефонная книга</a></li>
             </ul>
         </div>
+    <!--Главная страница-->
     <div id="page-content-wrapper">
         <div class="container-fluid text-center">
             {% block content %}

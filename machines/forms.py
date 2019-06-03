@@ -1,5 +1,5 @@
 from django import forms
-from models import Reason
+from .models import Reason
 
 
 class ReasonForm(forms.ModelForm):

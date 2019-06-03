@@ -1,8 +1,57 @@
 {% extends "base.html" %}
+{% load bootstrap %}
+{% load admin_urls %}
+
+{% block navbar %}
+    {% if user.is_superuser %}
+        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
+    {% endif %}
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
 
 {% block content %}
     <div class="page-header">
-    <h1>Проверка шаблонов</h1>
-    <button class="btn-primary">Все понятно</button>
+        <h1>Мониторинг оборудования</h1>
     </div>
+    <form class="form-inline text-left" method="get">
+        <div class="form-group mb-2 text-left" style="padding-bottom: 30px">
+            {{ filter.form | bootstrap_inline }}
+            <button class="btn btn-primary" type="submit">Применить</button>
+        </div>
+    </form>
+    <table class="table-striped text-left" width="100%">
+        <thead>
+        <tr>
+            <th>Цех</th>
+            <th>Инв. номер</th>
+            <th>Модель</th>
+            <th>Статистика</th>
+            <th>Простои</th>
+            {% if user.is_superuser %}
+                <th>Настройка</th>
+            {% endif %}
+        </tr>
+        </thead>
+        {% for equip in filter.qs %}
+            <tr>
+                <td>{{ equip.workshop }}</td>
+                <td>{{ equip.code }}</td>
+                <td>{{ equip.model }}</td>
+                <td></td>
+                <td></td>
+                {% if user.is_superuser %}
+                    <td><a href="#">
+                        <span class="glyphicon glyphicon-cog"></span> Настройка
+                    </a></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock content %}

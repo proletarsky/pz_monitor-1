@@ -19,12 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework import routers
 from machines.views import RawDataViewSet
+from .view import main_index
 
 router = routers.DefaultRouter()
 router.register(r'^api/rawdata', RawDataViewSet)
 
 
 urlpatterns = [
+                  url(r'^$', main_index),
     url(r'^machines/', include('machines.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^accounts/', include('django.contrib.auth.urls'))

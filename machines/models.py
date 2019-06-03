@@ -12,7 +12,7 @@ class Reason(models.Model):
     description = models.TextField(max_length=1000, verbose_name='Описание')
 
     def __str__(self):
-        return ('{0} - {1}'.format(self.code, self.description)).encode('utf-8')
+        return ('{0} - {1}'.format(self.code, self.description))
 
 
 class Participant(models.Model):
@@ -31,7 +31,15 @@ class Participant(models.Model):
 
     def __str__(self):
         string = '{0} {1} {2}, {3}'.format(self.surname, self.first_name, self.second_name, self.role)
-        return string.encode('utf-8')
+        return string
+
+
+class RawData(models.Model):
+    date = models.DateTimeField(auto_now=True)
+    mac_address = models.CharField(max_length=25)
+    channel = models.CharField(max_length=5, null=True)
+    value = models.FloatField()
+    ip = models.CharField(max_length=20, null=True)
 
 
 class Equipment(models.Model):
@@ -51,16 +59,19 @@ class Equipment(models.Model):
         ('24/5', 'круглосуточно с выходными'),
         ('24/7', 'круглосуточно без выходных'),
     )
+    AVAILABLE_MACS = lambda: [(m.mac_address, m.mac_address)
+                              for m in RawData.objects.order_by('mac_address').distinct('mac_address')]
     workshop = models.CharField(max_length=20, verbose_name='Цех', choices=WORKSHOP_CHOICES)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
     description = models.TextField(max_length=1000, verbose_name='Описание', null=True, blank=True)
     timetable = models.CharField(max_length=30, verbose_name='Расписание', choices=TIMETABLE_CHOICES)
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
-    xbee_mac = models.CharField(max_length=15, verbose_name='MAC модема', null=True, blank=True)
+    xbee_mac = models.CharField(max_length=25, verbose_name='MAC модема',
+                                choices=AVAILABLE_MACS(), null=True, blank=True)
 
     def __str__(self):
-        return ('{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)).encode('utf-8')
+        return '{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)
 
 
 class TimetableDetail(models.Model):
@@ -91,7 +102,7 @@ class TimetableDetail(models.Model):
     def __str__(self):
         return ('{0}-{1}:(1-я смена:{2}-{3})'.format(self.day_of_week_start, self.day_of_week_end,
                                                      self.start_time1.strftime('%H:%M'),
-                                                     self.end_time1.strftime('%H:%M'))).encode('utf-8')
+                                                     self.end_time1.strftime('%H:%M')))
 
 
 class Timetable(models.Model):
@@ -100,19 +111,11 @@ class Timetable(models.Model):
                                             auto_created=True)
 
     def __str__(self):
-        return self.name.encode('utf-8')
+        return self.name
 
 
 class TimetableContent(models.Model):
     timetable = models.ForeignKey(Timetable, verbose_name='Расписание', on_delete=models.CASCADE)
     details = models.ForeignKey(TimetableDetail, verbose_name='Детали', on_delete=models.CASCADE)
-
-
-class RawData(models.Model):
-    date = models.DateTimeField(auto_now=True)
-    mac_address = models.CharField(max_length=25)
-    channel = models.CharField(max_length=5, null=True)
-    value = models.FloatField()
-    ip = models.CharField(max_length=20, null=True)
 
 
