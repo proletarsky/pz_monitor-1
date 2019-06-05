@@ -1,6 +1,8 @@
 from rest_framework.parsers import BaseParser
 from urllib.parse import unquote
 import re, datetime
+from django.utils import timezone
+import pytz
 
 
 class CoordinatorDataParser(BaseParser):
@@ -16,8 +18,8 @@ class CoordinatorDataParser(BaseParser):
             elements = [self.parse_string(s) for s in rawstrings if self.parse_string(s) is not None]
             max_tick_count = max([x['tick_count'] for x in elements])
             for e in elements:
-                e['time'] = datetime.datetime.now() - datetime.timedelta(
-                    seconds=(max_tick_count - e['tick_count']) // 100)
+                e['time'] = timezone.now() - datetime.timedelta(
+                    seconds=(max_tick_count - e['tick_count']) // 1000)  # 1 tick is 1 ms
         except Exception:
             pass
         return elements

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load googlecharts %}
+
+{% block navbar %}
+    {% if user.is_superuser %}
+        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
+    {% endif %}
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+    <div class="page-header text-left">
+        <h4>{{ object }}</h4>
+    </div>
+
+
+    <div id="my-graph" style="text-align: center; margin-top: 30px"></div>
+
+    {% googlecharts %}
+        {% data rawdata "track" %}
+            {% col "string" "time" %}"{{ val }}"{% endcol %}
+            {% col "number" "value" %}{{ val }}{% endcol %}
+        {% enddata %}
+
+        {% options "myoptions" %}
+            kind: "LineChart",
+            options: {
+            backgroundColor: "#f9f9f9",
+            colors: ["#FF0000", "#00FF00", "#0000FF"],
+            title: "График",
+            chartArea: {left: 40, top: 20, width: '90%', height: '100%'},
+            width: '100%',
+            height: '20%'
+            }
+        {% endoptions %}
+        {% graph "my-graph" "track" "myoptions" %}
+    {% endgooglecharts %}
+
+{% endblock content %}

@@ -33,7 +33,7 @@
             <th>Инв. номер</th>
             <th>Модель</th>
             <th>Статистика</th>
-            <th>Простои</th>
+            <th>Текущие данные</th>
             {% if user.is_superuser %}
                 <th>Настройка</th>
             {% endif %}
@@ -45,7 +45,9 @@
                 <td>{{ equip.code }}</td>
                 <td>{{ equip.model }}</td>
                 <td></td>
-                <td></td>
+                <td>
+                    <a href="{{ appname }}works/{{ equip.id }}/">Данные</a>
+                </td>
                 {% if user.is_superuser %}
                     <td><a href="#">
                         <span class="glyphicon glyphicon-cog"></span> Настройка

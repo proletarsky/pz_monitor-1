@@ -5,4 +5,4 @@ from machines.models import RawData
 class RawDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = RawData
-        fields = ['mac_address', 'value']
+        fields = ['mac_address', 'date', 'value']

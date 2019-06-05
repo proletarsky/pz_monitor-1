@@ -21,8 +21,6 @@ from rest_framework import routers
 from machines.views import RawDataViewSet
 from .view import main_index
 
-router = routers.DefaultRouter()
-router.register(r'^api/rawdata', RawDataViewSet)
 
 
 urlpatterns = [
