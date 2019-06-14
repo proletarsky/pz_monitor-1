@@ -130,7 +130,7 @@ class ClassifiedInterval(models.Model):
                 prev_last_obj.end = end or timezone.now()
                 prev_last_obj.save()
             else:
-                ci = ClassifiedInterval(start=start, end=end, equpment=equipment,
+                ci = ClassifiedInterval(start=start, end=end, equipment=equipment,
                                         automated_classification=classification)
                 ci.save()
         else:
