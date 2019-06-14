@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+import datetime
 
 # Create your models here.
 
@@ -10,6 +12,8 @@ from django.contrib.auth.models import User
 class Reason(models.Model):
     code = models.CharField(max_length=10, verbose_name='Код')
     description = models.TextField(max_length=1000, verbose_name='Описание')
+    is_working = models.BooleanField(verbose_name='Работа', default=False)
+    is_operator = models.BooleanField(verbose_name='Указывается оператором', default=False)
 
     def __str__(self):
         return ('{0} - {1}'.format(self.code, self.description))
@@ -61,6 +65,8 @@ class Equipment(models.Model):
     )
     AVAILABLE_MACS = lambda: [(m.mac_address, m.mac_address)
                               for m in RawData.objects.order_by('mac_address').distinct('mac_address')]
+    AVAILABLE_CHANNELS = lambda: [(m.channel, m.channel)
+                                  for m in RawData.objects.distinct('channel')]
     workshop = models.CharField(max_length=20, verbose_name='Цех', choices=WORKSHOP_CHOICES)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
@@ -69,9 +75,68 @@ class Equipment(models.Model):
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
     xbee_mac = models.CharField(max_length=25, verbose_name='MAC модема',
                                 choices=AVAILABLE_MACS(), null=True, blank=True)
+    main_channel = models.CharField(max_length=5, verbose_name='Канал', choices=AVAILABLE_CHANNELS(),
+                                    null=True, blank=True)
+    idle_threshold = models.IntegerField(verbose_name='Порог включения', default=100)
+    no_load_threshold = models.IntegerField(verbose_name='Порог холостого хода', default=110)
+    allowed_idle_interval = models.IntegerField(verbose_name='Допустимый простой, мин', default=15)
 
     def __str__(self):
         return '{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)
+
+
+class ClassifiedInterval(models.Model):
+    start = models.DateTimeField(verbose_name='Начало периода')
+    end = models.DateTimeField(verbose_name='Конец периода')
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE)
+    automated_classification = models.ForeignKey(Reason, verbose_name='Вычисленная причина',
+                                                 related_name='auto_reason', on_delete=models.PROTECT)
+    user_classification = models.ForeignKey(Reason, verbose_name='Причина оператора',
+                                            related_name='user_reason', on_delete=models.PROTECT, null=True)
+
+    @staticmethod
+    def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason):
+        """
+        This function build chain of intervals to remove gaps between those and avoid overlappings
+        result is adding or correction intervals in ClassifiedIntervals.objects
+        """
+        try:
+            last_obj = ClassifiedInterval.objects.filter(equipment_id=equipment.id).order_by('-end')[0]
+        except Exception as e:
+            ci = ClassifiedInterval(equipment=equipment, start=start, end=end, automated_classification=classification)
+            ci.save()
+            return
+
+        assert start >= last_obj.end, 'Overlapping do not allowed between intervals'
+        assert start - datetime.timedelta(minutes=2) < last_obj.end, 'Large intervals without data do not allowed'
+
+        # Without gaps
+        start = last_obj.end
+
+        if last_obj.automated_classification == classification:
+            last_obj.end = end or timezone.now()
+            last_obj.save()
+            # update(last_obj.id, end=end or datetime.datetime.now())
+        elif classification.is_working:  # working
+            # need to decide if we can drop out previous idle interval due to duration
+            try:
+                prev_last_obj = ClassifiedInterval.objects.filter(equipment_id=equipment.id).order_by('-end')[1]
+            except Exception as e:
+                prev_last_obj = None
+            if (prev_last_obj is not None
+                    and prev_last_obj.automated_classification.is_working
+                    and start - datetime.timedelta(minutes=equipment.idle_threshold) < prev_last_obj.end):
+                last_obj.delete()
+                prev_last_obj.end = end or timezone.now()
+                prev_last_obj.save()
+            else:
+                ci = ClassifiedInterval(start=start, end=end, equpment=equipment,
+                                        automated_classification=classification)
+                ci.save()
+        else:
+            ci = ClassifiedInterval(start=start, end=end, equipment=equipment,
+                                    automated_classification=classification)
+            ci.save()
 
 
 class TimetableDetail(models.Model):

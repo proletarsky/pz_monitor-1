@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 from django.views.generic import ListView
 from django.views.generic import DetailView
-from .models import Equipment, RawData
+from .models import Equipment, RawData, Reason, ClassifiedInterval
 from .serializers import RawDataSerializer
 from .forms import ReasonForm
 from rest_framework import viewsets, permissions, status
@@ -88,8 +88,7 @@ class EquipmentWorksDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        data = [['Jan', 12], ['Feb', 1], ['Mar', 9]]
-        context['mydata'] = data
+
         # get data from RawData
         start_time = timezone.now() - datetime.timedelta(days=1)
         equip = self.object

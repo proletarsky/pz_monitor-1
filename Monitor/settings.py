@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 #import sys
+from celery.schedules import crontab
+from backends.exchange import ExchangeBackend
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -86,6 +89,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'pzmonitor',
+        'USER': 'djangouser',
+        'PASSWORD': 'password',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
@@ -147,5 +152,24 @@ REST_FRAMEWORK = {
     ]
 }
 
-#Temporay
+# Temporary
+# EMAIL_BACKEND = 'backends.exchange.ExchangeBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_USER = 'proletarsky\monitor'
+EMAIL_PASSWORD = 'Zxcv6789'
+EMAIL_ACCOUNT = 'monitor@proletarsky.ru'
+
+# CELERY
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_IGNORE_RESULT = True
+CELERY_BEAT_SCHEDULE = {
+    'test-task': {
+        'task': 'machines.tasks.test_task',
+        'schedule': crontab(minute='*'),
+    },
+    'update_intervals': {
+        'task': 'machines.tasks.update_intervals',
+        'schedule': crontab(minute='*'),
+    },
+}
