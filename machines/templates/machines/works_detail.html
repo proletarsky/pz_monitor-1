@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load googlecharts %}
+{% load static %}
 
 {% block navbar %}
     {% if user.is_superuser %}
@@ -16,8 +17,33 @@
 {% endblock sidebar %}
 
 {% block content %}
+    {% if user_can_update %}
+        <form action="." method="post">
+    {% else %}
+        <form action="" method="get">
+    {% endif %}
+{% csrf_token %}
+<div class="hidden">{{ form.model }}</div>
     <div class="page-header text-left">
-        <h4>{{ object }}</h4>
+        <h4>
+            <table width="100%">
+                <tr>
+                    <th>{{ object }}</th>
+                    <th>
+                        <!--input type="date" id="mycalendar" name="date" style="alignment: center"-->
+                        {{ form.date }}
+                    </th>
+                    <th class="text-right">
+                        <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
+                                {% if user_can_update %}
+                               value="Сохранить"
+                                {% else %}
+                               value="Перейти"
+                                {% endif %}>
+                    </th>
+                </tr>
+            </table>
+        </h4>
     </div>
 
 
@@ -43,4 +69,44 @@
         {% graph "my-graph" "track" "myoptions" %}
     {% endgooglecharts %}
 
+<div class="table-responsive">
+    <table class="table">
+        {{ intervals.management_form }}
+        <tr>
+            <th>Начало</th>
+            <th>Длительность</th>
+            <th>Классификация</th>
+            <th>Укажите причину</th>
+            {% for interval in intervals.forms %}
+                <tr class="formset_row">
+                    <td>
+                        {% for hidden in interval.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        {{ interval.instance.start|date:"d.m.y H:i" }}
+                    </td>
+                    <td>{{ interval.instance.length_fmt }}</td>
+                    <td>
+                        {% if interval.instance.automated_classification.is_working %}
+                            <span class="glyphicon glyphicon-ok-sign text-success"> Работа</span>
+                        {% else %}
+                            <span class="glyphicon glyphicon-remove-sign text-danger"> Простой</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user_can_update %}
+                            {{ interval.user_classification }}
+                        {% else %}
+                            {% if not interval.instance.automated_classification.is_working and interval.instance.user_classification %}
+                                {{ interval.instance.user_classification }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tr>
+    </table>
+</div>
+</form>
+<script type="text/javascript" src="{% static 'js/work_detail.js' %}"></script>
 {% endblock content %}

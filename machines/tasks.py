@@ -24,14 +24,14 @@ def update_intervals():
             except Exception:
                 continue  # No data at all
 
-        print(last_date)
+        # print(last_date)
 
         qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel, date__gte=last_date)
 
         ts = QuerySetStats(qs, date_field='date', aggregate=Avg('value')).time_series(start=last_date,
                                                                                       end=timezone.now(),
                                                                                       interval='minutes')
-        print(ts[-1][0], ts[-1][1])
+        # print(ts[-1][0], ts[-1][1])
         prev_reason = None
         start = ts[0][0]
         for t in ts:
@@ -43,11 +43,11 @@ def update_intervals():
             # Do not forget to apply timetables
 
             if prev_reason is not None and (cur_reason.id != prev_reason.id or t[0] == ts[-1][0]):
-                print('adding interval {0} {1} {2}'.format(start, t[0], cur_reason))
+                # print('adding interval {0} {1} {2}'.format(start, t[0], cur_reason))
                 try:
                     ClassifiedInterval.add_interval(start=start, end=t[0], equipment=eq, classification=prev_reason)
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     return
                 prev_reason = cur_reason
                 start = t[0]

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.contrib.auth.models import User
 import datetime
 
 # Create your models here.
@@ -86,13 +87,34 @@ class Equipment(models.Model):
 
 
 class ClassifiedInterval(models.Model):
+    # AVAILABLE_USER_REASON = lambda: [(str(r), str(r)) for r in Reason.objects.filter(is_operator=True)]
     start = models.DateTimeField(verbose_name='Начало периода')
     end = models.DateTimeField(verbose_name='Конец периода')
     equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE)
     automated_classification = models.ForeignKey(Reason, verbose_name='Вычисленная причина',
                                                  related_name='auto_reason', on_delete=models.PROTECT)
     user_classification = models.ForeignKey(Reason, verbose_name='Причина оператора',
-                                            related_name='user_reason', on_delete=models.PROTECT, null=True)
+                                            related_name='user_reason', on_delete=models.PROTECT, null=True,
+                                            blank=True, limit_choices_to={'is_operator': True})
+    user = models.ForeignKey(User, verbose_name='Указал причину', on_delete=models.SET_NULL,
+                             null=True, blank=True)
+
+    @property
+    def length(self):
+        """
+        :return: int - amount of interval's minutes
+        """
+        delta = self.end - self.start
+        return delta.days * 60 * 24 + delta.hours * 60 + delta.minutes
+
+    @property
+    def length_fmt(self):
+        """
+        formatted interval
+        :return: string
+        """
+        delta = self.end - self.start
+        return str(delta).replace('days', 'дн').replace('day', 'д')
 
     @staticmethod
     def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason):

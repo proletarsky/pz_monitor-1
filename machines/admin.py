@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from .models import Participant, Reason, Equipment, TimetableDetail, Timetable, TimetableContent
+from .models import Participant, Reason, Equipment, TimetableDetail, Timetable, TimetableContent, ClassifiedInterval
 
 from django.contrib import admin
 
@@ -24,9 +24,17 @@ class TimetableAdmin(admin.ModelAdmin):
     ]
 
 
+class ClassifiedIntervalAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        if obj.pk:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
+
+
 # Register your models here.
 admin.site.register(Participant)
 admin.site.register(Reason)
 admin.site.register(Equipment, EquipmentAdmin)
 admin.site.register(TimetableDetail)
 admin.site.register(Timetable, TimetableAdmin)
+admin.site.register(ClassifiedInterval, ClassifiedIntervalAdmin)

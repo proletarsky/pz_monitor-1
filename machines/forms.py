@@ -1,5 +1,9 @@
 from django import forms
-from .models import Reason
+from django.forms import widgets
+from django.forms.models import inlineformset_factory, modelformset_factory
+from django.contrib.contenttypes.forms import generic_inlineformset_factory
+from .models import Reason, ClassifiedInterval, Equipment
+from django.utils import timezone
 
 
 class ReasonForm(forms.ModelForm):
@@ -7,3 +11,40 @@ class ReasonForm(forms.ModelForm):
     class Meta:
         model = Reason
         exclude = ['']
+
+
+class EquipmentDetailForm(forms.ModelForm):
+    date = forms.DateField(widget=forms.DateInput(attrs={'class': 'datepicker'}))
+
+    class Meta:
+        model = Equipment
+        fields = ['model']
+        widgets = {
+            'date': forms.DateInput(attrs={'class': 'datepicker'})
+        }
+
+    def save(self, commit=True):
+        """
+        prevent form from saving object
+        :param commit:
+        :return:
+        """
+        return self.instance
+
+
+class ClassifiedIntervalForm(forms.ModelForm):
+    class Meta:
+        model = ClassifiedInterval
+        fields = ['user_classification']
+
+    def __init__(self, *args, **kwargs):
+        super(ClassifiedIntervalForm, self).__init__(*args, **kwargs)
+        instance = getattr(self, 'instance', None)
+        if instance and instance.id:
+            # self.fields['start'].widget.attrs['readonly'] = True
+            if self.instance.automated_classification.is_working:
+                self.fields['user_classification'].widget.attrs['class'] = 'hidden'
+
+
+ClassifiedIntervalFormSet = modelformset_factory(ClassifiedInterval, form=ClassifiedIntervalForm,
+                                                 extra=0, can_delete=False)
