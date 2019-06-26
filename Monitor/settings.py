@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django_filters',
     'bootstrapform',
     'googlecharts',
+    # 'djcelery_email',
 ]
 
 MIDDLEWARE = [
