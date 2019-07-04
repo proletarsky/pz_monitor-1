@@ -259,7 +259,7 @@ def rebuild_intervals(equipment=None, start=None, end=None):
                         right_interval.save()
                 # try to join left interval
                 if left_interval:
-                    if intervals[0]['is_work'] == left_interval.is_work:
+                    if intervals[0]['is_work'] == left_interval.automated_classification.is_working:
                         left_interval.end = intervals[0]['end']
                         left_interval.save()
                         del intervals[0]
@@ -268,7 +268,7 @@ def rebuild_intervals(equipment=None, start=None, end=None):
                         left_interval.save()
                 # try to join right interval
                 if right_interval:
-                    if intervals[-1]['is_work'] == right_interval.is_work:
+                    if intervals[-1]['is_work'] == right_interval.automated_classification.is_working:
                         right_interval.start = intervals[-1]['start']
                         right_interval.save()
                         del intervals[-1]
