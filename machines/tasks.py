@@ -77,7 +77,8 @@ def update_intervals():
                 except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    logger.error(f'{exc_type}, {fname}, {exc_tb.tb_lineno}\n{e}')
+                    logger.error('{0}, {1}, {2}\n{3}'.format(exc_type, fname,
+                                                                            exc_tb.tb_lineno, e))
                     return
                 prev_reason = cur_reason
                 start = t[0]
