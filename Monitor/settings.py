@@ -163,6 +163,9 @@ EMAIL_ACCOUNT = 'monitor@proletarsky.ru'
 # CELERY
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_IMPORTS = [
+    'machines.tasks',
+]
 CELERY_IGNORE_RESULT = True
 CELERY_BEAT_SCHEDULE = {
     'test-task': {
