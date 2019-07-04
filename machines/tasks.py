@@ -11,7 +11,7 @@ from django.db.models import Avg
 from django.utils import timezone, dateparse
 from datetime import datetime, timedelta
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 @task()
 def test_task():
@@ -77,8 +77,9 @@ def update_intervals():
                 except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                    logger.error('{0}, {1}, {2}\n{3}'.format(exc_type, fname,
-                                                                            exc_tb.tb_lineno, e))
+                    #logger.error('{0}, {1}, {2}\n{3}'.format(exc_type, fname,
+                    #                                                        exc_tb.tb_lineno, e))
+                    print('{0}, {1}, {2}\n{3}'.format(exc_type, fname, exc_tb.tb_lineno, e))
                     return
                 prev_reason = cur_reason
                 start = t[0]
