@@ -29,7 +29,9 @@
         firstDay: 1,
         isRTL: false,
         showMonthAfterYear: false,
-        yearSuffix: ""
+        yearSuffix: "",
+        showOn: "button",
+        autoSize: true
     };
     datepicker.setDefaults(datepicker.regional.ru);
 

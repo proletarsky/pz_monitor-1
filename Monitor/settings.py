@@ -154,8 +154,8 @@ REST_FRAMEWORK = {
 }
 
 # Temporary
-# EMAIL_BACKEND = 'backends.exchange.ExchangeBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'backends.exchange.ExchangeBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_USER = 'proletarsky\monitor'
 EMAIL_PASSWORD = 'Zxcv6789'
 EMAIL_ACCOUNT = 'monitor@proletarsky.ru'

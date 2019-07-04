@@ -92,6 +92,7 @@ class ClassifiedInterval(models.Model):
     start = models.DateTimeField(verbose_name='Начало периода')
     end = models.DateTimeField(verbose_name='Конец периода')
     equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE)
+    is_zero = models.BooleanField(verbose_name='Нет данных', default=False, blank=True)
     automated_classification = models.ForeignKey(Reason, verbose_name='Вычисленная причина',
                                                  related_name='auto_reason', on_delete=models.PROTECT)
     user_classification = models.ForeignKey(Reason, verbose_name='Причина оператора',
@@ -106,7 +107,7 @@ class ClassifiedInterval(models.Model):
         :return: int - amount of interval's minutes
         """
         delta = self.end - self.start
-        return delta.days * 60 * 24 + delta.hours * 60 + delta.minutes
+        return int(delta.total_seconds() // 60)
 
     @property
     def length_fmt(self):
@@ -118,7 +119,8 @@ class ClassifiedInterval(models.Model):
         return str(delta).replace('days', 'дн').replace('day', 'д')
 
     @staticmethod
-    def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason):
+    def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason,
+                     is_zero = False):
         """
         This function build chain of intervals to remove gaps between those and avoid overlappings
         result is adding or correction intervals in ClassifiedIntervals.objects
@@ -126,7 +128,8 @@ class ClassifiedInterval(models.Model):
         try:
             last_obj = ClassifiedInterval.objects.filter(equipment_id=equipment.id).order_by('-end')[0]
         except Exception as e:
-            ci = ClassifiedInterval(equipment=equipment, start=start, end=end, automated_classification=classification)
+            ci = ClassifiedInterval(equipment=equipment, start=start, end=end, automated_classification=classification,
+                                    is_zero=is_zero)
             ci.save()
             return
 
@@ -148,18 +151,25 @@ class ClassifiedInterval(models.Model):
                 prev_last_obj = None
             if (prev_last_obj is not None
                     and prev_last_obj.automated_classification.is_working
-                    and start - datetime.timedelta(minutes=equipment.idle_threshold) < prev_last_obj.end):
+                    and start - datetime.timedelta(minutes=equipment.allowed_idle_interval) < prev_last_obj.end
+                    and not last_obj.is_zero):
                 last_obj.delete()
                 prev_last_obj.end = end or timezone.now()
                 prev_last_obj.save()
             else:
                 ci = ClassifiedInterval(start=start, end=end, equipment=equipment,
-                                        automated_classification=classification)
+                                        automated_classification=classification, is_zero=is_zero)
                 ci.save()
         else:
             ci = ClassifiedInterval(start=start, end=end, equipment=equipment,
-                                    automated_classification=classification)
+                                    automated_classification=classification, is_zero=is_zero)
             ci.save()
+
+
+class GraphicsData(models.Model):
+    date = models.DateTimeField(verbose_name='Дата и время')
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.PROTECT)
+    value = models.FloatField(verbose_name='Значение')
 
 
 class TimetableDetail(models.Model):
@@ -206,4 +216,24 @@ class TimetableContent(models.Model):
     timetable = models.ForeignKey(Timetable, verbose_name='Расписание', on_delete=models.CASCADE)
     details = models.ForeignKey(TimetableDetail, verbose_name='Детали', on_delete=models.CASCADE)
 
+
+class Semaphore(models.Model):
+    name = models.CharField(max_length=50, verbose_name='Семафор')
+    is_locked = models.BooleanField(verbose_name='Заблокировано', default=False)
+    locked_when = models.DateTimeField(verbose_name='Когда заблокировано', default=timezone.now)
+    alert_interval = models.IntegerField(verbose_name='Количество минут до предупреждения', default=15)
+
+    def get_locked_interval(self):
+        if self.is_locked:
+            delta = timezone.now() - self.locked_when
+            return int(delta.total_seconds()//60)
+        else:
+            return 0
+
+    def __str__(self):
+        if self.is_locked:
+            to_s = '{0}, locked {1} min'.format(self.name, self.get_locked_interval())
+        else:
+            to_s = '{0}, unlocked'.format(self.name)
+        return to_s
 

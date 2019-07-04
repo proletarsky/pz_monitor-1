@@ -11,7 +11,7 @@ from django.http import Http404
 from django.http.response import HttpResponse
 from django.views.generic import ListView
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -154,10 +154,13 @@ class EquipmentWorksDetailView(UpdateView):
                                                         Q(equipment=self.object)).order_by('-end')
 
         # get data from RawData
-        queryset = RawData.objects.filter(mac_address=self.object.xbee_mac, channel='AD0',
-                                          date__gte=start_time, date__lt=end_time).order_by('date')
-        qsstat = QuerySetStats(queryset, date_field='date', aggregate=Avg('value'))
-        context['rawdata'] = qsstat.time_series(start_time, end_time, interval='minutes')
+        # queryset = RawData.objects.filter(mac_address=self.object.xbee_mac, channel='AD0',
+        #                                  date__gte=start_time, date__lt=end_time).order_by('date')
+        # qsstat = QuerySetStats(queryset, date_field='date', aggregate=Avg('value'))
+        # context['rawdata'] = qsstat.time_series(start_time, end_time, interval='minutes')
+        graph_qs = GraphicsData.objects.filter(equipment=self.object, date__gte=start_time,
+                                               date__lt=end_time).order_by('date')
+        context['rawdata'] = [[gd.date, gd.value] for gd in graph_qs]
 
         if self.request.POST:
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)

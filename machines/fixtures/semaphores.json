@@ -1,0 +1,9 @@
+[
+  {
+    "model": "machines.semaphore",
+    "pk": 1,
+    "fields": {
+      "name": "ClassifiedInterval"
+    }
+  }
+]
