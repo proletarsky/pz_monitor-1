@@ -41,7 +41,7 @@ def update_intervals():
             except Exception:
                 continue  # No data at all
 
-        print(last_date)
+        # print(last_date)
 
         qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel, date__gte=last_date)
 
@@ -62,18 +62,8 @@ def update_intervals():
             if prev_reason is not None and (cur_reason.id != prev_reason.id or t[0] == ts[-1][0]):
                 # print('adding interval {0} {1} {2}'.format(start, t[0], cur_reason))
                 try:
-                    with transaction.atomic():
-                        # write all grouped RawData object into GraphicsData and delete RawData
-                        last_gd = GraphicsData.objects.filter(equipment=eq).order_by('-date').first()
-                        date_from = last_gd.date if last_gd else ts[0][0] - timedelta(minutes=1)
-                        GraphicsData.objects.bulk_create(
-                            [GraphicsData(equipment=eq, date=t[0], value=t[1])
-                             for t in ts if t[0] > date_from]
-                        )
-                        ClassifiedInterval.add_interval(start=start, end=t[0], equipment=eq,
-                                                        classification=prev_reason)
-                        # clear RawData
-                        RawData.objects.filter(mac_address=eq.xbee_mac, date__gte=last_date).delete()
+                    ClassifiedInterval.add_interval(start=start, end=t[0], equipment=eq,
+                                                    classification=prev_reason)
                 except Exception as e:
                     exc_type, exc_obj, exc_tb = sys.exc_info()
                     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -85,6 +75,23 @@ def update_intervals():
                 start = t[0]
             else:
                 prev_reason = cur_reason
+
+        # clear data in RawData between last_date and date_from
+        last_gd = GraphicsData.objects.filter(equipment=eq).order_by('-date').first()
+        date_from = last_gd.date if last_gd else last_date
+        date_from += timedelta(minutes=1)
+        if date_from <= last_date:
+            qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel,
+                                        date__gte=date_from, date__lte=last_date)
+            ts = QuerySetStats(qs, date_from, date_field=last_date,
+                               aggregate=Avg('value')).time_series(start=date_from, end=last_date, interval='minutes')
+            with transaction.atomic():
+                # write all grouped RawData object into GraphicsData and delete RawData
+                GraphicsData.objects.bulk_create(
+                    [GraphicsData(equipment=eq, date=t[0], value=t[1]) for t in ts]
+                )
+                # clear RawData
+                RawData.objects.filter(mac_address=eq.xbee_mac, date__gte=date_from, date__lte=last_date).delete()
 
 
 @task()
