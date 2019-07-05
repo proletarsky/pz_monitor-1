@@ -87,6 +87,7 @@ def update_intervals():
             # print(last_date)
             ts = QuerySetStats(qs, date_field='date',
                                aggregate=Avg('value')).time_series(start=date_from, end=last_date, interval='minutes')
+            print(ts)
             with transaction.atomic():
                 # write all grouped RawData object into GraphicsData and delete RawData
                 GraphicsData.objects.bulk_create(
