@@ -94,7 +94,8 @@ def update_intervals():
                     [GraphicsData(equipment=eq, date=t[0], value=t[1]) for t in ts]
                 )
                 # clear RawData
-                RawData.objects.filter(mac_address=eq.xbee_mac, date__gte=date_from, date__lte=last_date).delete()
+                RawData.objects.filter(mac_address=eq.xbee_mac, date__gte=date_from,
+                                       date__lte=last_date+timedelta(minutes=1)).delete()
         else:
             print('Nothing to update')
 
@@ -150,6 +151,8 @@ def rebuild_intervals(equipment=None, start=None, end=None):
                 raise AttributeError('Wring date or datetime format {0}. Use standard one'.format(end))
         else:
             period_end = end
+
+        print(period_start, period_end)
 
         # Main cycle
         detected_intervals = []
@@ -312,3 +315,11 @@ def rebuild_intervals(equipment=None, start=None, end=None):
             semaphore.save()
         else:
             print('Can not unlock!!!!!')
+
+
+@task()
+def fixit():
+    start = dateparse.parse_datetime('2019-07-04T21:45:00+03')
+    end = dateparse.parse_datetime('2019-07-05T12:10:00+03')
+    if start and end:
+        rebuild_intervals(start=start, end=end)

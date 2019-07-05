@@ -24,6 +24,7 @@ from django.utils import timezone
 import re, datetime
 from qsstats import QuerySetStats
 from django.db.models import Avg
+from .forms import UserRegistrationForm
 
 
 @permission_classes([permissions.AllowAny])
@@ -159,7 +160,7 @@ class EquipmentWorksDetailView(UpdateView):
         # qsstat = QuerySetStats(queryset, date_field='date', aggregate=Avg('value'))
         # context['rawdata'] = qsstat.time_series(start_time, end_time, interval='minutes')
         graph_qs = GraphicsData.objects.filter(equipment=self.object, date__gte=start_time,
-                                               date__lt=end_time).order_by('date')
+                                               date__lte=end_time).order_by('date')
         context['rawdata'] = [[gd.date, gd.value] for gd in graph_qs]
 
         if self.request.POST:
@@ -206,6 +207,27 @@ def index(request):
     }
 
     return render(request, 'machines/equipment_list.html', context)
+
+
+def register(request):
+    """
+    User registration view
+    :param request:
+    :return:
+    """
+    if request.method == 'POST':
+        user_form = UserRegistrationForm(request.POST)
+        if user_form.is_valid():
+            # —оздание пользовател€тел€, но пока не сохран€ем его
+            new_user = user_form.save(commit=False)
+            # ”станвока парол€
+            new_user.set_password(user_form.cleaned_data['password'])
+            # —охранение пользовател
+            new_user.save()
+            return render(request, 'account/register_done.html', {'new_user': new_user})
+    else:
+        user_form = UserRegistrationForm()
+    return render(request, 'account/register.html', {'user_form': user_form})
 
 
 @permission_classes([permissions.AllowAny])

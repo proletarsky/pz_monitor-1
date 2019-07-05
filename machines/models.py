@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.db.models import Count, Max
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -165,11 +166,46 @@ class ClassifiedInterval(models.Model):
                                     automated_classification=classification, is_zero=is_zero)
             ci.save()
 
+    @staticmethod
+    def remove_doubles():
+        """
+        remove doubles from intervals
+        :return:
+        """
+        qs = ClassifiedInterval.objects.values('equipment', 'start').annotate(cnt=Count('id'),
+                                                                              mid=Max('id')).filter(cnt__gt=1)
+        ClassifiedInterval.objects.filter(id__in=qs.values('mid')).delete()
+
+    @staticmethod
+    def find_and_set_system_stopped_intervals():
+        """
+        if system stopped intervals would be zero and same start/end. When found such intervals set
+        them as system fault
+        :return:
+        """
+        # find special classified interval
+        sys_stop_reason = Reason.objects.filter(code='999').first()
+        if not sys_stop_reason:
+            raise AttributeError('Причина 999 - системный сбой не найдена, продолжение невозможно')
+        print(sys_stop_reason)
+
+        # making query
+        qs = ClassifiedInterval.objects.filter(is_zero=True).values('start', 'end').annotate(cnt=Count('id')) \
+            .filter(cnt__gt=1)
+        ClassifiedInterval.objects.filter(is_zero=True, start__in=qs.values('start'),
+                                          end__in=qs.values('end')).update(automated_classification=sys_stop_reason)
+
 
 class GraphicsData(models.Model):
     date = models.DateTimeField(verbose_name='Дата и время')
     equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.PROTECT)
     value = models.FloatField(verbose_name='Значение')
+
+    @staticmethod
+    def clear_doubles():
+        qs = GraphicsData.objects.values('date', 'equipment').annotate(cnt=Count('id'),
+                                                                       mid=Max('id')).filter(cnt__gt=1)
+        GraphicsData.objects.filter(id__in=qs.values('mid')).delete()
 
 
 class TimetableDetail(models.Model):
