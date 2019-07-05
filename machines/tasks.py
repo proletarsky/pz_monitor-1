@@ -48,7 +48,7 @@ def update_intervals():
         ts = QuerySetStats(qs, date_field='date', aggregate=Avg('value')).time_series(start=last_date,
                                                                                       end=timezone.now(),
                                                                                       interval='minutes')
-        print(ts[0][0], ts[-1][0])
+        # print(ts[0][0], ts[-1][0])
         prev_reason = None
         start = ts[0][0]
         for t in ts:
@@ -83,7 +83,9 @@ def update_intervals():
         if date_from <= last_date:
             qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel,
                                         date__gte=date_from, date__lte=last_date)
-            ts = QuerySetStats(qs, date_from, date_field=last_date,
+            # print(date_from)
+            # print(last_date)
+            ts = QuerySetStats(qs, date_field='date',
                                aggregate=Avg('value')).time_series(start=date_from, end=last_date, interval='minutes')
             with transaction.atomic():
                 # write all grouped RawData object into GraphicsData and delete RawData
@@ -92,6 +94,8 @@ def update_intervals():
                 )
                 # clear RawData
                 RawData.objects.filter(mac_address=eq.xbee_mac, date__gte=date_from, date__lte=last_date).delete()
+        else:
+            print('Nothing to update')
 
 
 @task()
