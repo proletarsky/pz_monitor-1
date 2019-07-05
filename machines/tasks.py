@@ -83,7 +83,7 @@ def update_intervals():
         if date_from < last_date:
             qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel,
                                         date__gte=date_from, date__lte=last_date)
-            # print(date_from)
+            print(date_from, last_date)
             # print(last_date)
             ts = QuerySetStats(qs, date_field='date',
                                aggregate=Avg('value')).time_series(start=date_from, end=last_date, interval='minutes')
