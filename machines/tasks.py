@@ -80,7 +80,7 @@ def update_intervals():
         last_gd = GraphicsData.objects.filter(equipment=eq).order_by('-date').first()
         date_from = last_gd.date if last_gd else last_date
         date_from += timedelta(minutes=1)
-        if date_from <= last_date:
+        if date_from < last_date:
             qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel,
                                         date__gte=date_from, date__lte=last_date)
             # print(date_from)
