@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+{% load static %}
+
+{% block navbar %}
+    {% if user.is_superuser %}
+        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
+    {% endif %}
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+    <div class="page-header">
+        <h3>Интервалы простоя</h3>
+    </div>
+    <div style="padding-top: 10px; padding-bottom: 10px">
+        <form class="form-inline text-left" method="get">
+            <ul class="nav navbar-nav navbar-left" style="margin-left: 20px">
+                <li>{{ filter.form | bootstrap_inline }}</li>
+
+                <li><button class="btn btn-primary" style="margin-left: 20px" type="submit">Применить</button></li>
+            </ul>
+
+        </form>
+        <ul class="nav navbar-nav navbar-right"><li>
+            <!--Paginator-->
+            {% if 'equipment' in requst.get_full_path or 'start__gte' in request.get_full_path or 'empty_only' in request.get_full_path %}
+                {% with objectset=filtered_objects prefix=request.get_full_path|add:'&' %}
+                    {% include "machines/paginator.html" %}
+                {% endwith %}
+            {% else %}
+                {% with objectset=filtered_objects prefix='?' %}
+                    {% include "machines/paginator.html" %}
+                {% endwith %}
+            {% endif %}
+        </li>
+        </ul>
+    </div>
+
+
+
+    <table class="table">
+    <tr>
+        <th>Начало</th>
+        <th>Длительность</th>
+        <th>Оборудование</th>
+        <th>Причина</th>
+        <th>Автор</th>
+    </tr>
+    {% for obj in filtered_objects %}
+        <tr class="text-left">
+            <td><a href="{% url 'works-detail' obj.equipment.id %}?date={{ obj.start|date:'Y-m-d' }}">
+                {{ obj.start|date:"d.m.y H:i" }}</a></td>
+            <td>{{ obj.length_fmt }}</td>
+            <td>{{ obj.equipment }}</td>
+            <td>
+                {% if obj.user_classification.id > 0 %}
+                    {{ obj.user_classification }}
+                {% endif %}
+            </td>
+            <td>
+                {% if obj.user %}
+                    {{ obj.user }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+<script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
+{% endblock content %}

@@ -119,6 +119,14 @@ class ClassifiedInterval(models.Model):
         delta = self.end - self.start
         return str(delta).replace('days', 'дн').replace('day', 'д')
 
+    @property
+    def get_link_graphdata(self):
+        """
+        get url page
+        :return:
+        """
+        return ''
+
     @staticmethod
     def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason,
                      is_zero = False):

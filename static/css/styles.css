@@ -59,6 +59,12 @@
     margin: 0px;
 }
 
+.page-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
 /*!
  * Start Bootstrap - Simple Sidebar (https://startbootstrap.com/template-overviews/simple-sidebar)
  * Copyright 2013-2017 Start Bootstrap

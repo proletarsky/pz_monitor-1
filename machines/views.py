@@ -9,6 +9,7 @@ from django.urls.base import reverse_lazy
 from django.utils.dateparse import parse_datetime, parse_date
 from django.http import Http404
 from django.http.response import HttpResponse
+from django.core.paginator import Paginator
 from django.views.generic import ListView
 from django.views.generic import DetailView, UpdateView
 from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData
@@ -19,7 +20,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .parsers import CoordinatorDataParser
-from .filters import EquipmentFilter
+from .filters import EquipmentFilter, ClassifiedIntervalFilter
 from django.utils import timezone
 import re, datetime
 from qsstats import QuerySetStats
@@ -260,3 +261,20 @@ class APIGraphData(APIView):
             raise Http404('Error in parameters')
 
         return Response(data)
+
+
+class ClassifiedIntervalsListView(ListView):
+    model = ClassifiedInterval
+    # paginate_by = 20
+    template_name = 'machines/classifiedintervals_list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ci_filter = ClassifiedIntervalFilter(self.request.GET,
+            queryset=ClassifiedInterval.objects.filter(automated_classification__is_working=False).order_by('start'))
+        paginator = Paginator(ci_filter.qs, 15)
+        page = self.request.GET.get('page')
+        objs = paginator.get_page(page)
+        context['filter'] = ci_filter
+        context['filtered_objects'] = objs
+        return context

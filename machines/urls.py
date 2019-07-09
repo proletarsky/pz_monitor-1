@@ -10,9 +10,10 @@ router.register(r'^api/rawdata', RawDataViewSet, base_name='RawData')
 
 urlpatterns = [
                   url(r'^$', views.EqipmentFilteredListView.as_view(), name='equipment-list'),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-    url(r'^register$', views.register, name='register'),
-    url(r'^newdata/', views.RawDataUploadView.as_view()),
+                  url(r'^accounts/', include('django.contrib.auth.urls')),
+                  url(r'^register$', views.register, name='register'),
+                  url(r'^newdata/', views.RawDataUploadView.as_view()),
                   url(r'graph', views.APIGraphData.as_view(), name='graph-data'),
+                  url(r'^ci$', views.ClassifiedIntervalsListView.as_view(), name='classifiedinterval-list'),
                   path('works/<int:pk>/', views.EquipmentWorksDetailView.as_view(), name='works-detail'),
               ] + router.urls

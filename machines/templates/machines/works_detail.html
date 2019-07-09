@@ -33,6 +33,9 @@
                         <!--input type="date" id="mycalendar" name="date" style="alignment: center"-->
                         {{ form.date }}
                     </th>
+                    <th>
+                        <a href="{% url 'classifiedinterval-list' %}">Все простои</a>
+                    </th>
                     <th class="text-right">
                         <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
                                 {% if user_can_update %}
