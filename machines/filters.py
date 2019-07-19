@@ -36,3 +36,22 @@ class ClassifiedIntervalFilter(django_filters.FilterSet):
             'start': ['gte'],
         }
 
+
+class StatisticsFilter(django_filters.FilterSet):
+    """
+    For statistics purposes
+    """
+    PERIODS = [
+        ['прошлая неделя', 'За прошедшую неделю'],
+        ['прошлая декада', 'За прошедшую декаду'],
+        ['прошлый месяц', 'За прошедший месяц'],
+        ['текущий месяц', 'За текущий месяц'],
+        # ['период', 'Указать произвольный период'],
+    ]
+    periods_selector = django_filters.ChoiceFilter(choices=PERIODS, label='Период');
+    start_date = django_filters.DateFilter(field_name='end', lookup_expr='gte', label='Начало')
+    end_date = django_filters.DateFilter(field_name='start', lookup_expr='lte', label='Конец')
+
+    class Meta:
+        model = ClassifiedInterval
+        fields = []

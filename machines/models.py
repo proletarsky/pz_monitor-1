@@ -4,9 +4,10 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models import Count, Max
 from django.contrib.auth.models import User
-from django.utils import timezone
+from django.utils import timezone, dateparse
 from django.contrib.auth.models import User
 import datetime
+
 
 # Create your models here.
 
@@ -202,6 +203,71 @@ class ClassifiedInterval(models.Model):
             .filter(cnt__gt=1)
         ClassifiedInterval.objects.filter(is_zero=True, start__in=qs.values('start'),
                                           end__in=qs.values('end')).update(automated_classification=sys_stop_reason)
+
+    @staticmethod
+    def get_statistics(start, end, by_workshop=False, equipment=None):
+        '''
+        calculates statistics for period
+        :param start: start of period (string YYYY-mm-dd)
+        :param end: end of period (string YYYY-mm-dd)
+        :param by_workshop: if make grouping by workshop (Boolean)
+        :param equipment: filter by equipment or not (int, equipment, array)
+        :return: dict of statistics
+        '''
+        # check dates
+        start_date = dateparse.parse_date(start);
+        start_date = timezone.make_aware(datetime.datetime.combine(start_date, datetime.datetime.min.time())) \
+            if isinstance(start_date, datetime.date) else None
+        if start_date is None:
+            raise ValueError('Value {0} as start date is invalid, it should be YYYY-MM-DD formatted'.format(start))
+        end_date = dateparse.parse_date(end)
+        end_date = timezone.make_aware(datetime.datetime.combine(end_date, datetime.datetime.min.time()))\
+            if isinstance(end_date, datetime.date) else None
+        if end_date is None:
+            raise ValueError('Value {0} as end date is invalid, it should be YYYY-MM-DD formatted'.format(end))
+
+        # check equipment
+        if equipment is None:
+            equipment_id_list = [eq.id for eq in Equipment.objects.all()]
+        elif isinstance(equipment, list):
+            equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
+                                 [id for id in equipment if isinstance(id, int)])
+        elif isinstance(equipment, Equipment) or isinstance(equipment, int):
+            equipment_id_list = [equipment.id if isinstance(equipment, Equipment) else equipment]
+        else:
+            raise ValueError('Equipment should be one of [list of equipment] or [list of ids] or equipment or id')
+
+        statistics = {}
+        total_auto_stats = {}
+        total_user_stats = {}
+        # cycle to get statistics
+        for eid in equipment_id_list:
+            intervals = ClassifiedInterval.objects.filter(equipment__id=eid, end__gte=start_date, start__lte=end_date)
+            # auto_reasons = intervals.values('automated_classification').distinct()
+            # user_reasons = intervals.values('user_classification').distinct()
+            # setup auto_stats and user_stats (fills zero)
+            # auto_stats = {str(reason['automated_classification']): 0 for reason in auto_reasons}
+            # user_stats = {str(reason['user_classification']): 0 for reason in user_reasons if reason}
+            auto_stats = {}
+            user_stats = {}
+            for ci in intervals:
+                start_i = max(ci.start, start_date)
+                end_i = min(ci.end, end_date)
+                int_dur_min = int((end_i - start_i).total_seconds() // 60)
+                auto_cl = str(ci.automated_classification) if ci.automated_classification else 'Неопределено'
+                user_cl = str(ci.user_classification) if ci.user_classification else 'Не указано'
+                auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
+                user_stats[user_cl] = user_stats.get(user_cl, 0) + int_dur_min
+
+                # update total statistics
+                total_auto_stats[auto_cl] = total_auto_stats.get(auto_cl, 0) + int_dur_min
+                total_user_stats[user_cl] = total_user_stats.get(user_cl, 0) + int_dur_min
+
+            statistics[str(Equipment.objects.filter(id=eid).first())] = {'auto_stats': auto_stats,
+                                                                         'user_stats': user_stats}
+        # end of cycle
+        statistics['total'] = {'auto_stats' : total_auto_stats, 'user_stats': user_stats}
+        return statistics
 
 
 class GraphicsData(models.Model):

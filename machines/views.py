@@ -10,7 +10,7 @@ from django.utils.dateparse import parse_datetime, parse_date
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.core.paginator import Paginator
-from django.views.generic import ListView
+from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
 from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData
 from .serializers import RawDataSerializer
@@ -20,9 +20,10 @@ from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .parsers import CoordinatorDataParser
-from .filters import EquipmentFilter, ClassifiedIntervalFilter
+from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter
 from django.utils import timezone
 import re, datetime
+from .helpers import prepare_data_for_google_charts_bar
 from qsstats import QuerySetStats
 from django.db.models import Avg
 from .forms import UserRegistrationForm
@@ -277,4 +278,20 @@ class ClassifiedIntervalsListView(ListView):
         objs = paginator.get_page(page)
         context['filter'] = ci_filter
         context['filtered_objects'] = objs
+        return context
+
+
+class StatisticsView(ListView):
+    model = ClassifiedInterval
+    template_name = 'machines/statistics.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        filter = StatisticsFilter(self.request.GET, queryset=ClassifiedInterval.objects.all())
+        context['filter'] = filter
+        start_date = self.request.GET.get('start_date');
+        end_date = self.request.GET.get('end_date');
+        if start_date is not None and end_date is not None:
+            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
+
         return context

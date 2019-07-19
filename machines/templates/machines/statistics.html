@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load bootstrap %}
+{% load bootstrap3 %}
+{% load static %}
+{% load googlecharts %}
+
+{% block navbar %}
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript" src="{% static 'js/statistics.js' %}"></script>
+
+    {% if user.is_superuser %}
+        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
+    {% endif %}
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+    <div class="page-header">
+        <h3>Статистика работы</h3>
+    </div>
+    <div style="padding-top: 10px; padding-bottom: 50px">
+        <form class="form-inline text-left" method="get">
+            <ul class="nav navbar-nav navbar-left" style="margin-left: 20px">
+                <li>{{ filter.form | bootstrap_inline }}</li>
+
+                <li><button class="btn btn-primary" style="margin-left: 20px" type="submit">Применить</button></li>
+            </ul>
+        </form>
+    </div>
+    <div class="panel col-lg-12">
+        <ul class="nav navbar-nav navbar-left">
+            <li><b>Все предприятие</b></li>
+        </ul>
+        <ul class="nav navbar-right">
+            <li><a id="show-hide-plant" href="#">Скрыть</a></li>
+        </ul>
+    </div>
+    <div class="col-lg-12 toggled-pane toggled-pane-total">
+        <table style="width: 100%; height: 100%">
+            <tr>
+                <td width="50%">
+                    <p><b>Общая статистика работы</b></p>
+                    <div id="id-plant"></div>
+                </td>
+                <td>
+                    <p><b>Общая статистика причин простоев</b></p>
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% if statistics %}
+        <script type="text/javascript">
+            graphicsData={{ statistics|safe }}
+        </script>
+    {% endif %}
+{#    </div>#}
+
+{% endblock %}
