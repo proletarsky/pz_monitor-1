@@ -154,7 +154,7 @@ class EquipmentWorksDetailView(UpdateView):
         interval_qs = ClassifiedInterval.objects.filter(((Q(start__lt=start_time) & Q(end__gte=start_time)) |
                                                          (Q(start__lt=end_time) & Q(end__gte=end_time)) |
                                                          (Q(start__gte=start_time) & Q(end__lt=end_time))) &
-                                                        Q(equipment=self.object)).order_by('-end')
+                                                        Q(equipment=self.object)).order_by('end')
 
         # get data from RawData
         # queryset = RawData.objects.filter(mac_address=self.object.xbee_mac, channel='AD0',
