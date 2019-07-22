@@ -1,0 +1,15 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Edit your account{% endblock %}
+
+{% block content %}
+    <h4>Добавьте номер вашего телефона:</h4>
+	<table align=center >
+    <form action="." method="post">
+		{% csrf_token %}
+	<tr><td align=right><h4>Телефон:</h4></td><td>{{ profile_form.phone }}</td></tr>  
+	<tr ><td colspan="4" align=center><font color=white>.</font></td></tr>	
+	<tr><td colspan="4" align=center><input type="submit" value="Сохранить"></td></tr>
+    </form>
+	</table>
+{% endblock %}

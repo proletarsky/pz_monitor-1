@@ -8,27 +8,20 @@
     {% if form.errors %}
         <p class="text-danger">Неверное имя или пароль</p>
     {% endif %}
-
+	<table align=center >
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        <div class="form-group">
-            {{ form.username.label_tag }}
-            {{ form.username }}
-        </div>
-        <div class="form-group">
-            {{ form.password.label_tag }}
-            {{ form.password }}
-        </div>
-        <!--button type="submit" class="btn btn-default">Вход</button-->
-        <div class="form-group">
-            <input type="submit" class="btn btn-primary" value="Вход">
-        </div>
+	<tr><td align=right><h4>Почта:</h4></td><td>{{ form.username }}</td></tr>
+    <tr><td align=right><h4>Пароль:</h4></td><td>{{ form.password }}</td></tr>
+	<tr><td colspan="2" align=center><input type="submit" class="btn btn-primary" value="Вход"></td></tr>
     </form>
-
+	</table>
     <p><a class="text-muted" href="{% url 'password_reset' %}">
         <span class="glyphicon glyphicon-question-sign "></span> Забыли пароль?</a>
     </p>
-    <p><big>Если у вас нет учетной записи - создайте аккаунт
-        <a href="{% url "register" %}"><i>здесь</i></a></big>
-    </p>
+
+	<p><big>Если у вас нет учетной записи - создайте аккаунт
+	<a href="{% url "register" %}"><i>здесь</i></a></big>
+	</p>
+
 {% endblock content %}

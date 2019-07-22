@@ -19,13 +19,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework import routers
 from machines.views import RawDataViewSet
-from .view import main_index
-
-
+from .view import main_index, register, edit, validate
 
 urlpatterns = [
                   url(r'^$', main_index),
-    url(r'^machines/', include('machines.urls')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^accounts/', include('django.contrib.auth.urls'))
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+                  url(r'^machines/', include('machines.urls')),
+                  url(r'^admin/', admin.site.urls),
+                  url(r'^accounts/', include('django.contrib.auth.urls')),
+                  url(r'^accounts/register/$', register, name='register'),
+                  url(r'^accounts/edit/$', edit, name='edit'),
+                  url(r'^accounts/validate/(?P<user>\d+)$', validate, name='validate'),
+              ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

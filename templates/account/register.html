@@ -4,10 +4,29 @@
 
 {% block content %}
     <h1>Регистрация</h1>
-    <p><big>Пожалуйста, заполните форму:</big></p>
+    <p><big>Пожалуйста, заполните форму:</big></p>	
+    {% if user_form.errors %}
+		<p class="text-danger">Пароли в поле "Пароль" и "Повторите пароль" не совпадают.</p>
+		<p class="text-danger">Пожалуйста, введите пароль ещё раз:</p>
+    {% endif %}
+	<table align=center >
     <form action="." method="post">
-        {% csrf_token %}
-        {{ user_form.as_p }}
-        <p><input type="submit" value="Создать аккаунт"></p>
+		{% csrf_token %}
+	<tr><td align=right><h4>Фамилия:</h4></td><td>{{ user_form.last_name }}</td></tr>
+    <tr><td align=right><h4>Имя:</h4></td><td>{{ user_form.first_name }}</td></tr>
+	<tr><td align=right><h4>Электронная почта:</h4></td><td>{{ user_form.email }}</td></tr> 
+	<tr ><td align=right><h4>Телефон:</h4></td><td><input id="phone" type="text" name="phone" value="" /></td></tr> 	
+	<tr><td align=right><h4>Пароль:</h4></td><td>{{ user_form.password }}</td></tr>  
+	<tr><td align=right><h4>Повторите пароль:</h4></td><td>{{ user_form.password2 }}</td></tr>  	
+	<tr style="display:none;"><td align=right><h4>Пользователь:</h4></td><td><input id="user" type="{{ user_form.username }}"></td></tr> 
+	<tr ><td colspan="2" align=center><font color=white>.</font></td></tr>	
+	<tr><td colspan="2" align=center><input type="submit" value="Создать аккаунт"></td></tr>
     </form>
+	</table>
+	<script>
+	$(document).ready(function() {
+	$("#phone").inputmask("+79999999999")
+	document.getElementById('user').value = "1";
+	});
+	</script>
 {% endblock %}

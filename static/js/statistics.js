@@ -38,6 +38,26 @@ $(document).ready(function () {
         $('#show-hide-plant').text(txt);
     });
 
+    var ids = "";
+    var keys = Object.keys(graphicsData);
+    for(var i = 1; i <= keys.length; i++){
+        if (keys[i-1] !== 'total')
+            ids += (ids.length === 0 ? '' : ',') + `#show-hide-${i}`;
+    }
+    $(ids).click(function (e) {
+        e.preventDefault();
+        var elementID = $(this).attr('id');
+        var id = elementID.split('-').pop();
+        var classID = `.toggled-pane-${id}`;
+        console.log(elementID);
+        $(classID).toggle('slow');
+        var txt = $(elementID).text();
+        if (txt === 'Показать')
+            txt = 'Скрыть';
+        else
+            txt = 'Показать';
+        $(elementID).text(txt);
+    })
 });
 
 function formatDate(date) {
@@ -98,9 +118,10 @@ google.load("visualization", "1", {packages:["corechart"]});
 google.setOnLoadCallback(drawChart);
 function drawChart() {
     // console.log(graphicsData.total.data);
-    var data = google.visualization.arrayToDataTable(graphicsData.total.data);
+    var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
+    var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
 
-    var options = {
+    var options_auto = {
         width: '100%',
         height: '100%',
         legend: {position: 'top', maxLines: 3},
@@ -108,7 +129,14 @@ function drawChart() {
         bar: { groupWidth: '30%' },
         isStacked: 'percent'
     };
-    var chart = new google.visualization.BarChart(document.getElementById("id-plant"));
-    chart.draw(data, options);
+    var options_user = {
+        width: '100%',
+        height: '100%',
+        pieHole: 0.4
+    }
+    var auto_data_chart = new google.visualization.BarChart(document.getElementById("id-plant"));
+    var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
+    auto_data_chart.draw(auto_data, options_auto);
+    user_data_chart.draw(user_data, options_user);
 }
 
