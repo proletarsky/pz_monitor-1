@@ -120,13 +120,13 @@ function drawChart() {
     // console.log(graphicsData.total.data);
     var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
     var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
-    var data_keys = Object.keys(graphicsData).filter(k => k !== 'total');
+    var data_keys = Object.keys(graphicsData.details);
     // console.log(data_keys);
     var eq_auto_data = [];
     var eq_user_data = [];
     for (var i = 1; i <= data_keys.length; i++){
-        var eq_auto = google.visualization.arrayToDataTable(graphicsData[data_keys[i-1]].auto_data);
-        var eq_user = google.visualization.arrayToDataTable(graphicsData[data_keys[i-1]].user_data);
+        var eq_auto = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].auto_data);
+        var eq_user = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].user_data);
         eq_auto_data.push(eq_auto);
         eq_user_data.push(eq_user);
     }

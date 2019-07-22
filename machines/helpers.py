@@ -1,5 +1,6 @@
 def prepare_data_for_google_charts_bar(data):
     charts_data = {}
+    charts_data['details'] = {}
     for key in data.keys():
         chart = data[key]['auto_stats']
         chart2 = data[key]['user_stats']
@@ -13,5 +14,8 @@ def prepare_data_for_google_charts_bar(data):
             user_data += [[k, chart2[k]]]
         legend += [{'role': 'annotation'}]
         graph_data += ['']
-        charts_data[key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
+        if key == 'total':
+            charts_data[key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
+        else:
+            charts_data['details'][key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
     return charts_data
