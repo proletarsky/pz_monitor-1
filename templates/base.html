@@ -52,6 +52,7 @@
                 <span class="glyphicon glyphicon-menu-hamburger"></span>
             </a>
             <ul class="nav navbar-nav navbar-left">
+                <li><a href="/machines/stats"><span class="glyphicon glyphicon-stats"></span> Статистика</a></li>
                 {% block navbar %}
                 {% endblock navbar %}
             </ul>
@@ -83,6 +84,9 @@
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
                     <a href="/machines"><span class="glyphicon glyphicon-scale"></span> Оборудование</a>
+                </li>
+                <li class="sidebar-brand">
+                    <a href="/machines/stats"><span class="glyphicon glyphicon-stats"></span>  Статистика</a>
                 </li>
                 {% block sidebar %}
                 {% endblock sidebar %}

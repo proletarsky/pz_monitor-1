@@ -49,14 +49,14 @@ $(document).ready(function () {
         var elementID = $(this).attr('id');
         var id = elementID.split('-').pop();
         var classID = `.toggled-pane-${id}`;
-        console.log(elementID);
+        // console.log(`elID = ${elementID}`);
         $(classID).toggle('slow');
-        var txt = $(elementID).text();
+        var txt = $(`#${elementID}`).text();
         if (txt === 'Показать')
             txt = 'Скрыть';
         else
             txt = 'Показать';
-        $(elementID).text(txt);
+        $(`#${elementID}`).text(txt);
     })
 });
 
@@ -120,6 +120,16 @@ function drawChart() {
     // console.log(graphicsData.total.data);
     var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
     var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
+    var data_keys = Object.keys(graphicsData).filter(k => k !== 'total');
+    // console.log(data_keys);
+    var eq_auto_data = [];
+    var eq_user_data = [];
+    for (var i = 1; i <= data_keys.length; i++){
+        var eq_auto = google.visualization.arrayToDataTable(graphicsData[data_keys[i-1]].auto_data);
+        var eq_user = google.visualization.arrayToDataTable(graphicsData[data_keys[i-1]].user_data);
+        eq_auto_data.push(eq_auto);
+        eq_user_data.push(eq_user);
+    }
 
     var options_auto = {
         width: '100%',
@@ -133,10 +143,16 @@ function drawChart() {
         width: '100%',
         height: '100%',
         pieHole: 0.4
-    }
+    };
     var auto_data_chart = new google.visualization.BarChart(document.getElementById("id-plant"));
     var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
     auto_data_chart.draw(auto_data, options_auto);
     user_data_chart.draw(user_data, options_user);
+    for (var i = 1; i <= data_keys.length; i++){
+        var auto_chart = new google.visualization.BarChart(document.getElementById(`id-work-${i}`));
+        var user_chart = new google.visualization.PieChart(document.getElementById(`id-userdata-${i}`));
+        auto_chart.draw(eq_auto_data[i-1], options_auto);
+        user_chart.draw(eq_user_data[i-1], options_user);
+    }
 }
 
