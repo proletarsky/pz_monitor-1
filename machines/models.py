@@ -367,7 +367,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
-
-# Модель кода безопасности
-class Code(models.Model):
-    code=models.CharField(max_length=12)

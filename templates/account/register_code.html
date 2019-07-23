@@ -3,6 +3,7 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
+
     <h1>Осталось совсем чуть-чуть.</h1>
     <p><big>На указанный вами номер телефона был выслан код. Пожалуйста, введите его ниже:</big></p>
 	<table align=center >
@@ -11,6 +12,13 @@
 	<tr><td align=right><h4>Код:</h4></td><td>{{ code_form.code }}</td></tr>    
 	<tr ><td colspan="4" align=center><font color=white>.</font></td></tr>	
 	<tr><td colspan="4" align=center><input type="submit" value="Отправить"></td></tr>
+	<tr style="display:none;"><td align=right><h4>Пользователь:</h4></td><td><input id="user_id" type="{{ code_form.user_id }}"></td></tr>
     </form>
 	</table>
+	<script>
+	var strGET = window.location.search.replace( '?', ''); 
+	var data = strGET.split('=');
+	document.getElementById('user_id').value = data[1];
+	</script>
 {% endblock %}
+<!-->style="display:none;"

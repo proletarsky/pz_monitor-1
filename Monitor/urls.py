@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework import routers
 from machines.views import RawDataViewSet
-from .view import main_index, register, edit, validate
+from .view import main_index, register, edit, validate, not_validate
 
 urlpatterns = [
                   url(r'^$', main_index),
@@ -28,5 +28,6 @@ urlpatterns = [
                   url(r'^accounts/', include('django.contrib.auth.urls')),
                   url(r'^accounts/register/$', register, name='register'),
                   url(r'^accounts/edit/$', edit, name='edit'),
-                  url(r'^accounts/validate/(?P<user>\d+)$', validate, name='validate'),
+                  url(r'^accounts/validate/$', validate, name='validate'),
+                  url(r'^accounts/not_validate/$', not_validate, name='not_validate'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
