@@ -14,6 +14,8 @@ import os
 #import sys
 from celery.schedules import crontab
 from backends.exchange import ExchangeBackend
+import base64
+import requests
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -159,6 +161,11 @@ EMAIL_BACKEND = 'backends.exchange.ExchangeBackend'
 EMAIL_USER = 'proletarsky\monitor'
 EMAIL_PASSWORD = 'Zxcv6789'
 EMAIL_ACCOUNT = 'monitor@proletarsky.ru'
+
+# SMS settings
+SMS_API_URL = "https://a2p-api.megalabs.ru/sms/v1/sms"
+SMS_USER_PASS = "NW_prtzvd:K63GG1ag"
+SMS_PASS_PHRASE = base64.b64encode(SMS_USER_PASS.encode("ascii")).decode("ascii")
 
 # CELERY
 CELERY_BROKER_URL = 'redis://localhost:6379'

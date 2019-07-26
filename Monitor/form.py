@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
-from machines.models import Profile
+from machines.models import Profile, Code
 
 
 # Регистрация пользователей
@@ -48,7 +48,10 @@ class ProfileEditForm(forms.ModelForm):
 
 
 # Подтверждение кода безопасности
-class CodeForm(forms.Form):
-    code=forms.CharField(max_length=12)
+class CodeForm(forms.ModelForm):
     user_id=forms.CharField()
+
+    class Meta:
+        model = Code
+        fields = ('code',)
 
