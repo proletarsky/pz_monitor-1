@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+import re
 
 def prepare_data_for_google_charts_bar(data):
     charts_data = {}
@@ -28,10 +29,23 @@ def prepare_data_for_google_charts_bar(data):
 # кодируем связку логин:пароль
 # usrPass = "NW_prtzvd:K63GG1ag"
 # b64Val = base64.b64encode(usrPass.encode("ascii")).decode("ascii")
-def SendSMS(phone, message):
+def SendSMS(phone, pattern, message):
+    """
+    sends SMS to number 'phone'
+    :param phone: string +7(912)3492849
+    :param message:
+    :return: Http code
+    """
     # *************************************************
     """!!!Формирование текста СМС и номеров получателей!!!"""
-    assert isinstance(phone, int) and str(phone)[0] == '7', 'phone must be NUMBER and starts with 7'
+    ph = re.sub(r'([-\s\+\(\)]*)', "", phone)
+    assert (ph)[:2] == '79', 'phone should start with 79'
+    try:
+        ph = int(ph)
+    except ValueError as e:
+        raise ValueError("invalid phone number {0}".format(phone))
+    assert isinstance(pattern, int) and pattern >= 0 and pattern < len(settings.SMS_PATTERNS), "invalid pattern"
+
     # кому отправлять СМС
     # phone = 7...
 
@@ -41,11 +55,16 @@ def SendSMS(phone, message):
     # msg = "тестовое СМС для системы мониторинга"
     # *************************************************
 
+    if re.search(r'\{\d\}', settings.SMS_PATTERNS[pattern]):
+        msg = settings.SMS_PATTERNS[pattern].format(message)
+    else:
+        msg = settings.SMS_PATTERNS[pattern]
+
     # тело запроса
     sms = {
         "from": "PZMONITOR",
-        "to": phone,
-        "message": message
+        "to": ph,
+        "message": msg
     }
 
     # заголовок
@@ -59,3 +78,5 @@ def SendSMS(phone, message):
     # статус и отчет о выполнении, не обязательно
     print(r.status_code)
     print(r.text)
+
+    return r.status_code

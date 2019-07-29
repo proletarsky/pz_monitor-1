@@ -166,6 +166,11 @@ EMAIL_ACCOUNT = 'monitor@proletarsky.ru'
 SMS_API_URL = "https://a2p-api.megalabs.ru/sms/v1/sms"
 SMS_USER_PASS = "NW_prtzvd:K63GG1ag"
 SMS_PASS_PHRASE = base64.b64encode(SMS_USER_PASS.encode("ascii")).decode("ascii")
+SMS_PATTERNS = [
+    'ваш новый пароль к системе мониторинга пз {0}',
+    'система мониторинга пз не работает',
+    'введите код {0} чтобы подтвердить регистрацию в системе мониторинга пз',
+]
 
 # CELERY
 CELERY_BROKER_URL = 'redis://localhost:6379'
