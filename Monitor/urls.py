@@ -19,7 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from rest_framework import routers
 from machines.views import RawDataViewSet
-from .view import main_index, register, edit, validate, not_validate
+from .view import main_index, register, edit, validate, not_validate, validate_phone
 
 urlpatterns = [
                   url(r'^$', main_index),
@@ -30,4 +30,5 @@ urlpatterns = [
                   url(r'^accounts/edit/$', edit, name='edit'),
                   url(r'^accounts/validate/$', validate, name='validate'),
                   url(r'^accounts/not_validate/$', not_validate, name='not_validate'),
+                  url(r'^validate_phone/$', validate_phone, name='validate_phone'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -9,17 +9,28 @@
 	<table align=center >
     <form action="." method="post">
 	{% csrf_token %}
-	<tr><td align=right><h4>Код:</h4></td><td>{{ code_form.code }}</td></tr>
-	<tr ><td colspan="4" align=center><font color=white>.</font></td></tr>
+	<tr><td align=right><h4>Код:</h4></td><td>{{ code_form.code }}</td></tr>    
+	<tr ><td colspan="4" align=center><font color=white>.</font></td></tr>	
 	<tr><td colspan="4" align=center><input type="submit" value="Отправить"></td></tr>
 	<tr style="display:none;"><td align=right><h4>Пользователь:</h4></td><td><input id="user_id" type="{{ code_form.user_id }}"></td></tr>
     </form>
 	</table>
 	<br><br>
+	<table align=center >
+	<form action="." method="post">
+	{% csrf_token %}
+	<tr><td align=right><h4>Если у вас отсутствует возможность посмотреть почту, вы можете получить код на указанный вам номер телефона. Для этого нажмите кнопку "Получить код по смс"</h4></td></tr>    
+	<tr ><td colspan="4" align=center><font color=white>.</font></td></tr>	
+	<tr style="display:none;"><td align=right><h4>Пользователь:</h4></td><td><input id="user_id2" type="{{ id_user_form.user_id }}"></td></tr>
+	<tr><td colspan="4" align=center><input type="submit" value="Получить код по смс"></td></tr>
+    </form>
+	</table>
+	<br><br>
 	<p><big>Если вы не получили письмо с кодом проверьте папку "Нежелательная почта" или "Спам", если такие имеются.<br>Если письмо так и не нашли, скорее всего вы ввели неправильно адрес эллектронной почты.<br>Пожалуйста, пройдите регистрацию <a href="{% url "register" %}"><i>заново</i></a></big></p>
 	<script>
-	var strGET = window.location.search.replace( '?', '');
+	var strGET = window.location.search.replace( '?', ''); 
 	var data = strGET.split('=');
 	document.getElementById('user_id').value = data[1];
+	document.getElementById('user_id2').value = data[1];
 	</script>
 {% endblock %}

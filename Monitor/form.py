@@ -49,9 +49,14 @@ class ProfileEditForm(forms.ModelForm):
 
 # Подтверждение кода безопасности
 class CodeForm(forms.ModelForm):
-    user_id=forms.CharField()
+    user_id = forms.CharField()
 
     class Meta:
         model = Code
         fields = ('code',)
+
+
+# Подтверждение кода безопасности через телефон
+class PhoneCodeForm(forms.Form):
+    user_id=forms.CharField()
 
