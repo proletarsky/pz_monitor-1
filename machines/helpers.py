@@ -40,7 +40,7 @@ def get_ci_data_timeline():
         # return f'new Date({ltime.year}, {ltime.month-1}, {ltime.day}, {ltime.hour}, {ltime.minute}, 0)'
         return datetime(ltime.year, ltime.month, ltime.day, ltime.hour, ltime.minute, 0)
     end = timezone.now()
-    start = end - timedelta(days=2)
+    start = end - timedelta(days=1)
     graph_data = {}
     for eq in Equipment.objects.all():
         cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
