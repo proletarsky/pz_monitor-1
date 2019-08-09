@@ -23,7 +23,7 @@ from .parsers import CoordinatorDataParser
 from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter
 from django.utils import timezone
 import re, datetime
-from .helpers import prepare_data_for_google_charts_bar
+from .helpers import prepare_data_for_google_charts_bar, get_ci_data_timeline
 from qsstats import QuerySetStats
 from django.db.models import Avg
 from .forms import UserRegistrationForm
@@ -90,6 +90,7 @@ class EqipmentFilteredListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = EquipmentFilter(self.request.GET, queryset=self.get_queryset())
+        context['graph_data'] = get_ci_data_timeline()
         return context
 
 

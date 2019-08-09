@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load bootstrap %}
 {% load admin_urls %}
+{% load static %}
 
 {% block navbar %}
     {% if user.is_superuser %}
@@ -17,8 +18,10 @@
 {% endblock sidebar %}
 
 {% block content %}
+    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
     <div class="page-header">
-        <h1>Мониторинг оборудования</h1>
+        <h3>Мониторинг оборудования</h3>
     </div>
     <form class="form-inline text-left" method="get">
         <div class="form-group mb-2 text-left" style="padding-bottom: 30px">
@@ -26,34 +29,32 @@
             <button class="btn btn-primary" type="submit">Применить</button>
         </div>
     </form>
-    <table class="table-striped text-left" width="100%">
-        <thead>
+    <table class="table text-left" width="100%">
+        <thead style="color:#003063; background: #E0E0E0; text-align: center">
         <tr>
             <th>Цех</th>
-            <th>Инв. номер</th>
-            <th>Модель</th>
-            <th>Статистика</th>
-            <th>Текущие данные</th>
-            {% if user.is_superuser %}
-                <th>Настройка</th>
-            {% endif %}
+            <th>Оборудование</th>
+            <th style="width: 50%">Данные мониторинга</th>
+            <th style="text-align: center">Состояние</th>
         </tr>
         </thead>
         {% for equip in filter.qs %}
             <tr>
-                <td>{{ equip.workshop }}</td>
-                <td>{{ equip.code }}</td>
-                <td>{{ equip.model }}</td>
-                <td></td>
+                <td style="padding-top: 20px">{{ equip.workshop }}</td>
+                <td style="padding-top: 20px"><b>{{ equip.model }} ({{ equip.code }})</b></td>
                 <td>
-                    <a href="{{ appname }}works/{{ equip.id }}/">Данные</a>
+                    <div id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
+                    </div>
                 </td>
-                {% if user.is_superuser %}
-                    <td><a href="#">
-                        <span class="glyphicon glyphicon-cog"></span> Настройка
-                    </a></td>
-                {% endif %}
+                <td style="text-align: center">
+                    <a href="{{ appname }}works/{{ equip.id }}/">
+                        <h4><span class="glyphicon glyphicon-new-window"> </span></h4>
+                    </a>
+                </td>
             </tr>
         {% endfor %}
     </table>
+    <script type="text/javascript">
+        graphicsData={{ graph_data|safe }}
+    </script>
 {% endblock content %}

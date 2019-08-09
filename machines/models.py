@@ -87,6 +87,8 @@ class Equipment(models.Model):
     idle_threshold = models.IntegerField(verbose_name='Порог включения', default=100)
     no_load_threshold = models.IntegerField(verbose_name='Порог холостого хода', default=110)
     allowed_idle_interval = models.IntegerField(verbose_name='Допустимый простой, мин', default=15)
+    # image = models.ImageField(blank=True, null=True)
+    # sm_image = models.ImageField(blank=True, null=True)
 
     def __str__(self):
         return '{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)

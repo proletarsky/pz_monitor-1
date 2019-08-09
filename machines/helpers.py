@@ -1,6 +1,11 @@
 import requests
 from django.conf import settings
 import re
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
+from datetime import timedelta, datetime
+from machines.models import ClassifiedInterval, Equipment
 
 def prepare_data_for_google_charts_bar(data):
     charts_data = {}
@@ -11,7 +16,8 @@ def prepare_data_for_google_charts_bar(data):
         legend = ['Kind']
         graph_data = [key]
         user_data = [['user_reason', 'min']]
-        for k in chart.keys():
+        # Need to sort
+        for k in sorted(chart.keys()):
             legend += [k]
             graph_data += [chart[k]]
         for k in chart2.keys():
@@ -23,6 +29,26 @@ def prepare_data_for_google_charts_bar(data):
         else:
             charts_data['details'][key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
     return charts_data
+
+
+def get_ci_data_timeline():
+    """
+    :return: dict with classified intervals for last 24 hours, keys - equipment
+    """
+    def time_for_js(time):
+        ltime = timezone.localtime(time)
+        # return f'new Date({ltime.year}, {ltime.month-1}, {ltime.day}, {ltime.hour}, {ltime.minute}, 0)'
+        return datetime(ltime.year, ltime.month, ltime.day, ltime.hour, ltime.minute, 0)
+    end = timezone.now()
+    start = end - timedelta(days=2)
+    graph_data = {}
+    for eq in Equipment.objects.all():
+        cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
+        data = [['-', ci.automated_classification.description,
+                 time_for_js(max(ci.start, start)),
+                 time_for_js(ci.end)] for ci in cis]
+        graph_data[eq.id] = data
+    return json.dumps(graph_data, cls=DjangoJSONEncoder)
 
 
 # api_URL = "https://a2p-api.megalabs.ru/sms/v1/sms"
