@@ -75,7 +75,7 @@ function drawChart() {
         //height: '20',
         // chartArea: { width: '100%', height:'80%'},
         hAxis: {
-            format: "hh:mm"
+            format: "HH:mm"
         }
     };
 
