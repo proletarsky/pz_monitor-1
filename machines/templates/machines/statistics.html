@@ -4,15 +4,9 @@
 {% load static %}
 {% load googlecharts %}
 
-{% block navbar %}
-<script type="text/javascript" src="//www.google.com/jsapi"></script>
-{#    <script type="text/javascript" src="{% static 'js/jsapi.js' %}"></script>#}
-<script type="text/javascript" src="{% static 'js/statistics.js' %}"></script>
-
-
-{% endblock navbar %}
-
 {% block sidebar %}
+    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="{% static 'js/statistics.js' %}"></script>
     {% if user.is_superuser %}
         <li class="sidebar-brand">
             <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>

@@ -18,11 +18,13 @@ $(document).ready(function () {
     // set_period('прошлая декада');
     if (graphicsData !== null)
         console.log(graphicsData);
+    else
+        console.log('No Data');
 
     $("#id_periods_selector").change(function (e) {
-        // console.log('select changed!');
+        console.log('select changed!');
         var cur_val = $(this).val();
-        // console.log($(this).val());
+        console.log($(this).val());
         set_period(cur_val);
    });
 
