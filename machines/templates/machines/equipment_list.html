@@ -2,17 +2,17 @@
 {% load bootstrap %}
 {% load admin_urls %}
 {% load static %}
-
-{% block navbar %}
-    {% if user.is_superuser %}
-        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
-    {% endif %}
-{% endblock navbar %}
+{% load has_group %}
 
 {% block sidebar %}
     {% if user.is_superuser %}
         <li class="sidebar-brand">
             <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+	{% if request.user|has_group:'Руководитель производства' %}
+        <li class="sidebar-brand">
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
         </li>
     {% endif %}
 {% endblock sidebar %}

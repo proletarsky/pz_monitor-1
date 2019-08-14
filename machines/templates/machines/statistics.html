@@ -9,9 +9,7 @@
 {#    <script type="text/javascript" src="{% static 'js/jsapi.js' %}"></script>#}
 <script type="text/javascript" src="{% static 'js/statistics.js' %}"></script>
 
-    {% if user.is_superuser %}
-        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
-    {% endif %}
+
 {% endblock navbar %}
 
 {% block sidebar %}
