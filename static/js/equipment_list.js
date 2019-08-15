@@ -30,6 +30,24 @@ function dateParser(value) {
     if (typeof value === 'string' && reISO.exec(value)) {
             return new Date(value);
     }
+    else {
+        try {
+            let classID = parseInt(value);
+            switch (classID) {
+                case 999:
+                    return 'yellow';
+                case 0:
+                    return 'green';
+                case 1:
+                    return 'red';
+                default:
+                    return value;
+            }
+        }
+        catch (e) {
+            return value;
+        }
+    }
         return value;
 };
 function arrayParser(arr) {
@@ -37,7 +55,7 @@ function arrayParser(arr) {
     arr.forEach(function (obj, i, array) {
         newArr.push(obj.map(x=>dateParser(x)));
     });
-    console.log(newArr)
+    console.log(newArr);
     return newArr;
 }
 
@@ -54,11 +72,13 @@ function drawChart() {
         let eq_auto = new google.visualization.DataTable();
         eq_auto.addColumn({ type: 'string', id: 'Role' });
         eq_auto.addColumn({ type: 'string', id: 'Name' });
+        eq_auto.addColumn({type: 'string', id: 'style', role: 'style'}),
         eq_auto.addColumn({ type: 'date', id: 'Start' });
         eq_auto.addColumn({ type: 'date', id: 'End' });
         console.log('Try add row');
         graphicsData[val].forEach(function (row, i, array) {
-            eq_auto.addRow(row.map(v=>dateParser(v)))
+            // let row_data =
+            eq_auto.addRow(row.map(v=>dateParser(v)));
         });
         console.log(eq_auto);
         eq_auto_data.push(eq_auto);
@@ -66,7 +86,7 @@ function drawChart() {
     });
 
     let options_auto = {
-        colors: ['green', 'red', 'yellow'],
+        // colors: ['green', 'red', 'yellow'],
         timeline: {
             showRowLabels: false,
             showBarLabels: false

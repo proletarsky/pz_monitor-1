@@ -44,9 +44,8 @@ def get_ci_data_timeline():
     graph_data = {}
     for eq in Equipment.objects.all():
         cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
-        data = [['-', ci.automated_classification.description,
-                 time_for_js(max(ci.start, start)),
-                 time_for_js(ci.end)] for ci in cis]
+        data = [['-', ci.automated_classification.description, ci.automated_classification.code,
+                 max(ci.start, start), ci.end] for ci in cis]
         graph_data[eq.id] = data
     return json.dumps(graph_data, cls=DjangoJSONEncoder)
 
