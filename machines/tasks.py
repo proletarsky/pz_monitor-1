@@ -41,7 +41,7 @@ def update_intervals():
             except Exception:
                 continue  # No data at all
 
-        # print(last_date)
+        # print(f'eq = {eq}; last_date = {last_date}')
 
         qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel, date__gte=last_date)
 
