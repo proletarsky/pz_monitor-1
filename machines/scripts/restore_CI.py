@@ -34,7 +34,7 @@ def main():
                 ci.user = user
                 ci.save()
         else:
-            print(f'Interval {start}-{end} for equipment {eq_id} not found!')
+            print('Interval {0}-{1} for equipment {2} not found!'.format(start, end, eq_id))
 
 if __name__ == '__main__':
     main()
