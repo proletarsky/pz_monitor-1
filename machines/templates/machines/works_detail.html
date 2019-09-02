@@ -3,6 +3,12 @@
 {% load static %}
 {% load has_group %}
 
+{% block navbar %}
+        <li class="sidebar-brand">
+            <a href="/machines"><span class="glyphicon glyphicon-chevron-left"></span> Назад</a>
+        </li>
+{% endblock navbar %}
+
 {% block sidebar %}
     {% if user.is_superuser %}
         <li class="sidebar-brand">
