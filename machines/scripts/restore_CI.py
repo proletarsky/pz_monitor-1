@@ -11,7 +11,7 @@ cmd = 'select ci.start, ci.equipment_id, ci.automated_classification_id, ci.equi
         'from machines_classifiedinterval ci where ci.user_classification_id is not null'
 
 
-def restore_CI():
+def main():
     print('Restore ClassifiedIntervals user data')
 
     conn = ps.connect(host=HOST, database=DB, user=USER, password=PWD)
@@ -35,3 +35,6 @@ def restore_CI():
                 ci.save()
         else:
             print(f'Interval {start}-{end} for equipment {eq_id} not found!')
+
+if __name__ == '__main__':
+    main()
