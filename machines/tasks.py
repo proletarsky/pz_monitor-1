@@ -10,6 +10,7 @@ from django.db import transaction
 from django.db.models import Avg
 from django.utils import timezone, dateparse
 from datetime import datetime, timedelta
+import pytz
 
 from django.contrib.auth.models import User
 import psycopg2 as ps
@@ -337,7 +338,7 @@ def fixit():
         rebuild_intervals(start=start, end=end)
 
 @task()
-def main():
+def restore_ci():
     print('Restore ClassifiedIntervals user data')
 
     conn = ps.connect(host=HOST, database=DB, user=USER, password=PWD)
@@ -349,10 +350,10 @@ def main():
     for data in qs:
         start, end, auto_cl, eq_id, user_id = data
         print(start, type(start))
-        start_st = start - timedelta(minutes=2)
-        start_en = start + timedelta(minutes=2)
-        end_st = end - timedelta(minutes=2)
-        end_en = end + timedelta(minutes=2)
+        start_st = start.astimezone(pytz.UTC) - timedelta(minutes=2)
+        start_en = start.astimezone(pytz.UTC) + timedelta(minutes=2)
+        end_st = end.astimezone(pytz.UTC) - timedelta(minutes=2)
+        end_en = end.astimezone(pytz.UTC) + timedelta(minutes=2)
         cis = ClassifiedInterval.objects.filter(equipment__id=eq_id,
                                                  automated_classification_id=auto_cl,
                                                  start__range = (start_st, start_en),
@@ -360,7 +361,7 @@ def main():
         if cis:
             user_reason = Reason.objects.get(id=user_id)
             user = User.objects.get(id=user_id)
-            print(user)
+            print('user = {0}'.format(user))
             for ci in cis:
                 ci.user_classification = user_reason
                 ci.user = user

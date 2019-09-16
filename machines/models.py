@@ -262,11 +262,13 @@ class ClassifiedInterval(models.Model):
                 auto_cl = str(ci.automated_classification) if ci.automated_classification else 'Неопределено'
                 user_cl = str(ci.user_classification) if ci.user_classification else 'Не указано'
                 auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
-                user_stats[user_cl] = user_stats.get(user_cl, 0) + int_dur_min
+                user_stats[user_cl] = user_stats.get(user_cl, 0) + \
+                    (int_dur_min if not ci.automated_classification.is_working else 0)
 
                 # update total statistics
                 total_auto_stats[auto_cl] = total_auto_stats.get(auto_cl, 0) + int_dur_min
-                total_user_stats[user_cl] = total_user_stats.get(user_cl, 0) + int_dur_min
+                total_user_stats[user_cl] = total_user_stats.get(user_cl, 0) + \
+                    (int_dur_min if not ci.automated_classification..is_working else 0)
 
             statistics[str(Equipment.objects.filter(id=eid).first())] = {'auto_stats': auto_stats,
                                                                          'user_stats': user_stats}
