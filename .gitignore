@@ -1,5 +1,6 @@
-./Monitor/__pycache__/
-./backends/__pycache__/
-./__pycache__/
-./machines/migrations/__pycache__/
-./machines/__pycache__/
+.idea/
+Monitor/__pycache__/
+backends/__pycache__/
+__pycache__/
+machines/migrations/__pycache__/
+machines/__pycache__/
