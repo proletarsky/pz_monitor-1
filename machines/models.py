@@ -233,7 +233,7 @@ class ClassifiedInterval(models.Model):
 
         # check equipment
         if equipment is None:
-            equipment_id_list = [eq.id for eq in Equipment.objects.all()]
+            equipment_id_list = [eq.id for eq in Equipment.objects.all().order_by('workshop')]
         elif isinstance(equipment, list):
             equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
                                  [id for id in equipment if isinstance(id, int)])
@@ -273,7 +273,7 @@ class ClassifiedInterval(models.Model):
             statistics[str(Equipment.objects.filter(id=eid).first())] = {'auto_stats': auto_stats,
                                                                          'user_stats': user_stats}
         # end of cycle
-        statistics['total'] = {'auto_stats' : total_auto_stats, 'user_stats': user_stats}
+        statistics['total'] = {'auto_stats' : total_auto_stats, 'user_stats': total_user_stats}
         return statistics
 
 
