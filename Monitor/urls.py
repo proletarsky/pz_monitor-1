@@ -32,3 +32,6 @@ urlpatterns = [
                   url(r'^accounts/not_validate/$', not_validate, name='not_validate'),
                   url(r'^validate_phone/$', validate_phone, name='validate_phone'),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

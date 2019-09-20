@@ -33,7 +33,8 @@
         <thead style="color:#003063; background: #E0E0E0; text-align: center">
         <tr>
             <th>Цех</th>
-            <th>Оборудование</th>
+            <th colspan="2"><div style="text-align: center">Оборудование</div></th>
+{#			<th>Фото оборудования</th>#}
             <th style="width: 50%">Данные мониторинга</th>
             <th style="text-align: center">Состояние</th>
         </tr>
@@ -42,6 +43,13 @@
             <tr>
                 <td style="padding-top: 20px">{{ equip.workshop }}</td>
                 <td style="padding-top: 20px"><b>{{ equip.model }} ({{ equip.code }})</b></td>
+                <td>
+                    {% if equip.image %}
+                        <img src="{{ equip.image.url }}" height="75px">
+                    {% else %}
+                        <img src="{% static 'img/equipment.jpg'%}" width="100px">
+                    {% endif %}
+                </td>
                 <td>
                     <div id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
                     </div>

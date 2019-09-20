@@ -77,6 +77,7 @@ class Equipment(models.Model):
     workshop = models.CharField(max_length=20, verbose_name='Цех', choices=WORKSHOP_CHOICES)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
+    image=models.ImageField(blank=True, upload_to='machines', verbose_name='Фото оборудования')
     description = models.TextField(max_length=1000, verbose_name='Описание', null=True, blank=True)
     timetable = models.CharField(max_length=30, verbose_name='Расписание', choices=TIMETABLE_CHOICES)
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
