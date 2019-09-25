@@ -91,8 +91,13 @@ def update_intervals():
 
         # clear data in RawData between last_date and date_from
         last_gd = GraphicsData.objects.filter(equipment=eq).order_by('-date').first()
-        date_from = last_gd.date if last_gd else last_date
-        date_from += timedelta(minutes=1)
+        if not last_gd:
+            # No GraphicsData at all
+            date_from = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel) \
+                                        .order_by('date').first().date
+        else:
+            date_from = last_gd.date if last_gd else last_date
+            date_from += timedelta(minutes=1)
         if date_from < last_date:
             qs = RawData.objects.filter(mac_address=eq.xbee_mac, channel=eq.main_channel,
                                         date__gte=date_from) # Dont need to add last_date - in't error!
