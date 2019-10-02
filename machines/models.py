@@ -70,8 +70,7 @@ class Equipment(models.Model):
         ('24/7', 'круглосуточно без выходных'),
     )
     AVAILABLE_MACS = lambda: [(m.mac_address, m.mac_address)
-                              for m in RawData.objects.filter(date__gte=timezone.localdate())
-                                  .order_by('mac_address').distinct('mac_address')]
+                              for m in RawData.objects.all().distinct('mac_address')]
     AVAILABLE_CHANNELS = lambda: [(m.channel, m.channel)
                                   for m in RawData.objects.filter(date__gte=timezone.localdate()).distinct('channel')]
     workshop = models.CharField(max_length=20, verbose_name='Цех', choices=WORKSHOP_CHOICES)
