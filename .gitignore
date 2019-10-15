@@ -4,3 +4,4 @@ backends/__pycache__/
 __pycache__/
 machines/migrations/__pycache__/
 machines/__pycache__/
+venv
