@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from machines.time_helpers import CurrentDayType, get_duration_minutes
 
 from django.db import models
 from django.db.models import Count, Max
@@ -9,8 +10,8 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.conf import settings
+from django.core.exceptions import ValidationError
 import datetime
-
 
 # Create your models here.
 
@@ -52,6 +53,147 @@ class RawData(models.Model):
     ip = models.CharField(max_length=20, null=True)
 
 
+class TimetableDetail(models.Model):
+    DAYS_OF_WEEK = (
+        ('Пн', 'Понедельник'),
+        ('Вт', 'Вторник'),
+        ('Ср', 'Среда'),
+        ('Чт', 'Четверг'),
+        ('Пт', 'Пятница'),
+        ('Сб', 'Суббота'),
+        ('Вс', 'Воскресенье')
+    )
+    day_of_week_start = models.CharField(max_length=14, verbose_name='С дня недели', choices=DAYS_OF_WEEK)
+    day_of_week_end = models.CharField(max_length=14, verbose_name='По день недели', choices=DAYS_OF_WEEK)
+    start_time1 = models.TimeField(verbose_name='Начало 1 смены', auto_now=False)
+    end_time1 = models.TimeField(verbose_name='Окончание 1 смены', auto_now=False)
+    lunch_start1 = models.TimeField(verbose_name='Начало обеда 1 смены', auto_now=False, null=True, blank=True)
+    lunch_end1 = models.TimeField(verbose_name='Окончание обеда 1 смены', auto_now=False, null=True, blank=True)
+    start_time2 = models.TimeField(verbose_name='Начало 2 смены', auto_now=False, null=True, blank=True)
+    end_time2 = models.TimeField(verbose_name='Окончание 2 смены', auto_now=False, null=True, blank=True)
+    lunch_start2 = models.TimeField(verbose_name='Начало обеда 2 смены', auto_now=False, null=True, blank=True)
+    lunch_end2 = models.TimeField(verbose_name='Окончание обеда 2 смены', auto_now=False, null=True, blank=True)
+    start_time3 = models.TimeField(verbose_name='Начало 3 смены', auto_now=False, null=True, blank=True)
+    end_time3 = models.TimeField(verbose_name='Окончание 3 смены', auto_now=False, null=True, blank=True)
+    lunch_start3 = models.TimeField(verbose_name='Начало обеда 3 смены', auto_now=False, null=True, blank=True)
+    lunch_end3 = models.TimeField(verbose_name='Окончание обеда 3 смены', auto_now=False, null=True, blank=True)
+
+    def clean(self):
+        if (self.start_time2 is None) != (self.end_time2 is None):
+            raise ValidationError('У второй смены должны быть указаны и начало и конец')
+        if self.start_time2 is None and self.start_time3 is not None:
+            raise ValidationError('Нельзя включить третью смену без второй')
+        if (self.start_time3 is None) != (self.end_time3 is None):
+            raise ValidationError('У третьей смены должны быть указаны и начало и конец')
+        if (self.lunch_start1 is None) != (self.lunch_end1 is None):
+            raise ValidationError('У обеда 1 смены должны быть указаны и начало и конец')
+        if (self.lunch_start2 is None) != (self.lunch_end2 is None):
+            raise ValidationError('У обеда 2 смены должны быть указаны и начало и конец')
+        if (self.lunch_start3 is None) != (self.lunch_end3 is None):
+            raise ValidationError('У обеда 3 смены должны быть указаны и начало и конец')
+        if self.lunch_start1 is not None and get_duration_minutes(self.start_time1, self.lunch_start1) > 480:
+            raise ValidationError('Обед 1-й смены не должен начинаться раньше начала смены')
+        if self.lunch_start2 is not None and get_duration_minutes(self.start_time2, self.lunch_start2) > 480:
+            raise ValidationError('Обед 1-й смены не должен начинаться раньше начала смены')
+        if self.lunch_start3 is not None and get_duration_minutes(self.start_time3, self.lunch_start3) > 480:
+            raise ValidationError('Обед 1-й смены не должен начинаться раньше начала смены')
+        if self.lunch_end1 is not None and get_duration_minutes(self.lunch_end1, self.end_time1) > 480:
+            raise ValidationError('Обед 1-й смены не должен кончаться после окончания смены')
+        if self.lunch_end2 is not None and get_duration_minutes(self.lunch_end2, self.end_time2) > 480:
+            raise ValidationError('Обед 2-й смены не должен кончаться после окончания смены')
+        if self.lunch_end3 is not None and get_duration_minutes(self.lunch_end3, self.end_time3) > 480:
+            raise ValidationError('Обед 3-й смены не должен кончаться после окончания смены')
+
+    def __str__(self):
+        if self.start_time2 is None:
+            return ('{0}-{1}:(1-я смена:{2}-{3})'.format(self.day_of_week_start, self.day_of_week_end,
+                                                         self.start_time1.strftime('%H:%M'),
+                                                         self.end_time1.strftime('%H:%M')))
+        elif self.start_time3 is None:
+            return ('{0}-{1}:(1-я смена:{2}-{3}, 2-я смена:{4}-{5})'.format(self.day_of_week_start,
+                                                                            self.day_of_week_end,
+                                                                            self.start_time1.strftime('%H:%M'),
+                                                                            self.end_time1.strftime('%H:%M'),
+                                                                            self.start_time2.strftime('%H:%M'),
+                                                                            self.end_time2.strftime('%H:%M')))
+        else:
+            return ('{0}-{1}:(1-я смена:{2}-{3}, 2-я смена:{4}-{5}), 3-я смена:{6}-{7}'
+                    .format(self.day_of_week_start, self.day_of_week_end,
+                            self.start_time1.strftime('%H:%M'), self.end_time1.strftime('%H:%M'),
+                            self.start_time2.strftime('%H:%M'), self.end_time2.strftime('%H:%M'),
+                            self.start_time3.strftime('%H:%M'), self.end_time3.strftime('%H:%M')))
+
+
+class Timetable(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Название расписания:')
+    pre_holiday_short = models.BooleanField(verbose_name='В предпразничные дни на смены час короче',
+                                            auto_created=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_current_working_intervals(self):
+        todayType = CurrentDayType.get_day_type()
+        short_day_of_week = [d[0] for d in TimetableDetail.DAYS_OF_WEEK]
+        if todayType == 1:
+            return []
+        elif todayType == 0 or todayType == 2:    # common working day or eve holiday
+            # to find suitable timetable detail
+            todayWorkDay = timezone.localtime()
+            weekDay = todayWorkDay.weekday() if CurrentDayType.get_working_day(todayWorkDay) == todayWorkDay.day \
+                else (todayWorkDay - datetime.timedelta(days=1)).weekday()
+            foundTD = None
+            for tc in self.timetable.all():
+                day_start = -1
+                day_end = -1
+                td = tc.details
+                try:
+                    day_start = short_day_of_week.index(td.day_of_week_start)
+                    day_end = short_day_of_week.index(td.day_of_week_end)
+                except:
+                    pass
+                if day_start <= weekDay <= day_end:
+                    foundTD = td
+                    break
+            time_intervals = []
+            if foundTD is None:
+                return []
+            else:
+                sub_hour = 1 if todayType == 2 else 0
+                if foundTD.lunch_start1 is None:
+                    time_intervals = [(foundTD.start_time1, datetime.time(foundTD.end_time1.hour-sub_hour,
+                                                                          foundTD.end_time1.minute, 0))]
+                else:
+                    time_intervals = [(foundTD.start_time1, foundTD.lunch_start1),
+                                      (foundTD.lunch_end1, datetime.time(foundTD.end_time1.hour-sub_hour,
+                                                                         foundTD.end_time1.minute, 0))]
+                if foundTD.start_time2:
+                    if foundTD.lunch_start2 is None:
+                        time_intervals += [(foundTD.start_time2, datetime.time(foundTD.end_time2.hour-sub_hour,
+                                                                               foundTD.end_time2.minute, 0))]
+                    else:
+                        time_intervals += [(foundTD.start_time2, foundTD.lunch_start2),
+                                           (foundTD.lunch_end2, datetime.time(foundTD.end_time2.hour-sub_hour,
+                                                                              foundTD.end_time2.minute, 0))]
+                if foundTD.start_time3:
+                    if foundTD.lunch_start3 is None:
+                        time_intervals += [(foundTD.start_time3, datetime.time(foundTD.end_time3.hour-sub_hour,
+                                                                               foundTD.end_time3.minute, 0))]
+                    else:
+                        time_intervals += [(foundTD.start_time3, foundTD.lunch_start3),
+                                           (foundTD.lunch_end3, datetime.time(foundTD.end_time3.hour-sub_hour,
+                                                                              foundTD.end_time3.minute, 0))]
+            return time_intervals
+        else:
+            return []
+
+
+class TimetableContent(models.Model):
+    timetable = models.ForeignKey(Timetable, related_name='timetable', verbose_name='Расписание',
+                                     on_delete=models.DO_NOTHING)
+    details = models.ForeignKey(TimetableDetail, related_name='detail', verbose_name='Детали', on_delete=models.DO_NOTHING)
+
+
 class Equipment(models.Model):
     WORKSHOP_CHOICES = (
         ('6', 'цех 6'),
@@ -87,6 +229,7 @@ class Equipment(models.Model):
     idle_threshold = models.IntegerField(verbose_name='Порог включения', default=100)
     no_load_threshold = models.IntegerField(verbose_name='Порог холостого хода', default=110)
     allowed_idle_interval = models.IntegerField(verbose_name='Допустимый простой, мин', default=15)
+    schedule = models.ForeignKey(Timetable, related_name='schedule', verbose_name='Режим работы')
     # image = models.ImageField(blank=True, null=True)
     # sm_image = models.ImageField(blank=True, null=True)
 
@@ -287,51 +430,6 @@ class GraphicsData(models.Model):
         qs = GraphicsData.objects.values('date', 'equipment').annotate(cnt=Count('id'),
                                                                        mid=Max('id')).filter(cnt__gt=1)
         GraphicsData.objects.filter(id__in=qs.values('mid')).delete()
-
-
-class TimetableDetail(models.Model):
-    DAYS_OF_WEEK = (
-        ('Пн', 'Понедельник'),
-        ('Вт', 'Вторник'),
-        ('Ср', 'Среда'),
-        ('Чт', 'Четверг'),
-        ('Пт', 'Пятница'),
-        ('Сб', 'Суббота'),
-        ('Вс', 'Воскресенье')
-    )
-    day_of_week_start = models.CharField(max_length=14, verbose_name='С дня недели', choices=DAYS_OF_WEEK)
-    day_of_week_end = models.CharField(max_length=14, verbose_name='По день недели', choices=DAYS_OF_WEEK)
-    start_time1 = models.TimeField(verbose_name='Начало 1 смены', auto_now=False)
-    end_time1 = models.TimeField(verbose_name='Окончание 1 смены', auto_now=False)
-    lunch_start1 = models.TimeField(verbose_name='Начало обеда 1 смены', auto_now=False, null=True, blank=True)
-    lunch_end1 = models.TimeField(verbose_name='Окончание обеда 1 смены', auto_now=False, null=True, blank=True)
-    start_time2 = models.TimeField(verbose_name='Начало 2 смены', auto_now=False, null=True, blank=True)
-    end_time2 = models.TimeField(verbose_name='Окончание 2 смены', auto_now=False, null=True, blank=True)
-    lunch_start2 = models.TimeField(verbose_name='Начало обеда 2 смены', auto_now=False, null=True, blank=True)
-    lunch_end2 = models.TimeField(verbose_name='Окончание обеда 2 смены', auto_now=False, null=True, blank=True)
-    start_time3 = models.TimeField(verbose_name='Начало 3 смены', auto_now=False, null=True, blank=True)
-    end_time3 = models.TimeField(verbose_name='Окончание 3 смены', auto_now=False, null=True, blank=True)
-    lunch_start3 = models.TimeField(verbose_name='Начало обеда 3 смены', auto_now=False, null=True, blank=True)
-    lunch_end3 = models.TimeField(verbose_name='Окончание обеда 3 смены', auto_now=False, null=True, blank=True)
-
-    def __str__(self):
-        return ('{0}-{1}:(1-я смена:{2}-{3})'.format(self.day_of_week_start, self.day_of_week_end,
-                                                     self.start_time1.strftime('%H:%M'),
-                                                     self.end_time1.strftime('%H:%M')))
-
-
-class Timetable(models.Model):
-    name = models.CharField(max_length=255, verbose_name='Название расписания:')
-    pre_holiday_short = models.BooleanField(verbose_name='В предпразничные дни на смены час короче',
-                                            auto_created=True)
-
-    def __str__(self):
-        return self.name
-
-
-class TimetableContent(models.Model):
-    timetable = models.ForeignKey(Timetable, verbose_name='Расписание', on_delete=models.CASCADE)
-    details = models.ForeignKey(TimetableDetail, verbose_name='Детали', on_delete=models.CASCADE)
 
 
 class Semaphore(models.Model):

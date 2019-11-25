@@ -2,10 +2,12 @@ import requests
 from django.conf import settings
 import re
 import json
+import pandas as pd
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from datetime import timedelta, datetime
 from machines.models import ClassifiedInterval, Equipment
+
 
 def prepare_data_for_google_charts_bar(data):
     charts_data = {}
@@ -105,3 +107,4 @@ def SendSMS(phone, pattern, message):
     print(r.text)
 
     return r.status_code
+

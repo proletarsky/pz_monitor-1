@@ -16,6 +16,7 @@ from celery.schedules import crontab
 from backends.exchange import ExchangeBackend
 import base64
 import requests
+from datetime import time
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -146,7 +147,7 @@ STATICFILES_DIRS = [
 
 LOGIN_REDIRECT_URL = '/machines'
 
-#REST_FRAMEWORK
+# REST_FRAMEWORK
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -154,6 +155,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
     ),
 }
+
+# Start time of working day
+START_TIME_DAY = time(7, 0, 0)
 
 # Temporary
 EMAIL_BACKEND = 'backends.exchange.ExchangeBackend'
