@@ -3,10 +3,20 @@ from django.conf import settings
 import re
 import json
 import pandas as pd
+import collections
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from datetime import timedelta, datetime
 from machines.models import ClassifiedInterval, Equipment
+
+
+sort_order = {
+    '40252 - FERRARI  A155-Е, цех 7': 0,
+    '40251 - OKUMA MB-46VAE, цех 7': 1,
+    '30428 - Sodic AQ 537 LQ 33W, цех 7': 2,
+    '32615 - Верт.-фрез. 6М12П, цех 7': 3,
+    '40619 - MAZAK VCS-530C, цех 20': 4
+}
 
 
 def prepare_data_for_google_charts_bar(data):
@@ -30,6 +40,10 @@ def prepare_data_for_google_charts_bar(data):
             charts_data[key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
         else:
             charts_data['details'][key] = {'auto_data': [legend, graph_data], 'user_data': user_data}
+
+    details_sorted = dict(collections.OrderedDict(sorted(charts_data['details'].items(),
+                                                    key=lambda k: sort_order.get(k[0], 400))))
+    charts_data['details'] = details_sorted
     return charts_data
 
 
