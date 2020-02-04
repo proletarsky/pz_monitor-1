@@ -1,4 +1,5 @@
 var graphicsData = null;
+var colorsJSON = null;
 
 $(document).ready(function () {
 
@@ -119,19 +120,21 @@ function set_period(period) {
 google.load("visualization", "1", {packages:["corechart"]});
 google.setOnLoadCallback(drawChart);
 function drawChart() {
-    // console.log(graphicsData.total.data);
     var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
     var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
     var data_keys = Object.keys(graphicsData.details);
-    // console.log(data_keys);
+
+
     var eq_auto_data = [];
     var eq_user_data = [];
     for (var i = 1; i <= data_keys.length; i++){
         var eq_auto = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].auto_data);
         var eq_user = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].user_data);
+        //console.log(eq_user)
         eq_auto_data.push(eq_auto);
         eq_user_data.push(eq_user);
     }
+
 
     var options_auto = {
         width: '100%',
@@ -141,20 +144,69 @@ function drawChart() {
         bar: { groupWidth: '30%' },
         isStacked: 'percent'
     };
-    var options_user = {
+    var list_color_total=[]
+
+    var new_total_array_data=[]
+    graphicsData.valueOf().total.user_data.forEach(x=>new_total_array_data.push(x[0]))
+    var new_total_array_data_filter_ON=[]
+    new_total_array_data_filter_ON=new_total_array_data.filter(x=>x!='user_reason')
+
+    var color_reason_list=[]
+    colorsJSON.valueOf().forEach(x=>color_reason_list.push(x.description))
+
+
+
+    //Функция для определения цвета по наименованию причины простоя
+    function color_def(searched_color) {
+        var ind=color_reason_list.indexOf(searched_color)
+        if(ind==-1){
+            return "#C0C0C0"
+        }
+        else {
+            return colorsJSON[ind].color
+        }
+    }
+
+    new_total_array_data_filter_ON.forEach(x=>list_color_total.push(color_def(x)))
+
+    var options_user_total = {
         width: '100%',
         height: '100%',
-        pieHole: 0.4
+        pieHole: 0.4,
+        colors:list_color_total
     };
+
     var auto_data_chart = new google.visualization.BarChart(document.getElementById("id-plant"));
     var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
     auto_data_chart.draw(auto_data, options_auto);
-    user_data_chart.draw(user_data, options_user);
+    user_data_chart.draw(user_data, options_user_total);
+
+
+
     for (var i = 1; i <= data_keys.length; i++){
         var auto_chart = new google.visualization.BarChart(document.getElementById(`id-work-${i}`));
         var user_chart = new google.visualization.PieChart(document.getElementById(`id-userdata-${i}`));
+
+        var list_color_example=[]
+
+        var machine_new_array_data=[]
+        Object.values(graphicsData.details)[i-1].user_data.forEach(x=>machine_new_array_data.push(x[0]))
+        var machine_new_array_data_filter_ON=machine_new_array_data.filter(x=>x!='user_reason')
+
+        machine_new_array_data_filter_ON.forEach(x=>list_color_example.push(color_def(x)))
+
+
+        var options_user_example = {
+            width: '100%',
+            height: '100%',
+            pieHole: 0.4,
+            colors:list_color_example
+
+        };
         auto_chart.draw(eq_auto_data[i-1], options_auto);
-        user_chart.draw(eq_user_data[i-1], options_user);
+        user_chart.draw(eq_user_data[i-1], options_user_example);
+
+
     }
 }
 

@@ -21,6 +21,8 @@ class Reason(models.Model):
     description = models.TextField(max_length=1000, verbose_name='Описание')
     is_working = models.BooleanField(verbose_name='Работа', default=False)
     is_operator = models.BooleanField(verbose_name='Указывается оператором', default=False)
+    selectable = models.BooleanField(verbose_name='Активность', default=False)
+    color = models.CharField(max_length=7, verbose_name='Цвет в диаграммах', null=True)
 
     def __str__(self):
         return ('{0} - {1}'.format(self.code, self.description))

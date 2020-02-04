@@ -294,5 +294,7 @@ class StatisticsView(ListView):
         end_date = self.request.GET.get('end_date');
         if start_date is not None and end_date is not None:
             context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
+            context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
+                                 for col in Reason.objects.all().values('description','code', 'color')]
 
         return context
