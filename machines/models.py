@@ -224,7 +224,8 @@ class Equipment(models.Model):
     timetable = models.CharField(max_length=30, verbose_name='Расписание', choices=TIMETABLE_CHOICES)
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
     xbee_mac = models.CharField(max_length=25, verbose_name='MAC модема',
-                                choices=AVAILABLE_MACS(), null=True, blank=True)
+                                #choices=AVAILABLE_MACS(), -- замена выпадающего списка на текстовое поле
+                                null=True, blank=True)
     main_channel = models.CharField(max_length=5, verbose_name='Канал', choices=AVAILABLE_CHANNELS(),
                                     null=True, blank=True)
     idle_threshold = models.IntegerField(verbose_name='Порог включения', default=100)
