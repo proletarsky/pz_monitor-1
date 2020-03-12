@@ -7,3 +7,8 @@ machines/__pycache__/
 venv
 venv1
 Monitor/__init__.pyc
+Monitor/*.pyc
+machines/*.pyc
+celerybeat-schedule
+djangoenv/
+machines/strange_migrations/
