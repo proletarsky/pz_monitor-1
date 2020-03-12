@@ -6,7 +6,7 @@ from rest_framework import routers
 from .views import RawDataViewSet, EquipmentWorksDetailView
 
 router = routers.DefaultRouter()
-router.register(r'^api/rawdata', RawDataViewSet, base_name='RawData')
+router.register(r'^api/rawdata', RawDataViewSet, basename='RawData')
 
 urlpatterns = [
                   url(r'^$', views.EqipmentFilteredListView.as_view(), name='equipment-list'),
