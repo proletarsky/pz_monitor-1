@@ -3,26 +3,40 @@
 {% block title %}Create an account{% endblock %}
 
 {% block content %}
-    <h1>Регистрация</h1>
-    <p><big>Пожалуйста, заполните форму:</big></p>	
+    <div class="page-header">
+        <h1>Регистрация</h1>
+    </div>
+  
+  <div class="form-wrapper">
+    <form class="act-form act-form-fixed" method="POST" action=".">
+	{% csrf_token %}
+
+<div class="act-alert">Пожалуйста, заполните форму:</div>
+
     {% if user_form.errors %}
-		<p class="text-danger">Пароли в поле "Пароль" и "Повторите пароль" не совпадают.</p>
-		<p class="text-danger">Пожалуйста, введите пароль ещё раз:</p>
+<div class="act-alert">Пароли в поле "Пароль" и "Повторите пароль" не совпадают.</div>
+<div class="act-alert">Пожалуйста, введите пароль ещё раз:</div>
     {% endif %}
-	<table align=center >
-    <form action="." method="post">
-		{% csrf_token %}
-	<tr><td align=right><h4>Фамилия:</h4></td><td>{{ user_form.last_name }}</td></tr>
-    <tr><td align=right><h4>Имя:</h4></td><td>{{ user_form.first_name }}</td></tr>
-	<tr><td align=right><h4>Электронная почта:</h4></td><td>{{ user_form.email }}</td></tr> 
-	<tr ><td align=right><h4>Телефон:</h4></td><td><input id="phone" type="text" name="phone" value="" /></td></tr> 	
-	<tr><td align=right><h4>Пароль:</h4></td><td>{{ user_form.password }}</td></tr>  
-	<tr><td align=right><h4>Повторите пароль:</h4></td><td>{{ user_form.password2 }}</td></tr>  	
-	<tr style="display:none;"><td align=right><h4>Пользователь:</h4></td><td><input id="user" type="{{ user_form.username }}"></td></tr> 
-	<tr ><td colspan="2" align=center><font color=white>.</font></td></tr>	
-	<tr><td colspan="2" align=center><input type="submit" value="Создать аккаунт"></td></tr>
-    </form>
-	</table>
+
+
+	 <label class="required" for="first_name">Имя:</label>
+	 <input type="text" name="first_name" id="id_first_name" maxlength="30" placeholder="Введите имя">	 
+	 <label class="required" for="id_last_name">Фамилия:</label>
+	 <input type="text" name="last_name" id="id_last_name" maxlength="150" placeholder="Введите Фамилию">
+	 <label class="required" for="id_email">Email:</label>
+	 <input type="email" name="email" id="id_email" maxlength="150" placeholder="Введите Email">
+	 <label class="required" for="id_phone">Телефон:</label>
+	 <input type="text" name="phone" id="phone" maxlength="150" placeholder="Введите телефон">
+	 <label class="required" for="id_password">Пароль:</label>
+	 <input type="password" name="password" id="id_password" maxlength="150" placeholder="Введите пароль">
+	 <label class="required" for="id_password2">Повторите пароль:</label>
+	 <input type="password" name="password2" id="id_password2" maxlength="150" placeholder="Повторите пароль">
+	 
+	 <input type="submit" value="Создать аккаунт">
+<p>Если у вас есть учётная запись - вы можете авторизоваться <a href="/accounts/login/">здесь</a></p>
+	</form>
+
+  </div>
 	<script>
 	$(document).ready(function() {
 	$("#phone").inputmask("+79999999999")

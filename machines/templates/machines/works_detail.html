@@ -23,6 +23,12 @@
 {% endblock sidebar %}
 
 {% block content %}
+
+
+<div class="page-header">
+        <h1>{{ object }}</h1>
+    </div>
+
     {% if user_can_update %}
         <form action="." method="post">
     {% else %}
@@ -31,7 +37,7 @@
 {% csrf_token %}
 <div class="hidden">{{ form.model }}</div>
     <div class="page-header text-left">
-        <h4>
+       
             <table width="100%">
                 <tr>
                     <th>{{ object }}</th>
@@ -52,7 +58,7 @@
                     </th>
                 </tr>
             </table>
-        </h4>
+   
     </div>
 
 

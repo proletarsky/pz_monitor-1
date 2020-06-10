@@ -22,7 +22,8 @@
     <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-	<link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -32,54 +33,32 @@
     <![endif]-->
 </head>
 <body>
-<div class="pz-header">
-    <div class="pz-blue-line"></div>
-    <div class="pz-logo">
-        <a href="/machines">
-            <img src="{% static 'img/pzLogo.png' %}" alt>
+<div id="sidebar-wrapper">
+<div class="pz-logo">
+        <a href="/" style="display: block;">
+            <img src="/static/img/pzlogo.png" alt="">
         </a>
-    </div>
-    <div class="pz-logo-osk">
-        <a href="http://www.aoosk.ru" target="_blank">
-            <img src="{% static 'img/OSKLogo.png' %}" alt>
-        </a>
-    </div>
 </div>
-<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" id="toggle-slidebar" href="#">
-                <span class="glyphicon glyphicon-menu-hamburger"></span>
-            </a>
-            <ul class="nav navbar-nav navbar-left">
-                {% block navbar %}
-                {% endblock navbar %}
-            </ul>
-        </div>
-        <ul class="nav navbar-nav navbar-right">
+ <ul class="nav navbar-nav navbar-right">
             {% if user.is_authenticated %}
                 <li>
-                    <a href="{% url 'login' %}" id="login_as">
+                    <a href="#" id="login_as">
                         <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
                     </a>
                 </li>
-                <li>
+                <li class="logoutb">
                     <a href="{% url 'logout' %}" id="logout">
                         <span class="glyphicon glyphicon-log-out"></span> Выход
                     </a>
                 </li>
             {% else %}
-                <li>
+                <li class="loginb">
                     <a href="{% url 'login' %}" id="login">
                         <span class="glyphicon glyphicon-log-in"></span> Вход</a>
                 </li>
             {% endif %}
         </ul>
-    </div>
-</nav>
-<!--Боковая панель с меню-->
-<div id="wrapper" class="toggled">
-        <div id="sidebar-wrapper">
+
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
                     <a href="/machines"><span class="glyphicon glyphicon-scale"></span> Оборудование</a>
@@ -88,13 +67,25 @@
                     <a href="/machines/stats"><span class="glyphicon glyphicon-stats"></span>  Статистика</a>
                 </li>
                 {% block sidebar %}
+
+{% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+
+
                 {% endblock sidebar %}
-                <li class="sidebar-brand">
-                    <a href="http://www.proletarsky.ru" target="_blank">Официальный сайт</a></li>
-                <li class="sidebar-brand">
-                    <a href="http://phonebook" target="_blank">Телефонная книга</a></li>
-            </ul>
-        </div>
+<!--                                <li class="sidebar-brand">
+                    <a href="http://www.proletarsky.ru" target="_blank"><span class="glyphicon glyphicon-globe"></span> Официальный сайт</a>
+				</li> -->
+<!--                <li class="sidebar-brand">
+                    <a href="http://phonebook" target="_blank"><span class="glyphicon glyphicon-book"></span> Телефонная книга</a>
+				</li> -->
+			</ul>
+        </div>	
+<div id="wrapper" class="toggled">
+
     <!--Главная страница-->
     <div id="page-content-wrapper">
         <div class="container-fluid text-center">
@@ -103,7 +94,19 @@
         </div>
     </div>
 </div>
+ <div class="footer">
 
+    <div class="footer-pz-logo-osk">
+        <a href="http://www.aoosk.ru" target="_blank">
+            <img src="{% static 'img/OSKLogo.png' %}" alt>
+        </a>
+    </div>
+    <div class="footer-pz-logo">
+        <a href="/">
+            <img src="{% static 'img/pzLogo.png' %}" alt>
+        </a>
+    </div>
+</div>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <!--script src="'bootstrap/js/bootstrap.min.js"></--script-->
 {% bootstrap_javascript %}

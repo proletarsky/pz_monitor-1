@@ -21,48 +21,83 @@
     <script type="text/javascript" src="//www.google.com/jsapi"></script>
     <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
     <div class="page-header">
-        <h3>Мониторинг оборудования</h3>
+        <h1>Мониторинг оборудования</h1>
     </div>
+
+  <div class="form-wrapper">
+    <form class="act-form" method="GET" action=".">	
+	 <div class="form-row">
+	 <label class="required" for="workshop">Цех:</label>
+	 <select id="id_workshop" name="workshop">
+	 <option value="" selected="">Выбрать цех</option>
+  <option value="6">цех 6</option>
+  <option value="7">цех 7</option>
+  <option value="8">цех 8</option>
+  <option value="9">цех 9</option>
+  <option value="11">цех 11</option>
+  <option value="14">цех 14</option>
+  <option value="20">цех 20</option>
+  <option value="21">цех 21</option>
+  <option value="26">цех 26</option>
+	 </select>
+	 </div>
+	 <div class="form-row">
+	 <label class="required" for="email">Название:</label>
+	 <input type="text" id="id_model" name="model" placeholder="Название оборудования">
+	 </div>
+	 <div class="form-row">
+	 <input id="sendform" type="submit" value="Найти">
+	 </div>
+	</form>
+  </div>
+<!--
     <form class="form-inline text-left" method="get">
         <div class="form-group mb-2 text-left" style="padding-bottom: 30px">
             {{ filter.form | bootstrap_inline }}
             <button class="btn btn-primary" type="submit">Применить</button>
         </div>
     </form>
+-->
+
+<div id='pagecontent'>
     <table class="table text-left" width="100%">
-        <thead style="color:#003063; background: #E0E0E0; text-align: center">
+        <thead style=" text-align: center">
         <tr>
-            <th>Цех</th>
-            <th colspan="2"><div style="text-align: center">Оборудование</div></th>
+            <th scope="col" style="width:5%">Цех</th>
+            <th scope="col" style="width:30%" colspan="2"><div style="text-align: center">Оборудование</div></th>
 {#			<th>Фото оборудования</th>#}
-            <th style="width: 50%">Данные мониторинга</th>
-            <th style="text-align: center">Состояние</th>
+            <th scope="col" style="width:65%" >Данные мониторинга</th>
+<!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
         {% for equip in filter.qs %}
             <tr>
-                <td style="padding-top: 20px">{{ equip.workshop }}</td>
-                <td style="padding-top: 20px"><b>{{ equip.model }} ({{ equip.code }})</b></td>
-                <td>
+                <td aria-label="Цех" ><a class="moreinfa" href="{{ appname }}/machines/?workshop={{ equip.workshop }}">{{ equip.workshop }}</a></td>
+                <td aria-label="Оборудование" ><a class="moreinfa" href="{{ appname }}works/{{ equip.id }}/">{{ equip.model }} ({{ equip.code }})</a></td>
+                <td aria-label="Фото оборудования">
                     {% if equip.image %}
                         <img src="{{ equip.image.url }}" height="75px">
                     {% else %}
                         <img src="{% static 'img/equipment.jpg'%}" width="100px">
                     {% endif %}
                 </td>
-                <td>
-                    <div id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
+                <td aria-label="Данные мониторинга" >
+                    <div class="equip-graph" id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
                     </div>
                 </td>
-                <td style="text-align: center">
-                    <a href="{{ appname }}works/{{ equip.id }}/">
-                        <h4><span class="glyphicon glyphicon-new-window"> </span></h4>
-                    </a>
+<!--
+                <td aria-label="Состояние" style="text-align: center">
+                    <a class="moreinf" href="{{ appname }}works/{{ equip.id }}/">Подробнее</a>
                 </td>
+-->
+
             </tr>
         {% endfor %}
+
     </table>
+</div>
     <script type="text/javascript">
         graphicsData={{ graph_data|safe }}
-    </script>
+       $(window).resize(function(){drawChart();});
+   </script>
 {% endblock content %}

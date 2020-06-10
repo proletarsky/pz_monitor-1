@@ -2,23 +2,17 @@
 {% load bootstrap %}
 {% load static %}
 
-{% block navbar %}
-    {% if user.is_superuser %}
-        <li><a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a></li>
-    {% endif %}
-{% endblock navbar %}
-
 {% block sidebar %}
     {% if user.is_superuser %}
         <li class="sidebar-brand">
-            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> ������ ����������</a>
         </li>
     {% endif %}
 {% endblock sidebar %}
 
 {% block content %}
     <div class="page-header">
-        <h3>Интервалы простоя</h3>
+        <h1>Интервалы простоя</h1>
     </div>
     <div style="padding-top: 10px; padding-bottom: 10px">
         <form class="form-inline text-left" method="get">
@@ -47,25 +41,27 @@
 
 
     <table class="table">
+<thead>
     <tr>
-        <th>Начало</th>
-        <th>Длительность</th>
-        <th>Оборудование</th>
-        <th>Причина</th>
-        <th>Автор</th>
+        <th scope="col">Начало</th>
+        <th scope="col">Длительность</th>
+        <th scope="col">Оборудование</th>
+        <th scope="col">Причина</th>
+        <th scope="col">Автор</th>
     </tr>
+</thead>
     {% for obj in filtered_objects %}
         <tr class="text-left">
-            <td><a href="{% url 'works-detail' obj.equipment.id %}?date={{ obj.start|date:'Y-m-d' }}">
+            <td aria-label="Начало"><a href="{% url 'works-detail' obj.equipment.id %}?date={{ obj.start|date:'Y-m-d' }}">
                 {{ obj.start|date:"d.m.y H:i" }}</a></td>
-            <td>{{ obj.length_fmt }}</td>
-            <td>{{ obj.equipment }}</td>
-            <td>
+            <td aria-label="Длительность">{{ obj.length_fmt }}</td>
+            <td aria-label="Оборудование">{{ obj.equipment }}</td>
+            <td aria-label="Причина">
                 {% if obj.user_classification.id > 0 %}
                     {{ obj.user_classification }}
                 {% endif %}
             </td>
-            <td>
+            <td aria-label="Автор">
                 {% if obj.user %}
                     {{ obj.user }}
                 {% endif %}

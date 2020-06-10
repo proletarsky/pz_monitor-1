@@ -5,23 +5,20 @@
         <h1>Добро пожаловать!</h1>
     </div>
 
-    {% if form.errors %}
-        <p class="text-danger">Неверное имя или пароль</p>
-    {% endif %}
-	<table align=center >
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-	<tr><td align=right><h4>Почта:</h4></td><td>{{ form.username }}</td></tr>
-    <tr><td align=right><h4>Пароль:</h4></td><td>{{ form.password }}</td></tr>
-	<tr><td colspan="2" align=center><input type="submit" class="btn btn-primary" value="Вход"></td></tr>
-    </form>
-	</table>
-    <p><a class="text-muted" href="{% url 'password_reset' %}">
-        <span class="glyphicon glyphicon-question-sign "></span> Забыли пароль?</a>
-    </p>
-
-	<p><big>Если у вас нет учетной записи - создайте аккаунт
-	<a href="{% url "register" %}"><i>здесь</i></a></big>
-	</p>
+  <div class="form-wrapper">
+    <form class="act-form act-form-fixed" method="POST" action="{% url 'login' %}" >
+	    {% if form.errors %}        
+		<div class="act-alert">Неверное имя или пароль</div>
+    {% endif %}	 
+	 <label class="required" for="id_username">Логин:</label>
+	 <input type="text" name="username" id="id_username" required="" autofocus="" placeholder="Введите логин">
+	 <label class="required" for="id_password">Пароль:</label>
+	 <input type="password" name="password" required="" id="id_password" placeholder="Введите пароль">
+	 {% csrf_token %}
+	 <input type="submit" value="Войти">
+	 <a href="{% url 'password_reset' %}"><span class="glyphicon glyphicon-question-sign"></span>Забыли пароль?</a>
+	 <p>Если у вас нет учетной записи - создайте аккаунт <a href="{% url 'register' %}">здесь</a></p>
+	</form>
+  </div>
 
 {% endblock content %}

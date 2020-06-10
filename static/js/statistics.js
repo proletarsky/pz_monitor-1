@@ -43,7 +43,9 @@ $(document).ready(function () {
 
     var ids = "";
     var keys = Object.keys(graphicsData);
+    console.log(keys);
     for(var i = 1; i <= keys.length; i++){
+	console.log('Tut->'+keys[i]);
         if (keys[i-1] !== 'total')
             ids += (ids.length === 0 ? '' : ',') + `#show-hide-${i}`;
     }

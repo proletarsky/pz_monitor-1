@@ -1,8 +1,13 @@
-let graphicsData = null;
+var graphicsData = null;
 $(document).ready(function () {
    console.log(JSON.stringify(graphicsData));
    console.log(Date.parse('2019-08-08T12:12:13'));
    console.log(JSON.parse(JSON.stringify(graphicsData), JSON.dateParser));
+
+if($('table>tbody>tr').length==0){
+$('table').after('<div class="no-result"><h2>По данному запросу ничего не найдено.</h2></div>');
+}
+
 });
 
 function getDatetime(str){
@@ -100,8 +105,10 @@ function drawChart() {
     };
 
     eq_auto_data.forEach(function (val, i, arr) {
+	if(arr){
        let chart = new google.visualization.Timeline(document.getElementById(`graph-${eq_ids[i]}`));
        chart.draw(eq_auto_data[i], options_auto);
+    }
     });
 }
 

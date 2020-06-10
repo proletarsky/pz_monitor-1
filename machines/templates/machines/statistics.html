@@ -16,11 +16,16 @@
 
 {% block content %}
     <div class="page-header">
-        <h3>Статистика работы</h3>
+        <h1>Статистика работы</h1>
+<!--
+<input type="date" id="start" name="trip-start"
+       value="2018-07-22"
+       min="2018-01-01" max="2018-12-31">
+-->
     </div>
     <div style="padding-top: 10px; padding-bottom: 50px">
         <form class="form-inline text-left" method="get">
-            <ul class="nav navbar-nav navbar-left" style="margin-left: 20px">
+            <ul class=" navbar-nav navbar-left" style="margin-left: 20px">
                 <li>{{ filter.form | bootstrap_inline }}</li>
 
                 <li><button class="btn btn-primary" style="margin-left: 20px" type="submit">Применить</button></li>
@@ -30,10 +35,10 @@
     {% if statistics %}
         <hr class="hr-primary" />
         <div class="panel col-lg-12">
-            <ul class="nav navbar-nav navbar-left">
+            <ul class=" navbar-nav navbar-left">
                 <li><b>Все предприятие</b></li>
             </ul>
-            <ul class="nav navbar-right">
+            <ul class=" navbar-right">
                 <li><a id="show-hide-plant" href="#">Скрыть</a></li>
             </ul>
         </div>
@@ -56,10 +61,10 @@
                 <div class="col-lg-12">
                 <hr class="hr-primary" /></div>
                 <div class="panel col-lg-12">
-                    <ul class="nav navbar-nav navbar-left show-hide-{{ forloop.counter }}">
+                    <ul class=" navbar-nav navbar-left show-hide-{{ forloop.counter }}">
                         <li><b>{{ equip }}</b></li>
                     </ul>
-                    <ul class="nav navbar-right">
+                    <ul class=" navbar-right">
                         <li><a id="show-hide-{{forloop.counter}}" href="#">Скрыть</a></li>
                     </ul>
                 </div>
