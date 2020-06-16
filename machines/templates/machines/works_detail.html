@@ -2,7 +2,7 @@
 {% load googlecharts %}
 {% load static %}
 {% load has_group %}
-
+ 
 {% block navbar %}
         <li class="sidebar-brand">
             <a href="/machines"><span class="glyphicon glyphicon-chevron-left"></span> Назад</a>
@@ -32,7 +32,7 @@
     {% if user_can_update %}
         <form action="." method="post">
     {% else %}
-        <form action="" method="get">
+        <form action="." method="get">
     {% endif %}
 {% csrf_token %}
 <div class="hidden">{{ form.model }}</div>
