@@ -20,16 +20,17 @@ $.fn.loadWith = function(u){
     });
 };
 //$("#test").loadWith($(this).parents('form').serialize());
-	$('#sendform').on('click', function (e) {
-        e.preventDefault();	
+	
+/////$('#sendform').on('click', function (e) {
+     ////   e.preventDefault();	
         //alert($(this).parents('form').serialize());
-	$("#pagecontent table").loadWith('?'+$(this).parents('form').serialize());
-	
-        
-	
-    });
+////	$("#pagecontent table").loadWith('?'+$(this).parents('form').serialize());
+////    });
 
-
+// убрать кнопку "вернуться" на главной
+if(window.location.pathname=='/'){
+$('a.goback').remove();
+}
 
 // Прилипание меню к верху страницы
  /* var navbar=$('.pz-header'),navtop = navbar.height() + navbar.offset().top,*.

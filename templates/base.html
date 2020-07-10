@@ -85,6 +85,18 @@
 			</ul>
         </div>	
 <div id="wrapper" class="toggled">
+<script>
+function goBack() {
+console.log(document.referrer);
+if (document.referrer == "") {
+    window.close()
+} else {
+    history.back()
+}
+//  window.history.back();
+}
+</script>
+<a class="goback" href="#" onclick="goBack()">❮ Вернуться</a>
 
     <!--Главная страница-->
     <div id="page-content-wrapper">

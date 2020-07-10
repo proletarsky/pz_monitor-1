@@ -45,7 +45,6 @@ class RawDataUploadView(APIView):
             rawdata.save()
         return Response(status=status.HTTP_201_CREATED)
 
-
 # Create your views here.
 class RawDataViewSet(viewsets.ModelViewSet):  # APIView, for data visualization
     # queryset = RawData.objects.all()
