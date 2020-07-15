@@ -75,11 +75,13 @@
                 <td aria-label="Цех" ><a class="moreinfa" href="{{ appname }}/machines/?workshop={{ equip.workshop }}">{{ equip.workshop }}</a></td>
                 <td aria-label="Оборудование" ><a class="moreinfa" href="{{ appname }}works/{{ equip.id }}/">{{ equip.model }} ({{ equip.code }})</a></td>
                 <td aria-label="Фото оборудования">
+		<a href="{{ appname }}works/{{ equip.id }}/">
                     {% if equip.image %}
                         <img src="{{ equip.image.url }}" height="75px">
                     {% else %}
-                        <img src="{% static 'img/equipment.jpg'%}" width="100px">
+                        <img src="{% static 'img/noimg.png'%}" width="100px">
                     {% endif %}
+		</a>
                 </td>
                 <td aria-label="Данные мониторинга" >
                     <div class="equip-graph" id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">

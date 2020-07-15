@@ -32,6 +32,38 @@ if(window.location.pathname=='/'){
 $('a.goback').remove();
 }
 
+
+// Returns the ISO day of week
+Date.prototype.getWeekDay = function() {
+  var day = this.getDay();
+  if(day==0) return 7;
+  else return day;  
+}
+
+// Returns current week start date
+Date.prototype.getWeekStartDate = function() {
+  var date = new Date(this.getTime());      
+  date.setDate(this.getDate()-(this.getWeekDay()-1));
+  return date;     
+}
+
+// Returns current week end date
+Date.prototype.getWeekEndDate = function() {
+  var date = new Date(this.getTime());      
+  date.setDate(this.getDate()+(7-this.getWeekDay()));
+  return date;     
+}
+
+msInDay = 86400000;  // миллисекунд в сутках
+currentDate = new Date;  // текущая дата
+prevWeekDate = new Date(currentDate - (7 * msInDay)); // дата на прошлой неделе
+
+prevWeekStartDate = prevWeekDate.getWeekStartDate();  // дата понедельника прошлой недели
+prevWeekEndDate = prevWeekDate.getWeekEndDate();  // дата воскресенья прошлой недели
+
+
+
+
 // Прилипание меню к верху страницы
  /* var navbar=$('.pz-header'),navtop = navbar.height() + navbar.offset().top,*.
   /* thead=$('thead'),

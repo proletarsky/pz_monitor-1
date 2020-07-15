@@ -103,12 +103,13 @@ function drawChart() {
             format: "HH:mm"
         }
     };
-
+console.log('ТУТ МАССИВ');
+//console.log(arr);
+console.log(eq_auto_data);
     eq_auto_data.forEach(function (val, i, arr) {
-	if(arr){
+//    if(eq_ids[i]){
        let chart = new google.visualization.Timeline(document.getElementById(`graph-${eq_ids[i]}`));
        chart.draw(eq_auto_data[i], options_auto);
-    }
+//    }
     });
 }
-

@@ -291,9 +291,17 @@ class StatisticsView(ListView):
         context['filter'] = filter
         start_date = self.request.GET.get('start_date');
         end_date = self.request.GET.get('end_date');
-        if start_date is not None and end_date is not None:
+        if start_date is not None and start_date!='' and end_date is not None and end_date!='':
             context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
-
+        else:
+            day = datetime.date.today()
+            monday = day - datetime.timedelta(days=day.weekday()) + datetime.timedelta(days=0, weeks=-1)
+            sunday = monday + datetime.timedelta(days = 6)
+            start_date = str(monday)
+            end_date = str(sunday)
+            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
+            context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
+                                 for col in Reason.objects.all().values('description','code', 'color')]
         return context
