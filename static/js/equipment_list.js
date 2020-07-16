@@ -4,6 +4,21 @@ $(document).ready(function () {
    console.log(Date.parse('2019-08-08T12:12:13'));
    console.log(JSON.parse(JSON.stringify(graphicsData), JSON.dateParser));
 
+var urlParams = new URLSearchParams(window.location.search);
+if(urlParams.toString()!=''){
+if(urlParams.has('workshop')){
+var exists = 0 != $('#id_workshop option[value='+parseInt(urlParams.get('workshop'))+']').length;
+if(exists){$('#id_workshop').val(parseInt(urlParams.get('workshop')));}
+}
+
+if(urlParams.has('model')){
+$('#id_model').val(urlParams.get('model'));
+}
+//location.hash = urlParams.toString();
+}
+
+
+
 if($('table>tbody>tr').length==0){
 $('table').after('<div class="no-result"><h2>По данному запросу ничего не найдено.</h2></div>');
 }
@@ -103,13 +118,22 @@ function drawChart() {
             format: "HH:mm"
         }
     };
-console.log('ТУТ МАССИВ');
-//console.log(arr);
+
+
+console.log('DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 console.log(eq_auto_data);
-    eq_auto_data.forEach(function (val, i, arr) {
-//    if(eq_ids[i]){
+console.log('DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'+eq_ids);
+
+
+eq_auto_data.forEach(function (val, i, arr) {
+
+//console.log(val);
+//console.log(arr);
+if ($('#graph-'+eq_ids[i]).length > 0) {
        let chart = new google.visualization.Timeline(document.getElementById(`graph-${eq_ids[i]}`));
-       chart.draw(eq_auto_data[i], options_auto);
-//    }
+       chart.draw( eq_auto_data[i], options_auto);
+    }else{console.log('НЕТ ТАКОГО НА СТРАНИЦЕ!!!!!!!!!____'+i);}
     });
+
+
 }

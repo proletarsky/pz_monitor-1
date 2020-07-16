@@ -2,6 +2,7 @@
 .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th{
 vertical-align:middle;text-align:center;border-top:none;border-bottom:1px solid #ddd;
 }
+.calend button{top:-5px;}
 H1{font-size:30px;}
 .lkb{background: #0064ab;}
 .loginb{background:#0bb760;border-color:#000;}
@@ -36,6 +37,18 @@ opacity:0.5;
 }
 .goback:hover{
 opacity:1;
+}
+.datepicker{
+    padding: 10px 15px;
+    font-size: 15px;
+    height: auto;
+    width: auto;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: inline-block;
+    vertical-align: middle;
 }
 .form-group input,.form-group button{display:inline-block;}
 .equip-graph{

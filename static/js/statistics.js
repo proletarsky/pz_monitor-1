@@ -2,6 +2,16 @@ var graphicsData = null;
 var colorsJSON = null;
 
 $(document).ready(function () {
+var urlParams = new URLSearchParams(window.location.search);
+if(urlParams.toString()==''){
+set_period('прошлая неделя');
+$("#id_periods_selector").val('прошлая неделя');
+urlParams.append('periods_selector', 'прошлая+неделя');
+urlParams.append('start_date', $('#id_start_date').val());
+urlParams.append('end_date', $('#id_end_date').val());
+location.hash = urlParams.toString();
+}
+
 
     $('#id_start_date').datepicker({
         changeMonth: true,
