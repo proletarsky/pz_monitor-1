@@ -32,6 +32,15 @@ if(window.location.pathname=='/'){
 $('a.goback').remove();
 }
 
+$(document).on('click', 'a.goback', function(e){
+e.preventDefault();
+if (document.referrer == "") {
+    window.close()
+} else {
+//    history.back()
+history.go(-1);
+}
+});
 
 // Returns the ISO day of week
 Date.prototype.getWeekDay = function() {

@@ -520,7 +520,7 @@ input[type=button][disabled].default {
     font-weight: 400;
     font-size: 13px;
     text-align: left;
-    background: #79aec8;
+    background:#005998; /*#79aec8;*/
     color: #fff;
 }
 
@@ -824,9 +824,9 @@ table#change-history tbody th {
     width: auto;
     height: 40px;
     padding: 10px 40px;
-    background: #417690;
+    background:#005998; /*#417690;*/
     line-height: 40px;
-    color: #ffc;
+    color: #FFF;/*#ffc;*/
     overflow: hidden;
 }
 
@@ -851,7 +851,7 @@ table#change-history tbody th {
 }
 
 #branding h1, #branding h1 a:link, #branding h1 a:visited {
-    color: #f5dd5d;
+    color:#FFF; /*#f5dd5d;*/
 }
 
 #branding h2 {

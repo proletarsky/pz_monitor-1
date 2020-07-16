@@ -9,6 +9,11 @@ H1{font-size:30px;}
 button,input,select,textarea{font-size:15px;vertical-align:middle;line-height:normal;}
 .no-result{width:100%;min-height:50%;display:table;}
 .no-result H2{font-size:16px;display:table-cell;vertical-align:middle;}
+input[type="submit"]:active {
+    transform: scale(0.99);
+	-moz-opacity:0.9;
+	opacity:0.9;
+}
 input::-webkit-input-placeholder {color:#c3c3c3;transition:.5s;text-shadow:none;}
 input:-moz-placeholder {color:#c3c3c3;opacity:1;transition:.5s;text-shadow:none;}
 input::-moz-placeholder {color:#c3c3c3;opacity:1;transition:.5s;text-shadow:none;}
@@ -17,6 +22,7 @@ input::-ms-input-placeholder{color:#c3c3c3;transition:.5s;text-shadow:none;}
 input::placeholder {color:#c3c3c3;transition:.5s;text-shadow:none;}
 input:focus::placeholder{color:#c7c7c7;transition:.5s;opacity:0.6;text-shadow:none;}
 input:focus::-webkit-input-placeholder{color:#c7c7c7;transition:.5s;opacity:0.6;text-shadow:none;}
+.formset_row select{width:100%;}
 .goback{
     position:fixed;
     left:15px;
@@ -26,7 +32,12 @@ input:focus::-webkit-input-placeholder{color:#c7c7c7;transition:.5s;opacity:0.6;
     border-radius:4px;
     border:2px solid #585858;
 z-index:9999;
+opacity:0.5;
 }
+.goback:hover{
+opacity:1;
+}
+.form-group input,.form-group button{display:inline-block;}
 .equip-graph{
 position:relative;
 top:25px;
@@ -49,11 +60,20 @@ position: relative;
     padding: 10px;
     vertical-align: top;
 }
+.inner-main-menu-block:hover{
+	box-shadow: 0 0 4px #868686;
+    transform: scale(1.03);
+}
+.inner-main-menu-block:active{
+	/*box-shadow: 0 0 5px #868686;*/
+    transform: scale(0.96);
+}
 .inner-main-menu-block {
 position: relative;
     height: 100%;
     border: 1px solid #d6d6d6;
     border-radius: 3px;
+transition:.25s;
 }
 .inner-main-menu-block a {
 position: relative;
@@ -266,8 +286,8 @@ margin:10px 0 0;
 
 .toggled-pane {
     width: 100%;
-    height: 250px;
-    'background-color: #bbccdd;
+    /*height: 250px;
+    background-color: #bbccdd;*/
 }
 
 /*!
@@ -409,7 +429,7 @@ background-color:transparent;
 .navbar-nav{margin:0;line-height:50px;margin-right:15px;}
 
 @media(min-width:768px) {
-.navbar-nav>li{float:none;}
+.navbar-nav>li{/*float:none;*/}
 .navbar-nav>li>a { 
     padding: 7.5px 10px;
 }
@@ -453,7 +473,7 @@ height:0;
 
 
 
-hr {
+hr{
   height: 2px;
   margin-left: 0px;
   margin-bottom:10px;
@@ -470,12 +490,52 @@ hr {
 .hr-danger{
   background-image: -webkit-linear-gradient(left, rgba(244,67,54,.8), rgba(244,67,54,.6), rgba(0,0,0,0));
 }
+.loginb,.logoutb,.login_as{float:none !important;}
 
+.ui-datepicker-trigger{
+    position: absolute;
+    height: 43px;
+    width: 33px;
+    margin-left: -33px;
+    margin-top: 5px;
+    border: 1px solid #cacaca;
+    border-radius: 5px;
+    font-size: 0;
+    background-image: url('/static/img/calendar.png');
+    background-repeat: no-repeat;
+    background-size: 20px;
+    background-position: center;
+}
 table{
     table-layout: fixed;
 }
-
+.form-control{
+padding: 10px 15px;
+font-size: 15px;
+height:auto;
+}
+.btn-primary{
+margin-left:5px;
+padding: 9px 15px;
+    text-align: center;
+    background: #184371;
+    color: white;
+    border: 2px solid #184371;
+    cursor: pointer;
+    font-weight: bold;
+    top:1px;
+    position:relative;
+}
 @media screen and (max-width: 768px){
+.btn-primary{width:100%;margin-left:0;}
+.ui-datepicker-trigger{
+    position: absolute;
+    right: 15px;
+    margin-top: 5px;
+    height: 43px;
+    width: 33px;
+}
+
 .sidebar-nav>.sidebar-brand {
     font-size: 15px;
 }
@@ -498,6 +558,9 @@ text-align:center;
   table thead {
     display: none;
   }
+.ui-datepicker-calendar thead{
+display: table-header-group !important;
+}
   table tr {
     border-bottom: 3px solid #ddd;
     display: block;
@@ -506,16 +569,23 @@ text-align:center;
 -moz-border-radius:5px ;
 -webkit-border-radius:5px;
 border-radius:5px;
-   
   }
+
   table td {
     border-bottom: 1px solid #ddd;
    display: block;
     font-size: .8em;
     text-align: right;
   }
-table.ui-datepicker-calendar tr{display:table-row !important;}
-table.ui-datepicker-calendar td{display:table-row !important;}
+.ui-datepicker-calendar tbody td{
+display: table-cell;
+}
+#ui-datepicker-div{left:auto !important;right:15px;}
+
+table.ui-datepicker-calendar tr{display:table-row !important;border:none;}
+
+
+/*table.ui-datepicker-calendar td{display:table-row !important;}*/
   table td:before {
     content: attr(aria-label);
     float: left;
