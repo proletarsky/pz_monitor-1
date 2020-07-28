@@ -25,29 +25,43 @@
 {% block content %}
 
 
+<div id="forprint">
 <div class="page-header">
-        <h1>{{ object }}</h1>
+        <h1>{{object}}</h1>
     </div>
 
-    {% if user_can_update %}
-        <form action="." method="post">
-    {% else %}
-        <form action="." method="get">
-    {% endif %}
+
+
+{% if object.pk != 16 %}
+
+
+<form action="." method="get">
+
+    
+
 {% csrf_token %}
 <div class="hidden">{{ form.model }}</div>
-    <div class="page-header text-left">
+    <div class="page-header calen text-left">
        
             <table width="100%">
                 <tr>
                     <!-- <th>{{ object }}</th> -->
-                    <th class="calend" style="position:relative;">
-                        <!--input type="date" id="mycalendar" name="date" style="alignment: center"-->
+                    <th class="calend row" style="position:relative;">
+<!--                        <input type="date" id="mycalendar" name="date" style="alignment: center"/> -->
                         {{ form.date }}
+
+ <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
+                                {% if user_can_update %}
+                               value="Сохранить"
+                                {% else %}
+                               value="Перейти"
+                                {% endif %}>
+
                     </th>
                     <th>
                         <a href="{% url 'classifiedinterval-list' %}">Все простои</a>
                     </th>
+<!--
                     <th class="text-right">
                         <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
                                 {% if user_can_update %}
@@ -56,13 +70,52 @@
                                value="Перейти"
                                 {% endif %}>
                     </th>
+-->
                 </tr>
             </table>
+
    
     </div>
 
 
+
     <div id="my-graph" style="text-align: center; margin-top: 30px"></div>
+{% endif %}
+
+<script>
+
+const convertTime12to24 = (time12h) => {
+  const [time, modifier] = time12h.split(' ');
+
+  let [hours, minutes] = time.split(':');
+
+  if (hours === '12') {
+    hours = '00';
+  }
+
+  if (modifier === 'PM') {
+    hours = parseInt(hours, 10) + 12;
+  }
+
+  return `${hours}:${minutes}`;
+}
+
+function normdate(x){
+x = x.replace("midnight.","p.m.");
+x = x.replace("a.m.","AM");
+x = x.replace("p.m.","PM");
+//newx = x.split(','); //('12 September,12:30 a.m.')
+//x = convertTime12to24(newx[1]);
+//return new Date(newx[0]+' '+x);
+return new Date(x);
+
+}
+{% data rawdata "track" %}
+            {% col "string" "time" %} normdate(' {{ val }} ') {% endcol %}
+            {% col "number" "value" %}{{ val }}{% endcol %}
+        {% enddata %}
+</script>
+
 
     {% googlecharts %}
         {% data rawdata "track" %}
@@ -77,12 +130,56 @@
             colors: ["#FF0000", "#00FF00", "#0000FF"],
             title: "График",
             chartArea: {left: 40, top: 20, width: '90%', height: '100%'},
+explorer: {
+      axis: 'horizontal',
+      keepInBounds: true,
+      maxZoomIn: 9.0,
+      maxZoomOut: 1
+},
+
+
+
             width: '100%',
-            height: '20%'
+{% if object.pk == 16 %}
+            height: '450'
+{% else %}
+	    height:'30%'
+{% endif %}
             }
         {% endoptions %}
         {% graph "my-graph" "track" "myoptions" %}
     {% endgooglecharts %}
+
+{% if object.pk == 16 %}
+
+<div id="chart_div" style="width: 500px; height: 300px;"></div>
+</div>
+<button style="
+   padding: 7.5px 12.5px;
+    background-color:#e86b00;
+    display: inline-block;
+    margin: 15px 0;
+    border: 1px solid #5a5a5a;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;color:#FFF;
+" class="w3-button w3-white w3-round-small w3-right" id="PRINT_BTN">
+			Печать 🖶
+		</button>
+<!--
+<a id="PRINT_BTN" style="
+    padding: 7.5px 12.5px;
+    background-color:#e86b00;
+    display: inline-block;
+    margin: 15px 0;
+    border: 1px solid #5a5a5a;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 600;color:#FFF;
+" href="furnace1">Печать</a>
+-->
+{% else %}
+
 
 <div class="table-responsive">
     <table class="table">
@@ -123,5 +220,12 @@
     </table>
 </div>
 </form>
+
+{% endif %}
+
+
+<div id="test_charts"></div>
+<div id="test_charts2"></div>
+<script type="text/javascript" src="{% static 'js/print.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/work_detail.js' %}"></script>
 {% endblock content %}

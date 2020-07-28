@@ -520,15 +520,18 @@ input[type=button][disabled].default {
     font-weight: 400;
     font-size: 13px;
     text-align: left;
-    background:#005998; /*#79aec8;*/
+    background:#7b7b7b; /*#005998; #79aec8;*/
     color: #fff;
 }
 
 .module caption,
 .inline-group h2 {
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+    padding: 15px 12.5px;
+    border-radius: 5px 5px 0 0;
+    font-weight: bold;
 }
 
 .module table {
@@ -774,7 +777,8 @@ table#change-history tbody th {
 }
 
 .dashboard #content {
-    width: 600px;
+  /*  width: 600px;*/
+width:auto;
 }
 
 #content-main {

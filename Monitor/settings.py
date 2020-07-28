@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'Monitor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pzmonitor',
+        'NAME': 'pzmonitor_test',
         'USER': 'djangouser',
         'PASSWORD': 'password',
         'HOST': '127.0.0.1',

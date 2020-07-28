@@ -264,6 +264,14 @@ class APIGraphData(APIView):
         return Response(data)
 
 
+#добавление по печке Шабанов Р.Д 20.07.2020
+#def furnace_one(request):
+#    data = RawData.objects.filter(mac_address='DC:A6:32:6E:1B:95:001').order_by('date')
+#    context={'rawdata':data,}
+#    #return render(request,'furnace_one.html',context)
+#    return render(request, 'machines/furnace_one.html', context)
+
+
 class ClassifiedIntervalsListView(ListView):
     model = ClassifiedInterval
     # paginate_by = 20

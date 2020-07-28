@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load googlecharts %}
+{% load static %}
+{% load has_group %}
+
+
+{% block navbar %}
+        <li class="sidebar-brand">
+            <a href="/machines"><span class="glyphicon glyphicon-chevron-left"></span> Назад</a>
+        </li>
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+	{% if request.user|has_group:'Руководитель производства' %}
+        <li class="sidebar-brand">
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+<button style="
+    padding: 10px 15px;
+    font-size: 16px;
+    letter-spacing: 1.2px;
+" class="w3-button w3-white w3-round-small w3-right" id="PRINT_BTN">
+			Печать 🖶
+		</button>
+
+<div id="forprint">
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+
+<div id="test_charts"></div>
+
+<table class="furnace">
+<tbody>
+<tr><th>Начало</th><th>Длительность</th></tr>
+
+{% for obj in rawdata %}
+    <tr class="formset_row"> <td>{{ obj.date }}</td><td>{{obj.value}}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+
+
+       
+     
+<script>
+function normdate(x){
+x = x.replace("midnight.","p.m.");
+x = x.replace("a.m.","AM");
+x = x.replace("p.m.","PM");
+//newx = x.split(','); //('12 September,12:30 a.m.')
+//x = convertTime12to24(newx[1]);
+//return new Date(newx[0]+' '+x);
+return new Date(x);
+}
+
+var  googlecharts_data_track = [];
+googlecharts_data_track.push(['Время', 'Значение']);
+{% for obj in rawdata %}
+googlecharts_data_track.push('{{ obj.date }}',{{ obj.value }});
+{% endfor %}
+
+</script>
+<script type="text/javascript" src="{% static 'js/html2canvas.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/print.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/furnace_one.js' %}"></script>
+{% endblock content %}

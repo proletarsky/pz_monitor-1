@@ -59,7 +59,8 @@ location.hash = urlParams.toString();
         if (keys[i-1] !== 'total')
             ids += (ids.length === 0 ? '' : ',') + `#show-hide-${i}`;
     }
-    $(ids).click(function (e) {
+    //$(ids).click(function (e) {
+$('.show-hide-button').click(function (e) {
         e.preventDefault();
         var elementID = $(this).attr('id');
         var id = elementID.split('-').pop();
@@ -154,6 +155,7 @@ function drawChart() {
         legend: {position: 'top', maxLines: 3},
         chartArea: { width: '80%', height:'80%'},
         bar: { groupWidth: '30%' },
+// explorer: {actions: ['dragToZoom', 'rightClickToReset'],         axis: 'horizontal',             keepInBounds: true,             maxZoom: 20},
         isStacked: 'percent'
     };
     var list_color_total=[]
