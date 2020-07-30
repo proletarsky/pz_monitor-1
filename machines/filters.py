@@ -19,7 +19,7 @@ class ClassifiedIntervalFilter(django_filters.FilterSet):
     empty_only = django_filters.BooleanFilter(field_name='user_classification',
                                               # lookup_expr='isnull',
                                               widget=forms.CheckboxInput,
-                                              label='Для указания причины',
+                                              label='Без причины простоя',
                                               method='filter_empty_only'
                                               )
 

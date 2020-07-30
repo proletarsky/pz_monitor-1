@@ -18,7 +18,7 @@
 {% endblock sidebar %}
 
 {% block content %}
-    <script type="text/javascript" src="//www.google.com/jsapi"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
     <div class="page-header">
         <h1>Мониторинг оборудования</h1>
@@ -84,7 +84,7 @@
 		</a>
                 </td>
                 <td aria-label="Данные мониторинга" >
-                    <div class="equip-graph" id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
+                    <div class="equip-graph equip-loading" id="graph-{{ equip.id }}" style="width: 100%; height: 100px;">
                     </div>
                 </td>
 <!--

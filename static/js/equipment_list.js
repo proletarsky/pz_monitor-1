@@ -80,6 +80,13 @@ function arrayParser(arr) {
 }
 
 // Google charts
+  function loadTheMap() {
+    google.load("visualization", "1", {packages:["timeline"]});
+    console.log('Callback is set');
+  }
+
+ // setTimeout(loadTheMap, 200);
+
 google.load("visualization", "1", {packages:["timeline"]});
 google.setOnLoadCallback(drawChart);
 function drawChart() {
@@ -124,6 +131,10 @@ console.log('DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
 console.log(eq_auto_data);
 console.log('DATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'+eq_ids);
 
+function afterDraw(x){
+    console.log('all done '+x);
+$('#graph-'+x).removeClass('equip-loading');
+}
 
 eq_auto_data.forEach(function (val, i, arr) {
 
@@ -131,6 +142,10 @@ eq_auto_data.forEach(function (val, i, arr) {
 //console.log(arr);
 if ($('#graph-'+eq_ids[i]).length > 0) {
        let chart = new google.visualization.Timeline(document.getElementById(`graph-${eq_ids[i]}`));
+       google.visualization.events.addListener(chart, 'ready', function(){
+$('#graph-'+eq_ids[i]).removeClass('equip-loading');
+
+});
        chart.draw( eq_auto_data[i], options_auto);
     }else{console.log('НЕТ ТАКОГО НА СТРАНИЦЕ!!!!!!!!!____'+i);}
     });

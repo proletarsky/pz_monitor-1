@@ -47,16 +47,18 @@
                 <tr>
                     <!-- <th>{{ object }}</th> -->
                     <th class="calend row" style="position:relative;">
+<div class="form-group">
 <!--                        <input type="date" id="mycalendar" name="date" style="alignment: center"/> -->
                         {{ form.date }}
-
+</div>
+<div class="form-group">
  <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
                                 {% if user_can_update %}
                                value="Сохранить"
                                 {% else %}
                                value="Перейти"
                                 {% endif %}>
-
+</div>
                     </th>
                     <th>
                         <a href="{% url 'classifiedinterval-list' %}">Все простои</a>
@@ -79,7 +81,7 @@
 
 
 
-    <div id="my-graph" style="text-align: center; margin-top: 30px"></div>
+    <div id="my-graph" style="text-align: center;"></div>
 {% endif %}
 
 <script>
@@ -184,11 +186,14 @@ explorer: {
 <div class="table-responsive">
     <table class="table">
         {{ intervals.management_form }}
+<thead>
         <tr>
             <th>Начало</th>
             <th>Длительность</th>
             <th>Классификация</th>
             <th>Укажите причину</th>
+<tr>
+</thead>
             {% for interval in intervals.forms %}
                 <tr class="formset_row">
                     <td>
