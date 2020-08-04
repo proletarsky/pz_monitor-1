@@ -225,13 +225,14 @@ class Equipment(models.Model):
     description = models.TextField(max_length=1000, verbose_name='Описание', null=True, blank=True)
     timetable = models.CharField(max_length=30, verbose_name='Расписание', choices=TIMETABLE_CHOICES)
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
+    machine_or_furnace_sign = models.BooleanField(verbose_name='Оборудование является станком', default=True)
     xbee_mac = models.CharField(max_length=25, verbose_name='MAC модема',
                                 #choices=AVAILABLE_MACS(), -- замена выпадающего списка на текстовое поле
                                 null=True, blank=True)
     main_channel = models.CharField(max_length=5, verbose_name='Канал', choices=AVAILABLE_CHANNELS(),
                                     null=True, blank=True)
     idle_threshold = models.IntegerField(verbose_name='Порог включения', default=100)
-    no_load_threshold = models.IntegerField(verbose_name='Порог холостого хода', default=110)
+    no_load_threshold = models.FloatField(verbose_name='Порог холостого хода')
     allowed_idle_interval = models.IntegerField(verbose_name='Допустимый простой, мин', default=15)
     schedule = models.ForeignKey(Timetable, related_name='schedule', verbose_name='Режим работы',
                                  on_delete=models.DO_NOTHING, null=True)
