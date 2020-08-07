@@ -35,8 +35,11 @@
 {% if object.pk != 16 %}
 
 
-<form action="." method="get">
-
+{% if user_can_update  %}
+        <form action="." method="post">
+    {% else %}
+        <form action="" method="get">
+    {% endif %}
     
 
 {% csrf_token %}
