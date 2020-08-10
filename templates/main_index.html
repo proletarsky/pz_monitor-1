@@ -8,8 +8,10 @@
     <a href="/machines" class="h2"><span class="glyphicon glyphicon-scale"></span> Мониторинг оборудования</a>
 -->
 <div class="main-menu-wrapper">
-<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/machines"><img src="static/img/pzmonitor.png" alt="123"/><span>Мониторинг оборудования</span></a></div></div>
-<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/machines/stats"><img src="static/img/pzstatistic.png" alt="123"/><span>Статистика простоев</span></a></div></div>
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/machines"><img src="static/img/pzmonitor.png" alt="Мониторинг оборудования"/><span>Мониторинг оборудования</span></a></div></div>
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/machines/stats"><img src="static/img/pzstatistic.png" alt="Статистика простоев"/><span>Статистика простоев</span></a></div></div>
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/machines/ci"><img src="static/img/pzci.png" alt="Все простои"/><span>Все простои</span></a></div></div>
+
 {% if user.is_superuser %}
 <div class="main-menu-block"><div class="inner-main-menu-block"><a href="/admin/"><img src="static/img/pzapanel.png" alt="123"/><span>Панель управления</span></a></div></div>
 {% endif %}

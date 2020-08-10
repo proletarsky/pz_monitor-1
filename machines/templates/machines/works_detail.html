@@ -24,6 +24,7 @@
 
 {% block content %}
 
+<img class="worksimg"src="{{object.image}}" alt="123" />
 
 <div id="forprint">
 <div class="page-header">
@@ -32,7 +33,7 @@
 
 
 
-{% if object.pk != 16 %}
+{% if object.machine_or_furnace_sign %}
 
 
 {% if user_can_update  %}
@@ -145,7 +146,7 @@ explorer: {
 
 
             width: '100%',
-{% if object.pk == 16 %}
+{% if not object.machine_or_furnace_sign %}
             height: '450'
 {% else %}
 	    height:'30%'
@@ -155,7 +156,7 @@ explorer: {
         {% graph "my-graph" "track" "myoptions" %}
     {% endgooglecharts %}
 
-{% if object.pk == 16 %}
+{% if not object.machine_or_furnace_sign %}
 
 <div id="chart_div" style="width: 500px; height: 300px;"></div>
 </div>
