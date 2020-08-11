@@ -11,6 +11,11 @@ var exists = 0 != $('#id_workshop option[value='+parseInt(urlParams.get('worksho
 if(exists){$('#id_workshop').val(parseInt(urlParams.get('workshop')));}
 }
 
+if(urlParams.has('machine_or_furnace_sign')){
+$('#type_workshop').val( urlParams.get('machine_or_furnace_sign') );
+$('#type_w').val( urlParams.get('machine_or_furnace_sign') )
+}
+
 if(urlParams.has('model')){
 $('#id_model').val(urlParams.get('model'));
 }
@@ -41,6 +46,14 @@ function getDatetime(str){
     }
 }
 
+$(document.body).on('change',"#type_workshop",function (e) {
+   var optVal= $("#type_workshop option:selected").val();
+   if($('#type_w').val()!=optVal){
+   $('#type_w').val(optVal);
+   $('#sendform').click();
+   }
+   
+});
 
 function dateParser(value) {
     let reISO = /(\d{4})-(\d{1,2})-(\d{1,2})T(\d{1,2}):(\d{1,2}):(\d{1,2})/;

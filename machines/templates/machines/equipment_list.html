@@ -46,6 +46,7 @@
 	 <input type="text" id="id_model" name="model" placeholder="Название оборудования">
 	 </div>
 	 <div class="form-row">
+	<input type="hidden" id="type_w" name="machine_or_furnace_sign" placeholder="станки или прочее" value="">
 	 <input id="sendform" type="submit" value="Найти">
 	 </div>
 	</form>
@@ -64,7 +65,16 @@
         <thead style=" text-align: center">
         <tr>
             <th scope="col" style="width:5%">Цех</th>
-            <th scope="col" style="width:30%" colspan="2"><div style="text-align: center">Оборудование</div></th>
+            <th scope="col" style="width:30%" colspan="2"><div style="text-align: center">
+		<!-- &machine_or_furnace_sign=false -->
+<select id="type_workshop" name="typefilter">
+  <option value="" selected="">Всё оборудование</option>
+  <option value="true">Только Станки</option>
+<option value="false">Прочее оборудование</option>
+	 </select>
+
+
+</div></th>
 {#			<th>Фото оборудования</th>#}
             <th scope="col" style="width:65%" >Данные мониторинга</th>
 <!--            <th scope="col" style="width:15%">Состояние</th> -->

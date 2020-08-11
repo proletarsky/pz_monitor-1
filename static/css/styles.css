@@ -6,7 +6,15 @@ vertical-align:middle;text-align:center;border-top:none;border-bottom:1px solid 
 input[type=checkbox], input[type=radio] {
     margin: -2px 0 0;
 }
-
+#type_workshop{
+background: transparent;
+border: none;
+cursor:pointer;
+}
+#type_workshop:focus{border:none;}
+#type_workshop option{
+color:#000;
+}
 .worksimg{min-width:100px;max-width:220px;}
 .equip-loading{
     background-image: url(/static/img/loading.gif);

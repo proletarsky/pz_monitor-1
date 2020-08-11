@@ -11,8 +11,6 @@ $(document).ready(function () { /*
         today.value = year + "-" + month + "-" + day;
     }
     
-
-
     $('#mycalendar').change(function (e) {
         var btn = $('#btn_save_and_go');
         if (btn.is('visible')) { // It means that user has rights to change form
@@ -30,6 +28,23 @@ $(document).ready(function () { /*
             window.locataion = url + "?date=" + date;
         }
     })*/
+
+$.date = function(dateObject) {
+    var d = new Date(dateObject);
+    var day = d.getDate();
+    var month = d.getMonth() + 1;
+    var year = d.getFullYear();
+    if (day < 10) {
+        day = "0" + day;
+    }
+    if (month < 10) {
+        month = "0" + month;
+    }
+    var date = day + "/" + month + "/" + year;
+
+    return date;
+};
+
 
     $(".datepicker").change(function (e) {
         var txt = $('#btn_save_and_go').val();
@@ -75,16 +90,6 @@ google.setOnLoadCallback(function() {
 $(window).resize(function(){drawChart();});
 
 
-
-
-
-
-
-
-
-
-
-
  google.charts.load('current', {
         'packages': ['corechart']
       });
@@ -94,16 +99,21 @@ console.log('111111');
 console.log(googlecharts_data_track);
 console.log('111111');
 
-
 var result = [];
 for (var i=0; i<googlecharts_data_track.length-1;i++){
-if ( isNaN( googlecharts_data_track[i][0].getTime() ) ) { 
-if ( !isNaN( googlecharts_data_track[i-1][0].getTime() ) ) { 
+//console.log(googlecharts_data_track[i][0].toJSON().replace(/-/g,'/'));
+
+if ( isNaN( googlecharts_data_track[i][0].getTime() ) ) {
+if(i>0){
+if ( !isNaN( googlecharts_data_track[i-1][0].getTime() ) ) {
 googlecharts_data_track[i][0] = new Date(googlecharts_data_track[i-1][0].getTime() + 3600);
 //console.log(googlecharts_data_track[i]);
 }
 
-
+}
+//googlecharts_data_track[i][0].toJSON().replace(/-/g,'/');
+//googlecharts_data_track[i][0].replace(/-/g,'/');
+//googlecharts_data_track[i][0] = new Date(googlecharts_data_track[i][0]).toDateString();
 }
 result.push( googlecharts_data_track[i] );
 }
@@ -218,6 +228,7 @@ var w = window.innerWidth
           title: 'Печь',
           hAxis: {
             title: 'Печь',
+	   maxTextLines: 1,
             titleTextStyle: {
               color: '#333'
             },
