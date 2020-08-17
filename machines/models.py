@@ -229,8 +229,8 @@ class Equipment(models.Model):
     AVAILABLE_CHANNELS = lambda: [(m.channel, m.channel)
                                   for m in RawData.objects.filter(date__gte=timezone.localdate()).distinct('channel')]
     #Шабанов изменение структуры модели - поле "Цех" больше не является строкой, здесь теперь хранятся ссылки на объекты типа цех из таблицы Workshop
-    #workshop = models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.PROTECT,blank=True,null=True)
-    workshop=models.IntegerField(verbose_name='Цех')
+    workshop = models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.PROTECT,blank=True,null=True)
+    #workshop=models.IntegerField(verbose_name='Цех')
     area = models.ForeignKey(Area,verbose_name='Участок',on_delete=models.PROTECT,null=True,blank=True)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
