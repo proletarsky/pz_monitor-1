@@ -196,18 +196,28 @@ class TimetableContent(models.Model):
     details = models.ForeignKey(TimetableDetail, related_name='detail', verbose_name='Детали', on_delete=models.DO_NOTHING)
 
 
+#12.08.2020 Шабанов добавление новых моделей
+class Workshop(models.Model):
+    workshop_number = models.IntegerField(verbose_name='Номер цеха',primary_key=True)
+    name = models.CharField(max_length=50, verbose_name='Наименование')
+    foreman = models.CharField(max_length=50,verbose_name='Начальник цеха',null=True,blank=True)
+
+    def __str__(self):
+        return str(self.workshop_number)
+
+
+class Area(models.Model):
+    workshop=models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.SET_NULL,null=True,blank=True)
+    name=models.CharField(max_length=50,verbose_name='Наименование')
+    area_number=models.IntegerField(verbose_name='Номер участка',null=True,blank=True)
+    green_card_id=models.BigIntegerField(verbose_name='ID зеленой карточки')
+
+    def __str__(self):
+        return self.name+' цеха №'+str(self.workshop)
+
+
 class Equipment(models.Model):
-    WORKSHOP_CHOICES = (
-        ('6', 'цех 6'),
-        ('7', 'цех 7'),
-        ('8', 'цех 8'),
-        ('9', 'цех 9'),
-        ('11', 'цех 11'),
-        ('14', 'цех 14'),
-        ('20', 'цех 20'),
-        ('21', 'цех 21'),
-        ('26', 'цех 26'),
-    )
+    
     TIMETABLE_CHOICES = (
         ('8/5', '8 часов с выходными'),
         ('12/5', '12 часов с выходными'),
@@ -218,7 +228,10 @@ class Equipment(models.Model):
                               for m in RawData.objects.all().distinct('mac_address')]
     AVAILABLE_CHANNELS = lambda: [(m.channel, m.channel)
                                   for m in RawData.objects.filter(date__gte=timezone.localdate()).distinct('channel')]
-    workshop = models.CharField(max_length=20, verbose_name='Цех', choices=WORKSHOP_CHOICES)
+    #Шабанов изменение структуры модели - поле "Цех" больше не является строкой, здесь теперь хранятся ссылки на объекты типа цех из таблицы Workshop
+    #workshop = models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.PROTECT,blank=True,null=True)
+    workshop=models.IntegerField(verbose_name='Цех')
+    area = models.ForeignKey(Area,verbose_name='Участок',on_delete=models.PROTECT,null=True,blank=True)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
     image=models.ImageField(blank=True, upload_to='machines', verbose_name='Фото оборудования')
@@ -236,11 +249,23 @@ class Equipment(models.Model):
     allowed_idle_interval = models.IntegerField(verbose_name='Допустимый простой, мин', default=15)
     schedule = models.ForeignKey(Timetable, related_name='schedule', verbose_name='Режим работы',
                                  on_delete=models.DO_NOTHING, null=True)
+    is_in_monitoring = models.BooleanField(verbose_name='В системе мониторинга', default=False)
+    is_in_repair = models.BooleanField(verbose_name='В системе учета ремонтных работ', default=False)
+    JOB_STATUSES = (
+        (0,'В рабочем состоянии'),
+        (1,'Сломан, необходим ремонт'),
+        (2,'В ремонте'),
+    )
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
+    red_card_id = models.BigIntegerField(verbose_name='ID красной карточки',default=1000000000)
     # image = models.ImageField(blank=True, null=True)
     # sm_image = models.ImageField(blank=True, null=True)
 
     def __str__(self):
-        return '{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)
+        if self.area is None:
+            return '{0} - {1}, цех {2}'.format(self.code, self.model,self.workshop)
+        else:
+            return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
 
 
 class ClassifiedInterval(models.Model):
