@@ -10,8 +10,11 @@ class EquipmentFilter(django_filters.FilterSet):
         fields = [
             'workshop',
             'model',
-	    'machine_or_furnace_sign',
+	        'machine_or_furnace_sign',
+            #'is_in_monitoring',
+
         ]
+        
         attrs = {'class': 'sr-only'}
 
 

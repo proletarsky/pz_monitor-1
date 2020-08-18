@@ -406,8 +406,9 @@ class ClassifiedInterval(models.Model):
             raise ValueError('Value {0} as end date is invalid, it should be YYYY-MM-DD formatted'.format(end))
 
         # check equipment
+        #18.08.2020 Шабанов изменение филтрации поиска моделей
         if equipment is None:
-            equipment_id_list = [eq.id for eq in Equipment.objects.all().order_by('-workshop', 'id')]
+            equipment_id_list = [eq.id for eq in Equipment.objects.filter(is_in_monitoring=True).order_by('-workshop', 'id')]
         elif isinstance(equipment, list):
             equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
                                  [id for id in equipment if isinstance(id, int)])

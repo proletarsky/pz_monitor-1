@@ -88,7 +88,7 @@ class EqipmentFilteredListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filter'] = EquipmentFilter(self.request.GET, queryset=self.get_queryset())
+        context['filter'] = EquipmentFilter(self.request.GET, queryset=self.get_queryset().filter(is_in_monitoring=True))
         context['graph_data'] = get_ci_data_timeline()
         return context
 
@@ -280,7 +280,7 @@ class ClassifiedIntervalsListView(ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         ci_filter = ClassifiedIntervalFilter(self.request.GET,
-            queryset=ClassifiedInterval.objects.filter(automated_classification__is_working=False).order_by('start'))
+            queryset=ClassifiedInterval.objects.filter(automated_classification__is_working=False,equipment__is_in_monitoring=True).order_by('start'))
         paginator = Paginator(ci_filter.qs, 15)
         page = self.request.GET.get('page')
         objs = paginator.get_page(page)
