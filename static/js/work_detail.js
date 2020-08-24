@@ -29,6 +29,8 @@ $(document).ready(function () { /*
         }
     })*/
 
+var olddate= $(".datepicker").val();
+
 $.date = function(dateObject) {
     var d = new Date(dateObject);
     var day = d.getDate();
@@ -51,7 +53,7 @@ $.date = function(dateObject) {
         //console.log(txt);
         if (txt.includes("Сохранить")) {
             //console.log("User has rights");
-            $('#btn_save_and_go').val("Сохранить и перейти");
+            $('#btn_save_and_go').val("перейти");
         }
     });
 
@@ -85,7 +87,11 @@ google.setOnLoadCallback(function() {
     });
 });
 */
-
+$('.ciselect').on('change', function() {
+  $('.ui-datepicker-trigger').remove();
+  $('#id_date').val(olddate).prop('readonly', true);
+  $('#btn_save_and_go').val("Сохранить");
+});
 
 $(window).resize(function(){drawChart();});
 
