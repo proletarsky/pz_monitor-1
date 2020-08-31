@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from .models import Participant, Reason, Equipment, TimetableDetail, Timetable, TimetableContent, ClassifiedInterval
-from .models import Code, Profile , Workshop , Area
+from .models import Code, Profile , Workshop , Area, Repairer
 from django.contrib import admin
 
 
@@ -50,3 +50,4 @@ admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Code, CodeAdmin)
 admin.site.register(Workshop)
 admin.site.register(Area)
+admin.site.register(Repairer)
