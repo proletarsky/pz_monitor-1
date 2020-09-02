@@ -1,17 +1,94 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>TEST</title>
-</head>
-<body>
-	{% for e in equipments %}
-	<div>
-		<p>{{ e }}<p>
-	</div>
+{% extends "base.html" %}
+{% load bootstrap %}
+{% load admin_urls %}
+{% load static %}
+
+
+
+
+{% block content %}
+
+
+<div class="modal" style="display:none" >
+ <div class="modalblock fix-w" >
+  <div class="modalblock-header" >
+    <div class="modal-title">Изменение статуса</div>
+    <div class="mclose"></div>
+  </div>
+  <div class="modalblock-content row" >  
+	<form method="POST" class="post-form" >{% csrf_token %}
+        {{ form.machines_id.as_hidden }}
+        {{ form.repair_job_status.as_hidden }}
+      <p> <span></span> {{ form.repairer_id }}</p> <br>
+        <button id="savebtn" type="submit" class="save btn btn-default" >Применить</button>
+  	</form>  
+  </div>
+ </div>
+</div>
+
+<div class="equip-wrapper row">
+
+
+  <div class="form-wrapper">
+{% for e in equipments %}
+	<div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" class="equip stat{{ e.repair_job_status }}">
+ <div class="equip-inner">
+  <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
+  
+  <span>{{ e }}</span>
+ </div>
+</div>
 	{% endfor %}
-	<form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="save btn btn-default">Save</button>
-    </form>
-</body>
-</html>
+
+		
+
+  </div>
+
+</div>
+
+<script>
+/*$('#page-content-wrapper').addClass('h100');*/
+$('.container-fluid').css('display','table-cell');
+$('.equip').addClass('equip'+{{ del_result }} );
+$('.goback').remove();
+var modal = $('.modal');
+$(document).on('click','.mclose',function(){ 
+    modal.css('display','none');
+});
+
+$(document).on('click','button#savebtn',function(e){ 
+    if($("input[name='repair_job_status']:hidden").val()==2){
+    	//e.preventDefault();
+    	if( !$("#id_repairer_id").val() ){    	
+    		$('#id_repairer_id').parent('p').find('span').css('color','red');
+    		return false;
+    	}
+    }
+});
+
+$(document).on('click','.equip',function(){
+
+ 
+ var eqid = parseInt($(this).data('eid')),
+ eqstat = parseInt($(this).data('status'));
+if(eqstat!=0){
+modal.css('display','block');
+$("input[name='machines_id']:hidden").val(eqid);
+
+if(eqstat==1){
+	$('#id_repairer_id').css('display','inline-block');
+	$('#id_repairer_id').parent('p').find('span').text('Выберите мастера');
+	$('#id_repairer_id').parent('p').find('span').css('color','#000');
+	$("input[name='repair_job_status']:hidden").val(2);
+}else{
+	$('#id_repairer_id').css('display','none');
+	$('#id_repairer_id').parent('p').find('span').css('color','#000');
+	$('#id_repairer_id').parent('p').find('span').text('Оборудование отремонтировано?');
+	$("input[name='repair_job_status']:hidden").val(0);
+}
+}else{return false;}
+});
+</script>
+
+
+{% endblock content %}

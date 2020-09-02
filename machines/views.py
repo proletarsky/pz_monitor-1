@@ -317,16 +317,38 @@ class StatisticsView(ListView):
 
 
 
-def repair_equipment(request,workshop_numb,area_numb):
-	equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
-	if request.method == "POST":
-		form = Repairform(request.POST)
-		if form.is_valid():
-			Repair_rawdata=form.save()
-			return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
+#def repair_equipment(request,workshop_numb,area_numb):
+	#equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
+    #lenght=12
+    #len(equipments)
+    #del_result=(lenght//10)+1
+    #if (del_result > 1 and lenght%10>6) or lenght==26:
+    #    del_result+=1
+	#if request.method == "POST":
+		#form = Repairform(request.POST)
+		#if form.is_valid():
+			#Repair_rawdata=form.save()
+			#return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     #form = Repairform(request.POST)
     #Repair_rawdata=form.save()
-	else:
-		form = Repairform()
+	#else:
+		#form = Repairform()
     #form = Repairform()
-	return render(request,'machines/test.html',{'equipments':equipments,'form':form})
+	#return render(request,'machines/test.html',{'equipments':equipments,'form':form})
+    #,'lenght':lenght,'del_result':del_result
+
+
+def repair_equipment(request,workshop_numb,area_numb):
+    equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
+    lenght=len(equipments)
+    del_result=(lenght//10)+1
+    if (del_result > 1 and lenght%10>6) or lenght==26:
+        del_result+=1
+    if request.method == "POST":
+        form = Repairform(request.POST)
+        if form.is_valid():
+            Repair_rawdata=form.save()
+            return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
+    else:
+        form = Repairform()        
+    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result})

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пролетарский завод - внутренний портал</title>
+
+    {% load static %}
+ 
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+
+    <script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.js'%}"></script>
+    <script src="{% static 'js/datepicker-ru.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.js' %}"></script>
+
+    <!-- Bootstrap -->
+    <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+<link rel="icon" type="image/png" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-icon-precomposed" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-startup-image" href="/static/img/pzfavicon.png">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" />
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="76x76" >
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="152x152">
+</head>
+<body>
+<div id="sidebar-wrapper">
+<div class="pz-logo">
+        <a href="/" style="display: block;">
+            <img src="/static/img/pzlogo.png" alt="">
+        </a>
+</div>
+ <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+                <li class="login_as">
+                    <a href="#" id="login_as">
+                        <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
+                    </a>
+                </li>
+                <li class="logoutb">
+                    <a href="{% url 'logout' %}" id="logout">
+                        <span class="glyphicon glyphicon-log-out"></span> Выход
+                    </a>
+                </li>
+            {% else %}
+                <li class="loginb">
+                    <a href="{% url 'login' %}" id="login">
+                        <span class="glyphicon glyphicon-log-in"></span> Вход</a>
+                </li>
+            {% endif %}
+        </ul>
+
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand"> {{ equipments.0.area  }}</li>
+
+                {% block sidebar %}
+
+
+
+
+                {% endblock sidebar %}
+<!--                                <li class="sidebar-brand">
+                    <a href="http://www.proletarsky.ru" target="_blank"><span class="glyphicon glyphicon-globe"></span> Официальный сайт</a>
+				</li> -->
+<!--                <li class="sidebar-brand">
+                    <a href="http://phonebook" target="_blank"><span class="glyphicon glyphicon-book"></span> Телефонная книга</a>
+				</li> -->
+			</ul>
+        </div>	
+<div id="wrapper" class="toggled">
+<script>
+function goBack() {
+console.log(document.referrer);
+if (document.referrer == "") {
+    window.close()
+} else {
+    history.back()
+}
+//  window.history.back();
+}
+</script>
+<!-- <a class="goback" href="#" onclick="goBack()">❮ Вернуться</a> -->
+<a class="goback" href="#">❮ Вернуться</a> 
+
+    <!--Главная страница-->
+    <div id="page-content-wrapper">
+        <div class="container-fluid text-center">
+         <div class="modal" style="display:none" >
+ <div class="modalblock fix-w" >
+  <div class="modalblock-header" >
+    <div class="modal-title">Изменение статуса</div>
+    <div class="mclose"></div>
+  </div>
+  <div class="modalblock-content row" >  
+    <form method="POST" class="post-form" >{% csrf_token %}
+        {{ form.machines_id.as_hidden }}
+        {{ form.repair_job_status.as_hidden }}
+      <p> <span></span> {{ form.repairer_id }}</p> <br>
+        <button id="savebtn" type="submit" class="save btn btn-default" >Применить</button>
+    </form>  
+  </div>
+ </div>
+</div>
+
+<div class="equip-wrapper row">
+
+
+  <div class="form-wrapper">
+{% for e in equipments %}
+    <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" class="equip stat{{ e.repair_job_status }}">
+ <div class="equip-inner">
+  <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
+  
+  <span>{{ e }}</span>
+ </div>
+</div>
+    {% endfor %}
+
+        
+
+  </div>
+
+</div>
+
+<script>
+/*$('#page-content-wrapper').addClass('h100');*/
+$('.container-fluid').css('display','table-cell');
+$('.equip').addClass('equip'+{{ del_result }} );
+$('.goback').remove();
+var modal = $('.modal');
+$(document).on('click','.mclose',function(){ 
+    modal.css('display','none');
+});
+
+$(document).on('click','button#savebtn',function(e){ 
+    if($("input[name='repair_job_status']:hidden").val()==2){
+        //e.preventDefault();
+        if( !$("#id_repairer_id").val() ){      
+            $('#id_repairer_id').parent('p').find('span').css('color','red');
+            return false;
+        }
+    }
+});
+
+$(document).on('click','.equip',function(){
+
+ 
+ var eqid = parseInt($(this).data('eid')),
+ eqstat = parseInt($(this).data('status'));
+if(eqstat!=0){
+modal.css('display','block');
+$("input[name='machines_id']:hidden").val(eqid);
+
+if(eqstat==1){
+    $('#id_repairer_id').css('display','inline-block');
+    $('#id_repairer_id').parent('p').find('span').text('Выберите мастера');
+    $('#id_repairer_id').parent('p').find('span').css('color','#000');
+    $("input[name='repair_job_status']:hidden").val(2);
+}else{
+    $('#id_repairer_id').css('display','none');
+    $('#id_repairer_id').parent('p').find('span').css('color','#000');
+    $('#id_repairer_id').parent('p').find('span').text('Оборудование отремонтировано?');
+    $("input[name='repair_job_status']:hidden").val(0);
+}
+}else{return false;}
+});
+</script>
+
+        </div>
+    </div>
+</div>
+ <div class="footer">
+
+    <div class="footer-pz-logo-osk">
+        <a href="http://www.aoosk.ru" target="_blank">
+            <img src="{% static 'img/OSKLogo.png' %}" alt>
+        </a>
+    </div>
+    <div class="footer-pz-logo">
+        <a href="/">
+            <img src="{% static 'img/pzLogo.png' %}" alt>
+        </a>
+    </div>
+</div>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!--script src="'bootstrap/js/bootstrap.min.js"></script> -->
+</body>
+</html>
