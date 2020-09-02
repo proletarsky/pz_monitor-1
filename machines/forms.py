@@ -2,7 +2,7 @@ from django import forms
 from django.forms import widgets
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
-from .models import Reason, ClassifiedInterval, Equipment
+from .models import Reason, ClassifiedInterval, Equipment, Repair_rawdata
 from django.utils import timezone
 from django.contrib.auth.models import User
 
@@ -64,3 +64,10 @@ class UserRegistrationForm(forms.ModelForm):
         if cd['password'] != cd['password2']:
             raise forms.ValidationError('Пароли не совпадают')
         return cd['password2']
+
+
+class Repairform(forms.ModelForm):
+    class Meta:
+        model=Repair_rawdata
+        fields=('machines_id','repair_job_status','repairer_id')
+

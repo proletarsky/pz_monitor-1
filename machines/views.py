@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -26,7 +26,8 @@ import re, datetime
 from .helpers import prepare_data_for_google_charts_bar, get_ci_data_timeline
 from qsstats import QuerySetStats
 from django.db.models import Avg
-from .forms import UserRegistrationForm
+from .forms import UserRegistrationForm, Repairform
+from django.shortcuts import redirect
 
 
 @permission_classes([permissions.AllowAny])
@@ -313,3 +314,19 @@ class StatisticsView(ListView):
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
         return context
+
+
+
+def repair_equipment(request,workshop_numb,area_numb):
+	equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
+	if request.method == "POST":
+		form = Repairform(request.POST)
+		if form.is_valid():
+			Repair_rawdata=form.save()
+			return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
+    #form = Repairform(request.POST)
+    #Repair_rawdata=form.save()
+	else:
+		form = Repairform()
+    #form = Repairform()
+	return render(request,'machines/test.html',{'equipments':equipments,'form':form})
