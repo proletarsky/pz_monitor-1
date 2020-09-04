@@ -28,6 +28,8 @@ from qsstats import QuerySetStats
 from django.db.models import Avg
 from .forms import UserRegistrationForm, Repairform
 from django.shortcuts import redirect
+#FOR JSON RESPONSE!!!
+from django.http import JsonResponse
 
 
 @permission_classes([permissions.AllowAny])
@@ -346,9 +348,28 @@ def repair_equipment(request,workshop_numb,area_numb):
         del_result+=1
     if request.method == "POST":
         form = Repairform(request.POST)
-        if form.is_valid():
-            Repair_rawdata=form.save()
-            return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
+        machines_id = request.POST['machines_id']
+        action = request.GET['action']
+        if form.is_valid():            
+            if (action!='get_info'):
+                Repair_rawdata=form.save()
+
+            if request.is_ajax():
+               equip_info = equipments.get(id = machines_id).repair_job_status
+               message = {'equip_status' : equip_info }
+               return JsonResponse(message)
+            else:
+                return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
         form = Repairform()        
     return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result})
+
+
+
+#ajax for test Prigoda 4.09.20
+def ajax_stats(request):
+    if request.is_ajax():
+        message = "123"
+    else:
+        message = "no"
+    return HttpResponse(message)

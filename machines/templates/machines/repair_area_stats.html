@@ -43,6 +43,24 @@
 <link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="152x152">
 </head>
 <body>
+
+    <div id="countdown"
+    style="
+position: absolute;
+    z-index: 99999;
+    background: rgb(0 0 0 / 0.8);
+    margin: 0 auto;
+    text-align: center;
+    left: 0;
+    right: 0;
+    vertical-align: middle;
+    height: 100%;
+    padding: 20%;
+    "
+    >
+  <h2 style="font-size:7em !important;color:#FFF;">Приложите карточку <span class="display">10</span></h2>
+</div>
+
 <div id="sidebar-wrapper">
 <div class="pz-logo">
         <a href="/" style="display: block;">
@@ -111,10 +129,11 @@ if (document.referrer == "") {
     <div class="mclose"></div>
   </div>
   <div class="modalblock-content row" >  
-    <form method="POST" class="post-form" >{% csrf_token %}
+    <form id="set_status_form" method="POST" class="post-form" >{% csrf_token %}
         {{ form.machines_id.as_hidden }}
         {{ form.repair_job_status.as_hidden }}
-        <button id="savebtn" type="submit" class="save btn btn-default" >Применить</button>
+        <p><span id="text-status"></span></p>
+        <button id="savebtn" type="submit" class="save btn btn-default" >Подтвердить</button>
     </form>  
   </div>
  </div>
@@ -125,7 +144,7 @@ if (document.referrer == "") {
 
   <div class="form-wrapper">
 {% for e in equipments %}
-    <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" class="equip stat{{ e.repair_job_status }}">
+    <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" data-class="stat{{ e.repair_job_status }}" class="equip stat{{ e.repair_job_status }}">
  <div class="equip-inner">
   <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
   
@@ -141,6 +160,58 @@ if (document.referrer == "") {
 </div>
 
 <script>
+    $('#countdown').css('display','none');
+function start_timer(x){
+
+$('#countdown').css('display','block');
+var timerBlock = $('.display');
+var num = x;
+var real_status = $("input[name='repair_job_status']:hidden").val();
+var real_id = $("input[name='machines_id']:hidden").val();
+var timerId = setInterval(function(){
+timerBlock.text(--num);
+var form = document.getElementById("set_status_form"),
+        fd = new FormData(form); 
+$.ajax({
+        url: "?action=get_info",
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',        
+        success: function (data) {
+            //console.log(fd);
+            console.log('Compare info');
+            //if(data.equip_status!=''){
+                if(data.equip_status == real_status ){
+                    clearInterval(timerId);
+                    console.log('Карточка приложена!');
+                    var new_status_block = $(".form-wrapper").find("[data-eid='"+real_id +"']");
+                    $(new_status_block).removeClass(new_status_block.data('class')).addClass('stat'+parseInt(data.equip_status));
+                    $(new_status_block).data('class',parseInt(data.equip_status));
+                    $(new_status_block).data('status',parseInt(data.equip_status));
+                    $('#countdown').css('display','none');
+                    modal.css('display','none');
+                    timerBlock.text(x);
+                }
+            //}
+        }
+    });
+
+
+}, 1000);
+
+setTimeout(function(){
+if(num==0){
+clearInterval(timerId);
+console.log('Время закончилось');
+$('#countdown').css('display','none');
+modal.css('display','none');
+timerBlock.text(x);
+}
+}, num*1000);
+
+}
 /*$('#page-content-wrapper').addClass('h100');*/
 $('.container-fluid').css('display','table-cell');
 $('.equip').addClass('equip'+{{ del_result }} );
@@ -151,12 +222,31 @@ $(document).on('click','.mclose',function(){
 });
 
 $(document).on('click','button#savebtn',function(e){ 
-    if($("input[name='repair_job_status']:hidden").val()==2){
+    e.preventDefault();
+    console.log('click');
+    var rep_j_s = $("input[name='repair_job_status']:hidden").val();    
+    if(rep_j_s==0 || rep_j_s==2 ){
+    var form = document.getElementById("set_status_form"),
+        fd = new FormData(form);        
+$.ajax({
+        url: "?action=0",
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+            //console.log(data);
+            start_timer(10)
+        }
+    });
+
         //e.preventDefault();
-        if( !$("#id_repairer_id").val() ){      
+        /*if( !$("#id_repairer_id").val() ){
             $('#id_repairer_id').parent('p').find('span').css('color','red');
             return false;
-        }
+        }*/
+        return false;
     }
 });
 
@@ -170,14 +260,14 @@ modal.css('display','block');
 $("input[name='machines_id']:hidden").val(eqid);
 
 if(eqstat==1){
-    $('#id_repairer_id').css('display','inline-block');
-    $('#id_repairer_id').parent('p').find('span').text('Выберите мастера');
-    $('#id_repairer_id').parent('p').find('span').css('color','#000');
+    //$('#id_repairer_id').css('display','inline-block');
+    $('#text-status').text('Взять выбранное оборудование на ремонт?');
+    //$('#id_repairer_id').parent('p').find('span').css('color','#000');
     $("input[name='repair_job_status']:hidden").val(2);
 }else{
-    $('#id_repairer_id').css('display','none');
-    $('#id_repairer_id').parent('p').find('span').css('color','#000');
-    $('#id_repairer_id').parent('p').find('span').text('Оборудование отремонтировано?');
+    //$('#id_repairer_id').css('display','none');
+    //$('#id_repairer_id').parent('p').find('span').css('color','#000');
+    $('#text-status').text('Оборудование отремонтировано?');
     $("input[name='repair_job_status']:hidden").val(0);
 }
 }else{return false;}

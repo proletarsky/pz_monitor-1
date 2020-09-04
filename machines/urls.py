@@ -18,5 +18,6 @@ urlpatterns = [
                   url(r'^stats', views.StatisticsView.as_view(), name='statistics-view'),
 		  		  path('works/<int:pk>/', views.EquipmentWorksDetailView.as_view(), name='works-detail'),
 		  		  path('workshop<int:workshop_numb>/area_stats/<int:area_numb>/',repair_equipment,name='post_new'),
+                  url(r'^ajax_stats/$', views.ajax_stats, name='ajax_stats'),
                   
               ] + router.urls
