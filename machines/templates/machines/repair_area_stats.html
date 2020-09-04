@@ -114,7 +114,6 @@ if (document.referrer == "") {
     <form method="POST" class="post-form" >{% csrf_token %}
         {{ form.machines_id.as_hidden }}
         {{ form.repair_job_status.as_hidden }}
-      <p> <span></span> {{ form.repairer_id }}</p> <br>
         <button id="savebtn" type="submit" class="save btn btn-default" >Применить</button>
     </form>  
   </div>

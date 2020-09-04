@@ -210,6 +210,7 @@ class Area(models.Model):
     workshop=models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.SET_NULL,null=True,blank=True)
     name=models.CharField(max_length=50,verbose_name='Наименование')
     area_number=models.IntegerField(verbose_name='Номер участка',null=True,blank=True)
+    mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
     green_card_id=models.CharField(max_length=70,verbose_name='ID зеленой карточки')
 
     def __str__(self):
@@ -270,34 +271,35 @@ class Equipment(models.Model):
 
 
 class Repair_rawdata(models.Model):
-	date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
-	machines_id = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE, blank=True,null=True)
-	card_id = models.CharField(max_length=70,verbose_name='ID карточки',blank=True,null=True)
-	JOB_STATUSES = (
+    date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
+    machines_id = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE, blank=True,null=True)
+    card_id = models.CharField(max_length=70,verbose_name='ID карточки',blank=True,null=True)
+    JOB_STATUSES = (
         (0,'В рабочем состоянии'),
         (1,'Сломан, необходим ремонт'),
         (2,'В ремонте'),
-	)
-	repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
-	repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
+    )
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
+    repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
 
-	def __str__(self):
-		return '{0}, {1}, {2}'.format(self.machines_id,self.date,self.card_id)
+    def __str__(self):
+        return '{0}, {1}, {2}'.format(self.machines_id,self.date,self.card_id)
 
 
 class Data_from_scan(models.Model):
-	date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
-	card_id = models.CharField(max_length=70,verbose_name='ID карточки')
+    date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
+    mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
+    card_id = models.CharField(max_length=70,verbose_name='ID карточки')
 
-	def __str__(self):
-		return '{0}, {1}'.format(self.date, self.card_id)
+    def __str__(self):
+        return '{0}, {1}'.format(self.date, self.card_id)
 
 class Repairer(models.Model):
-	FIO = models.CharField(max_length=150,verbose_name='ФИО')
-	card_id=models.CharField(max_length=70,verbose_name='ID карточки')
+    FIO = models.CharField(max_length=150,verbose_name='ФИО')
+    card_id=models.CharField(max_length=70,verbose_name='ID карточки')
 
-	def __str__(self):
-		return '{0}'.format(self.FIO)
+    def __str__(self):
+        return '{0}'.format(self.FIO)
 
 
 
