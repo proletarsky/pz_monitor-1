@@ -188,7 +188,7 @@ $.ajax({
                     console.log('Карточка приложена!');
                     var new_status_block = $(".form-wrapper").find("[data-eid='"+real_id +"']");
                     $(new_status_block).removeClass(new_status_block.data('class')).addClass('stat'+parseInt(data.equip_status));
-                    $(new_status_block).data('class',parseInt(data.equip_status));
+                    $(new_status_block).data('class','stat'+parseInt(data.equip_status));
                     $(new_status_block).data('status',parseInt(data.equip_status));
                     $('#countdown').css('display','none');
                     modal.css('display','none');

@@ -341,7 +341,7 @@ class StatisticsView(ListView):
 
 
 def repair_equipment(request,workshop_numb,area_numb):
-    equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
+    equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('id')
     lenght=len(equipments)
     del_result=(lenght//10)+1
     if (del_result > 1 and lenght%10>6) or lenght==26:
