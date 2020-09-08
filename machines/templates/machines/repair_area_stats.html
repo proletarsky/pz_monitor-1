@@ -160,7 +160,11 @@ if (document.referrer == "") {
 </div>
 
 <script>
-    $('#countdown').css('display','none');
+var getting_info = false,
+getting_all_info = false;
+
+$('#countdown').css('display','none');
+
 function start_timer(x){
 
 $('#countdown').css('display','block');
@@ -169,30 +173,30 @@ var num = x;
 var real_status = $("input[name='repair_job_status']:hidden").val();
 var real_id = $("input[name='machines_id']:hidden").val();
 var timerId = setInterval(function(){
-timerBlock.text(--num);
-var form = document.getElementById("set_status_form"),
-        fd = new FormData(form); 
-$.ajax({
-        url: "?action=get_info",
-        data: fd,
-        cache: false,
-        processData: false,
-        contentType: false,
-        type: 'POST',        
-        success: function (data) {
-            //console.log(fd);
-            console.log('Compare info');
-            //if(data.equip_status!=''){
-                if(data.equip_status == real_status ){
-                    clearInterval(timerId);
-                    console.log('Карточка приложена!');
-                    var new_status_block = $(".form-wrapper").find("[data-eid='"+real_id +"']");
-                    $(new_status_block).removeClass(new_status_block.data('class')).addClass('stat'+parseInt(data.equip_status));
+    timerBlock.text(--num);
+    var form = document.getElementById("set_status_form"),
+        fd = new FormData(form);        
+        $.ajax({
+                url: "?action=get_info",
+                    data: fd,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    type: 'POST',
+                    success: function (data){
+                        console.log('Compare info');
+                        if(data.equip_status == real_status ){
+                            clearInterval(timerId);
+                            console.log('Карточка приложена!');
+                            var new_status_block = $(".form-wrapper").find("[data-eid='"+real_id +"']");
+                $(new_status_block).removeClass(new_status_block.data('class')).addClass('stat'+parseInt(data.equip_status));
                     $(new_status_block).data('class','stat'+parseInt(data.equip_status));
                     $(new_status_block).data('status',parseInt(data.equip_status));
                     $('#countdown').css('display','none');
                     modal.css('display','none');
                     timerBlock.text(x);
+                    getting_info = false;
+                    getting_all_info = false;                    
                 }
             //}
         }
@@ -208,16 +212,71 @@ console.log('Время закончилось');
 $('#countdown').css('display','none');
 modal.css('display','none');
 timerBlock.text(x);
+getting_info = false;
+getting_all_info = false;
 }
 }, num*1000);
 
 }
+
+
+
+
+
+
+
+
+setInterval(function(){
+        if(!getting_info && !getting_all_info){
+            getting_all_info= true;
+            $("input[name='machines_id']:hidden").val(15);
+        var form = document.getElementById("set_status_form"),        
+        fd = new FormData(form);        
+        //fd.append('machines_id', 123);
+        $.ajax({
+                url: "?action=get_all_info",
+                    data: fd,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    type:'POST',
+                    success: function (data){
+                        if(data.equipments){
+                        data.equipments.forEach(function(currentValue,index,arr){
+                            var status_block = $(".form-wrapper").find("[data-eid='"+data.equipments[index][0]+"']");
+                            if(parseInt(status_block.data('status'))!= data.equipments[index][1] ){                                
+                                $(status_block).removeClass(status_block.data('class')).addClass('stat'+parseInt(data.equipments[index][1]));
+                                $(status_block).data('class','stat'+parseInt(data.equipments[index][1]));
+                                $(status_block).data('status',parseInt(data.equipments[index][1]));
+                            }
+                            
+                        }); 
+                    }
+                        getting_all_info = false;
+                        console.log('Compare all info');                      
+            
+        }
+    });
+
+}else{console.log('Wait!');return false;}
+}, 1500);
+
+
+
+
+
+
+
+
+
 /*$('#page-content-wrapper').addClass('h100');*/
 $('.container-fluid').css('display','table-cell');
 $('.equip').addClass('equip'+{{ del_result }} );
 $('.goback').remove();
 var modal = $('.modal');
 $(document).on('click','.mclose',function(){ 
+    getting_info = false;
+    getting_all_info = false;
     modal.css('display','none');
 });
 
@@ -256,6 +315,8 @@ $(document).on('click','.equip',function(){
  var eqid = parseInt($(this).data('eid')),
  eqstat = parseInt($(this).data('status'));
 if(eqstat!=0){
+getting_all_info = false;
+getting_info = true;
 modal.css('display','block');
 $("input[name='machines_id']:hidden").val(eqid);
 

@@ -349,19 +349,30 @@ def repair_equipment(request,workshop_numb,area_numb):
     if request.method == "POST":
         form = Repairform(request.POST)
         machines_id = request.POST['machines_id']
-        action = request.GET['action']
-        if form.is_valid():            
-            if (action!='get_info'):
+        action = request.GET['action']        
+        if form.is_valid():
+            if action!='get_info' and action!= 'get_all_info':
                 Repair_rawdata=form.save()
-
-            if request.is_ajax():
-               equip_info = equipments.get(id = machines_id).repair_job_status
-               message = {'equip_status' : equip_info }
-               return JsonResponse(message)
+            if request.is_ajax():                
+                message = {'equipments' : 1 }
+                if action=='get_info':                    
+                    equip_info = equipments.get(id = machines_id).repair_job_status
+                    message = {'equip_status' : equip_info }
+                    return JsonResponse(message)
+                if action=='get_all_info':
+                    equip_info=[]                   
+                    for x in  range(0,lenght):#Equipment.objects.values_list('id', flat=True):  
+                        equip_info.append([equipments[x].id,equipments.get(id = equipments[x].id).repair_job_status])                      
+                        #equip_info.append([x,equipments.get(id = x).repair_job_status])
+                    message = {'equipments' : equip_info}                   
+                    #message = {'equipments' : [1234],1234]}
+                    return JsonResponse(message)
+                #return JsonResponse(message)
+                return JsonResponse({'sosi':'pisos'})
             else:
                 return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
-        form = Repairform()        
+        form = Repairform()    
     return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result})
 
 
