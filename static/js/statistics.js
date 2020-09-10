@@ -129,6 +129,7 @@ function set_period(period) {
        }
 }
 
+
 // Google charts
 google.load("visualization", "1", {packages:["corechart"]});
 google.setOnLoadCallback(drawChart);
@@ -136,6 +137,7 @@ function drawChart() {
     var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
     var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
     var data_keys = Object.keys(graphicsData.details);
+
 
 
     var eq_auto_data = [];
@@ -153,8 +155,9 @@ function drawChart() {
         width: '100%',
         height: '100%',
         legend: {position: 'top', maxLines: 3},
-        chartArea: { width: '80%', height:'80%'},
-        bar: { groupWidth: '30%' },
+        chartArea: { width: '80%', height:'80%'},        
+        bar: { groupWidth: '30%' },        
+        //colors: ['red','yellow'],
 // explorer: {actions: ['dragToZoom', 'rightClickToReset'],         axis: 'horizontal',             keepInBounds: true,             maxZoom: 20},
         isStacked: 'percent'
     };
@@ -168,8 +171,6 @@ function drawChart() {
     var color_reason_list=[]
     colorsJSON.valueOf().forEach(x=>color_reason_list.push(x.description))
 
-
-
     //Функция для определения цвета по наименованию причины простоя
     function color_def(searched_color) {
         var ind=color_reason_list.indexOf(searched_color)
@@ -181,7 +182,10 @@ function drawChart() {
         }
     }
 
+
     new_total_array_data_filter_ON.forEach(x=>list_color_total.push(color_def(x)))
+
+    //graphicsData.total.auto_data.forEach(x=>new_list_color_total.push(color_def(x)))
 
     var options_user_total = {
         width: '100%',
@@ -189,6 +193,9 @@ function drawChart() {
         pieHole: 0.4,
         colors:list_color_total
     };
+
+    console.log('qqweqweqewqew');
+console.log(new_total_array_data_filter_ON);
 
     var auto_data_chart = new google.visualization.BarChart(document.getElementById("id-plant"));
     var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
@@ -217,6 +224,7 @@ function drawChart() {
             colors:list_color_example
 
         };
+        
         auto_chart.draw(eq_auto_data[i-1], options_auto);
         user_chart.draw(eq_user_data[i-1], options_user_example);
 

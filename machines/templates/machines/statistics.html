@@ -87,8 +87,21 @@
 
         <script type="text/javascript">
             //console.log({{ context }});
-            graphicsData={{ statistics|safe }}
+            graphicsData={{ statistics|safe }}            
             colorsJSON={{ colors|safe }}
+
+// TYT KOPAT' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  $.each(graphicsData.details,function(index,value){  
+  //console.log('Индекс: ' + index + '; Значение: ' + value);
+  //console.log(value.auto_data);
+  //console.log(value.auto_data[0].length);
+  //console.log(value.auto_data[0]);
+  if(value.auto_data[0].length<4){
+    value.auto_data[0].splice(1, 0, '000 - Оборудование работает');
+    value.auto_data[1].splice(1, 0, 0);
+  }
+});
+
         </script>
     {% endif %}
 {#    </div>#}
