@@ -216,7 +216,9 @@ class Area(models.Model):
     def __str__(self):
         return self.name+' цеха №'+str(self.workshop)
 
-
+class Complex(models.Model):
+    name=models.CharField(max_length=70,verbose_name='Наименование')
+    descr=models.TextField(verbose_name='Описание')
 
 class Equipment(models.Model):
     
@@ -260,6 +262,7 @@ class Equipment(models.Model):
     )
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
     red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
+    in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
     # image = models.ImageField(blank=True, null=True)
     # sm_image = models.ImageField(blank=True, null=True)
 
