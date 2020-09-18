@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -374,6 +374,16 @@ def repair_equipment(request,workshop_numb,area_numb):
     else:
         form = Repairform()    
     return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result})
+
+
+def all_complexes(request):
+    complexes=Complex.objects.all()
+    return render(request,'htmltest',{'complexes':complexes})
+
+
+def complex_equipments(request,complex_id):
+    complex_data=Complex.objects.get(id=complex_id)
+    return render(request,'htmltest',{'complex_data':complex_data})
 
 
 

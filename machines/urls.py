@@ -18,6 +18,8 @@ urlpatterns = [
                   url(r'^stats', views.StatisticsView.as_view(), name='statistics-view'),
 		  		  path('works/<int:pk>/', views.EquipmentWorksDetailView.as_view(), name='works-detail'),
 		  		  path('workshop<int:workshop_numb>/area_stats/<int:area_numb>/',repair_equipment,name='post_new'),
-                  url(r'^ajax_stats/$', views.ajax_stats, name='ajax_stats'),
+		  		  path('complexes',all_complexes,name='all_complexes_name')
+		  		  path('complexes/equipment_complex<int:complex_id>',complex_equipments,name='complex_equipments_name'),
+                  #url(r'^ajax_stats/$', views.ajax_stats, name='ajax_stats'),
                   
               ] + router.urls
