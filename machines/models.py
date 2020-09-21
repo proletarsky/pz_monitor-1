@@ -220,6 +220,9 @@ class Complex(models.Model):
     name=models.CharField(max_length=70,verbose_name='Наименование')
     descr=models.TextField(verbose_name='Описание')
 
+    def __str__(self):
+        return self.name
+
 class Equipment(models.Model):
     
     TIMETABLE_CHOICES = (

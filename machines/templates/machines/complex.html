@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load googlecharts %}
+{% load static %}
+{% load has_group %}
+ 
+{% block navbar %}
+        <li class="sidebar-brand">
+            <a href="/machines"><span class="glyphicon glyphicon-chevron-left"></span> Назад</a>
+        </li>
+{% endblock navbar %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+    {% if request.user|has_group:'Руководитель производства' %}
+        <li class="sidebar-brand">
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+<!--
+<img class="worksimg" src="/media/{{object.image}}" alt="123" />
+-->
+
+
+<div class="page-header">
+        <h1>{{object}}</h1>
+    </div>
+
+
+{{ complex_data }}
+
+
+
+
+
+
+
+   
+{% endblock content %}

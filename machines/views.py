@@ -378,12 +378,12 @@ def repair_equipment(request,workshop_numb,area_numb):
 
 def all_complexes(request):
     complexes=Complex.objects.all()
-    return render(request,'htmltest',{'complexes':complexes})
+    return render(request,'machines/complex_all.html',{'complexes':complexes})
 
 
 def complex_equipments(request,complex_id):
     complex_data=Complex.objects.get(id=complex_id)
-    return render(request,'htmltest',{'complex_data':complex_data})
+    return render(request,'machines/complex.html',{'complex_data':complex_data})
 
 
 
