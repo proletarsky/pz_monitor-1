@@ -44,21 +44,8 @@
 </head>
 <body>
 
-    <div id="countdown"
-    style="
-position: absolute;
-    z-index: 99999;
-    background: rgb(0 0 0 / 0.8);
-    margin: 0 auto;
-    text-align: center;
-    left: 0;
-    right: 0;
-    vertical-align: middle;
-    height: 100%;
-    padding: 20%;
-    "
-    >
-  <h2 style="font-size:7em !important;color:#FFF;">Приложите карточку <span class="display">10</span></h2>
+    <div id="countdown" >
+  <h2>Приложите карточку <span class="display">10</span></h2>
 </div>
 
 <div id="sidebar-wrapper">
@@ -163,11 +150,17 @@ if (document.referrer == "") {
 var getting_info = false,
 getting_all_info = false;
 
-$('#countdown').css('display','none');
+//$('#countdown').css('display','none');
+
+
+var elements = document.getElementsByClassName('.equip-inner');
+
+$(function(){
+$(".equip-inner span").each(function(){$(this).text($(this).text().split(',')[0]);});
+});
 
 function start_timer(x){
-
-$('#countdown').css('display','block');
+$('#countdown').css('display','table');
 var timerBlock = $('.display');
 var num = x;
 var real_status = $("input[name='repair_job_status']:hidden").val();
@@ -184,6 +177,8 @@ var timerId = setInterval(function(){
                     contentType: false,
                     type: 'POST',
                     success: function (data){
+                        console.log('get info: '+getting_info);
+                        console.log('get all info: '+getting_all_info);
                         console.log('Compare info');
                         if(data.equip_status == real_status ){
                             clearInterval(timerId);
@@ -194,9 +189,22 @@ var timerId = setInterval(function(){
                     $(new_status_block).data('status',parseInt(data.equip_status));
                     $('#countdown').css('display','none');
                     modal.css('display','none');
-                    /////timerBlock.text(x);
+                    timerBlock.text(x);
                     getting_info = false;
                     getting_all_info = false;                    
+                }else{
+                    console.log('get info: '+getting_info);
+                        console.log('get all info: '+getting_all_info);
+                        console.log('Карточка пока ещё не приложена');
+                        if(num<=0){
+clearInterval(timerId);
+console.log('Время закончилось');
+$('#countdown').css('display','none');
+modal.css('display','none');
+timerBlock.text(x);
+getting_info = false;
+getting_all_info = false;
+                        }
                 }
             //}
         }
@@ -206,7 +214,7 @@ var timerId = setInterval(function(){
 }, 1000);
 
 setTimeout(function(){
-if(num==0){
+if(num<=0){
 clearInterval(timerId);
 console.log('Время закончилось');
 $('#countdown').css('display','none');
@@ -214,6 +222,10 @@ modal.css('display','none');
 timerBlock.text(x);
 getting_info = false;
 getting_all_info = false;
+}else{
+    console.log('TO get info: '+getting_info);
+    console.log('TO get all info: '+getting_all_info);
+    console.log('Timeout true! num>0 num:'+num);
 }
 }, num*1000);
 
