@@ -382,11 +382,16 @@ def all_complexes(request):
 
 
 def complex_equipments(request,complex_id):
-    complex_data=Complex.objects.get(id=complex_id)
-    return render(request,'machines/complex.html',{'complex_data':complex_data})
-
-
-
+    complex_data=Equipment.objects.filter(in_complex_id=complex_id)
+    context={'complex_data':complex_data}
+    context['rawdata']=[]
+    for x in complex_data:
+        start_time = timezone.now() - datetime.timedelta(days=1)
+        end_time=timezone.now()
+        graph_qs = GraphicsData.objects.filter(equipment=x.id, date__gte=start_time,
+                                 date__lte=end_time).order_by('date')
+        context['rawdata'].extend(graph_qs)
+    return render(request,'machines/complex.html',context)
 #ajax for test Prigoda 4.09.20
 def ajax_stats(request):
     if request.is_ajax():

@@ -298,7 +298,10 @@ thead tr{
      margin-right:0;
      margin-left:0;
 }
-.container-fluid{padding:0;vertical-align: middle; display: table-cell;
+.container-fluid{
+  padding:0;
+  vertical-align:middle;
+   /*display: table-cell;*/
   }
 
 .pz-header {
@@ -563,7 +566,7 @@ background-color:transparent;
     display: table;
     margin: 0 auto;
    /*height: calc(100vh - 80px);*/
-   /* width: 100%;*/
+    width: 100%;
     /*height: 100%;*/
   }
   #sidebar-wrapper {

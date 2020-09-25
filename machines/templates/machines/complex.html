@@ -33,11 +33,13 @@
     </div>
 
 
-{{ complex_data }}
+{% for x in complex_data %}
+{{ x }}
+{% endfor %}
 
-
-
-
+{% for x in rawdata %}
+{{ x.equipment.id }}
+{% endfor %}
 
 
 

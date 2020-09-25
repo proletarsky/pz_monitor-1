@@ -119,6 +119,9 @@ if (document.referrer == "") {
     <form id="set_status_form" method="POST" class="post-form" >{% csrf_token %}
         {{ form.machines_id.as_hidden }}
         {{ form.repair_job_status.as_hidden }}
+        <p><span>Выбрать причину поломки</span></p>
+        {{ form.repair_reason }}
+
         <p><span id="text-status"></span></p>
         <button id="savebtn" type="submit" class="save btn btn-default" >Подтвердить</button>
     </form>  
