@@ -69,5 +69,5 @@ class UserRegistrationForm(forms.ModelForm):
 class Repairform(forms.ModelForm):
     class Meta:
         model=Repair_rawdata
-        fields=('machines_id','repair_job_status')
+        fields=('machines_id','repair_job_status','repair_reason')
 
