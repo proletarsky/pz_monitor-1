@@ -116,13 +116,16 @@ if (document.referrer == "") {
     <div class="mclose"></div>
   </div>
   <div class="modalblock-content row" >  
+    <div id="crush-reason" style="display:none;">
+        <p><span>Выбрать причину поломки</span><i class="info">(заполняется оператором станка)</i></p>        
+        {{ form.repair_reason }}
+        </div>
     <form id="set_status_form" method="POST" class="post-form" >{% csrf_token %}
         {{ form.machines_id.as_hidden }}
-        {{ form.repair_job_status.as_hidden }}
-        <p><span>Выбрать причину поломки</span></p>
-        {{ form.repair_reason }}
+        {{ form.repair_job_status.as_hidden }}        
 
         <p><span id="text-status"></span></p>
+        <button id="change-modal" type="submit" class="save btn btn-default" >Указать причину поломки</button>
         <button id="savebtn" type="submit" class="save btn btn-default" >Подтвердить</button>
     </form>  
   </div>
@@ -133,8 +136,12 @@ if (document.referrer == "") {
 
 
   <div class="form-wrapper">
-{% for e in equipments %}
-    <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" data-class="stat{{ e.repair_job_status }}" class="equip stat{{ e.repair_job_status }}">
+{% for e in equipments %}   
+    <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" data-class="stat{{ e.repair_job_status }}" class="equip 
+    {% if e.is_limit %}
+    limited
+    {% endif %}
+    stat{{ e.repair_job_status }}">
  <div class="equip-inner">
   <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
   
@@ -282,7 +289,7 @@ setInterval(function(){
 
 
 
-
+var crushreason = false;
 
 /*$('#page-content-wrapper').addClass('h100');*/
 $('.container-fluid').css('display','table-cell');
@@ -292,18 +299,61 @@ var modal = $('.modal');
 $(document).on('click','.mclose',function(){ 
     getting_info = false;
     getting_all_info = false;
+    $('#crush-reason').css('display','none');
+    $('#change-modal').text('Указать причину поломки');
+    $('#text-status').css('display','block');
+    crushreason = false;
     modal.css('display','none');
 });
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        $('.mclose').click();
+    }
+});
+$(document).on('click','button#change-modal',function(e){ 
+    e.preventDefault();
+    if(crushreason == false){
+    crushreason = true;
+    $('#crush-reason').css('display','block');
+    $('#change-modal').text('Назад');
+    $('#text-status').css('display','none');
+    $('button#savebtn').css('display','none');
+}else{
+    $('#crush-reason').css('display','none');
+    $('#change-modal').text('Указать причину поломки');
+    $('#text-status').css('display','block');
+    $('button#savebtn').css('display','block');
+    crushreason = false;
+}
 
+});
+$('#id_repair_reason option').each(function()
+{    
+    if($(this).val()!=''){
+    $('#crush-reason').append('<div class="reason-block"><a class="sel-reason" href="#" data-val="'+$(this).val()+'" >'+$(this).text()+'</a></div>');
+    }
+});
+$(document).on('click','.sel-reason',function(e){ 
+    e.preventDefault();
+    $('#id_repair_reason').val($(this).data('val'));
+    $('button#savebtn').click();
+});
 $(document).on('click','button#savebtn',function(e){ 
     e.preventDefault();
     console.log('click');
     var rep_j_s = $("input[name='repair_job_status']:hidden").val();    
     if(rep_j_s==0 || rep_j_s==2 ){
     var form = document.getElementById("set_status_form"),
-        fd = new FormData(form);        
+        fd = new FormData(form), aurl = "?action=0";
+        if(crushreason){var cr=document.getElementById("id_repair_reason"),crv = cr.value; 
+        if (crv != "") {
+            fd.append('reason_id',crv);
+            aurl = "?action=add_reason";
+        }else{alert('UKAJI PRICHINU!!!!');return false;}
+        }
+
 $.ajax({
-        url: "?action=0",
+        url: aurl,
         data: fd,
         cache: false,
         processData: false,
@@ -311,7 +361,11 @@ $.ajax({
         type: 'POST',
         success: function (data) {
             //console.log(data);
-            start_timer(10)
+            if(!crushreason){
+            start_timer(10);
+        }else{            
+            $('.mclose').click();
+        }
         }
     });
 
@@ -334,16 +388,22 @@ getting_all_info = false;
 getting_info = true;
 modal.css('display','block');
 $("input[name='machines_id']:hidden").val(eqid);
-
+$('button#savebtn').css('display','block');
 if(eqstat==1){
     //$('#id_repairer_id').css('display','inline-block');
     $('#text-status').text('Взять выбранное оборудование на ремонт?');
+    $('#text-status').css('display','block');
+    $('#crush-reason').css('display','none');
+    $('#change-modal').css('display','block');
     //$('#id_repairer_id').parent('p').find('span').css('color','#000');
     $("input[name='repair_job_status']:hidden").val(2);
 }else{
     //$('#id_repairer_id').css('display','none');
     //$('#id_repairer_id').parent('p').find('span').css('color','#000');
     $('#text-status').text('Оборудование отремонтировано?');
+    $('#text-status').css('display','block');
+    $('#crush-reason').css('display','none');
+    $('#change-modal').css('display','none');
     $("input[name='repair_job_status']:hidden").val(0);
 }
 }else{return false;}

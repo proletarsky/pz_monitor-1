@@ -32,16 +32,124 @@
         <h1>{{object}}</h1>
     </div>
 
+  {% for x in complex_data %}    
+    <img class="worksimg" src="/media/{{ x.image }}" alt="123">
+    
+    {% endfor %}
+{% for x in complex_data %}    
+    
+    <h2>{{ x }}</h2>
+    {% endfor %}
 
-{% for x in complex_data %}
-{{ x }}
-{% endfor %}
 
-{% for x in rawdata %}
-{{ x.equipment.id }}
-{% endfor %}
+<!--<script type="text/javascript">
+var complex_data = {};
 
+    {% for x in rawdata %}
+    //complex_data[{{x.equipment.id}}].appEnd({'{{x.date}}': {{ x.value }} });
+    complex_data.{ {{x.equipment.id}} : {'{{x.date}}': {{ x.value }} } };
+    {% endfor %}
+
+
+console.log(complex_data);
+</script>-->
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    var comp = [{% for row in rawdata %}{{ row|safe }},{% endfor %}],complexes = [];
+    for (const element of comp) {
+        if(!complexes.hasOwnProperty(element[0]) ){            
+            complexes[element[0]]= [];
+        }
+        complexes[element[0]].push([new Date(element[1]) ,element[2]]);
+        
+    }
+    complexes = complexes.filter(function (el) {  return el != null;});
+    console.log(complexes);
+
+
+google.charts.load('current', {'packages': ['corechart']});
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+    var data = [];
+    for (var y=0;y<=complexes.length-1;y++){
+       data[y] = new google.visualization.DataTable();
+       data[y].addColumn('date', 'Date');
+       data[y].addColumn('number', 'Company '+y);
+       
+       for(var i=0;i<complexes[y].length;i++){
+       data[y].addRow([ complexes[y][i][0],complexes[y][i][1] ]);        
+       }
+    }
+       console.log(data[0]);
+
+
+       /*
+       var data2 = new google.visualization.DataTable();
+       data2.addColumn('date', 'Date');
+       data2.addColumn('number', 'Company 2');
+       for(var i=0;i<complexes[5].length-1;i++){
+       data2.addRow([ complexes[5][i][0],complexes[5][i][1] ]); 
+       }
+*/     
+        
+ 
+
+switch(data.length) {
+  case 1:  
+    var joinedData = google.visualization.data.join(data[0], 'full', [[0, 0]], [1], [1]);
+    break;
+
+  case 2:  
+    var joinedData = google.visualization.data.join(data[0],data[1], 'full', [[0, 0]], [1], [1]);
+    break;
+ case 3:  
+    var joinedData2 = google.visualization.data.join(data[0],data[1], 'full', [[0, 0]], [1], [1]);    
+    var joinedData = google.visualization.data.join(joinedData2, data[2], 'full', [[0, 0]], [1,2], [1]);
+    
+    break;
+
+ case 4:  
+    var joinedData1 = google.visualization.data.join(data[0],data[1], 'full', [[0, 0]], [1], [1]);    
+    var joinedData2 = google.visualization.data.join(joinedData1, data[2], 'full', [[0, 0]], [1,2], [1]);
+    var joinedData = google.visualization.data.join(joinedData2, data[3], 'full', [[0, 0]], [1,2,3], [1]);
+    break;
+case 5:  
+    var joinedData1 = google.visualization.data.join(data[0],data[1], 'full', [[0, 0]], [1], [1]);    
+    var joinedData2 = google.visualization.data.join(joinedData1, data[2], 'full', [[0, 0]], [1,2], [1]);
+    var joinedData3 = google.visualization.data.join(joinedData2, data[3], 'full', [[0, 0]], [1,2,3], [1]);
+    var joinedData = google.visualization.data.join(joinedData3, data[4], 'full', [[0, 0]], [1,2,3,4], [1]);
+    break;
+
+  default:
+    var joinedData = google.visualization.data.join(data[0],null, 'full', [[0, 0]], [1], [1]);
+    break;
+}
+
+      // var joinedData = google.visualization.data.join(data[0],data[1], 'full', [[0, 0]], [1], [1]);
+       
+       /*for(var z=1;z<data.length;z++){
+            joinedData.join(data[z], 'full', [[0, 0]], [1], [1]);
+        }*/
+       
+       var chart = new google.visualization.LineChart(document.querySelector('#chart_div'));
+       chart.draw(joinedData, {
+          height: 600,
+          width: 1920,
+          interpolateNulls: true,                
+       });
+}
+</script>
+
+<div id="chart_div" style="width:100%; height: 600px;"></div>
 
 
    
+<!--
+
+
+
+-->
+
+
 {% endblock content %}

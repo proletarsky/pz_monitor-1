@@ -266,6 +266,7 @@ class Equipment(models.Model):
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
     red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
     in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
+    is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
     # image = models.ImageField(blank=True, null=True)
     # sm_image = models.ImageField(blank=True, null=True)
 
@@ -286,7 +287,7 @@ class Repair_reason(models.Model):
 
 
 class Repair_rawdata(models.Model):
-    date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
+    date = models.DateTimeField(auto_now_add=True,verbose_name='Дата/Время')
     machines_id = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE, blank=True,null=True)
     card_id = models.CharField(max_length=70,verbose_name='ID карточки',blank=True,null=True)
     JOB_STATUSES = (

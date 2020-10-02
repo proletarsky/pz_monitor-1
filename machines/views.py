@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -346,18 +346,28 @@ def repair_equipment(request,workshop_numb,area_numb):
     del_result=(lenght//10)+1
     if (del_result > 1 and lenght%10>6) or lenght==26:
         del_result+=1
+    if del_result >7:
+        del_result=7
     if request.method == "POST":
         form = Repairform(request.POST)
         machines_id = request.POST['machines_id']
+        reason_id=request.POST.get('reason_id')
         action = request.GET['action']        
         if form.is_valid():
-            if action!='get_info' and action!= 'get_all_info':
-                Repair_rawdata=form.save()
+            if action!='get_info' and action!= 'get_all_info' and action!= 'add_reason':
+                Repair_rawdata1=form.save()
             if request.is_ajax():                
                 message = {'equipments' : 1 }
                 if action=='get_info':                    
                     equip_info = equipments.get(id = machines_id).repair_job_status
                     message = {'equip_status' : equip_info }
+                    return JsonResponse(message)
+                if action=='add_reason':                    
+                    equip = Repair_rawdata.objects.filter(machines_id_id = machines_id,repair_job_status=1).order_by('-date')[0:1:1]
+                    reas = Repair_reason.objects.get(id=reason_id)
+                    equip[0].repair_reason=reas
+                    equip[0].save()
+                    message = {'response' : '1' }
                     return JsonResponse(message)
                 if action=='get_all_info':
                     equip_info=[]                   
@@ -390,8 +400,13 @@ def complex_equipments(request,complex_id):
         end_time=timezone.now()
         graph_qs = GraphicsData.objects.filter(equipment=x.id, date__gte=start_time,
                                  date__lte=end_time).order_by('date')
-        context['rawdata'].extend(graph_qs)
+        a=[]
+        a.extend([gd.equipment.id,str(gd.date),gd.value] for gd in graph_qs)
+        context['rawdata'].extend(a)
     return render(request,'machines/complex.html',context)
+
+
+
 #ajax for test Prigoda 4.09.20
 def ajax_stats(request):
     if request.is_ajax():
