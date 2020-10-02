@@ -407,6 +407,16 @@ def complex_equipments(request,complex_id):
 
 
 
+def repair_view_data(request):
+    need_id=Equipment.objects.filter(is_in_repair=True,area__id=2,repair_job_status=1)
+    crush_equipments=[]
+    for x in need_id:
+        a=Repair_rawdata.objects.filter(repair_job_status=1,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
+        crush_equipments.extend(a)
+    in_repair_equipments = Equipment.objects.filter(is_in_repair=True,area__id=2,repair_job_status=2)
+    context={'crush_equipments':crush_equipments,'in_repair_equipments':in_repair_equipments}
+    return render(request,'machines/repair_view_data.html',context)
+
 #ajax for test Prigoda 4.09.20
 def ajax_stats(request):
     if request.is_ajax():
