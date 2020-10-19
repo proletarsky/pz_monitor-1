@@ -79,5 +79,61 @@
         {% endfor %}
 
     </table>
+
+
+<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+        <tr>
+            <th scope="col" style="width:15%">Участок</th>
+            <th scope="col" style="width:40%" colspan="2"><div style="text-align: center">
+		<!-- &machine_or_furnace_sign=false -->
+Оборудование
+
+
+</div></th>
+{#			<th>Фото оборудования</th>#}
+			<th scope="col" style="width:15%" >Лимитирующее</th>
+            <th scope="col" style="width:25%" >Причина</th>
+            <th scope="col" style="width:10%" >Дата поломки</th>
+<!--            <th scope="col" style="width:15%">Состояние</th> -->
+        </tr>
+        </thead>
+        {% for x in repair_equipments %}				
+            <tr>
+                <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.machines_id.area }}</a></td>
+                <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
+                <td aria-label="Фото оборудования">
+                
+		
+                    {% if x.machines_id.image %}
+                        <img src="{{ x.machines_id.image.url }}" height="75px">
+                    {% else %}
+                        <img src="{% static 'img/noimg.png'%}" width="100px">
+                    {% endif %}
+		</td>
+                <td aria-label="Данные мониторинга" >
+                    {% if x.machines_id.is_limit %}
+                        <img src="{% static 'img/true.png'%}" height="30px">
+                    {% else %}
+                        <img src="{% static 'img/false.png'%}" height="30px">
+                    {% endif %}
+                    </div>
+                </td>
+                </td>
+                <td aria-label="Данные мониторинга" >
+                	{% if x.repair_reason %}
+                    {{ x.repair_reason }}  
+                    {% else %}
+                        ПРИЧИНА НЕ УКАЗАНА
+                    {% endif %}                 
+                    
+                    </div>
+                </td>
+                <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+    
 </div>    
 {% endblock content %}

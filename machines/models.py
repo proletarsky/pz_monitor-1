@@ -278,12 +278,11 @@ class Equipment(models.Model):
 
 
 class Repair_reason(models.Model):
-	name = models.CharField(max_length=100,verbose_name='Наименование')
-	description = models.TextField(verbose_name='Описание')
-
-	def __str__(self):
-		return self.name
-
+    name = models.CharField(max_length=100,verbose_name='Наименование')
+    description = models.TextField(verbose_name='Описание')
+    is_machines_operator_reason = models.BooleanField(verbose_name='Причина указывается оператором станка',blank=True,null=True)
+    def __str__(self):
+        return self.name
 
 
 class Repair_rawdata(models.Model):
@@ -298,6 +297,7 @@ class Repair_rawdata(models.Model):
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
     repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
     repair_reason = models.ForeignKey('Repair_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL)
+    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True)
 
     def __str__(self):
         return '{0}, {1}, {2}'.format(self.machines_id,self.date,self.card_id)
@@ -317,6 +317,16 @@ class Repairer(models.Model):
 
     def __str__(self):
         return '{0}'.format(self.FIO)
+
+class Repair_statistics(models.Model):
+    JOB_STATUSES = (
+        (0,'В рабочем состоянии'),
+        (1,'Сломан, необходим ремонт'),
+        (2,'В ремонте'),)
+    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE)
+    start = models.DateTimeField(verbose_name='Начало периода',blank=True,null=True)
+    end = models.DateTimeField(verbose_name='Конец периода',blank=True,null=True)
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования',choices=JOB_STATUSES,null=True,blank=True)
 
 
 
