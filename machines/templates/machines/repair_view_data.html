@@ -21,7 +21,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
     <div class="page-header">
-        <h1>Неисправное оборудование</h1>
+        <h2>Неисправное оборудование</h2>
     </div>
 
 
@@ -29,7 +29,7 @@
     <table class="table text-left" width="100%">
         <thead style=" text-align: center">
         <tr>
-            <th scope="col" style="width:15%">Участок</th>
+            <th scope="col" style="width:20%">Участок</th>
             <th scope="col" style="width:40%" colspan="2"><div style="text-align: center">
 		<!-- &machine_or_furnace_sign=false -->
 Оборудование
@@ -37,9 +37,9 @@
 
 </div></th>
 {#			<th>Фото оборудования</th>#}
-			<th scope="col" style="width:15%" >Лимитирующее</th>
-            <th scope="col" style="width:25%" >Причина</th>
-            <th scope="col" style="width:10%" >Дата поломки</th>
+			<!-- <th scope="col" style="width:15%" >Лимитирующее</th> -->
+            <th scope="col" style="width:20%" >Причина</th>
+            <th scope="col" style="width:20%" >Дата поломки</th>
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
@@ -49,23 +49,26 @@
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
                 
-		
+		<div class="repair_img {% if x.machines_id.is_limit %} limited {% endif %}">
                     {% if x.machines_id.image %}
                         <img src="{{ x.machines_id.image.url }}" height="75px">
                     {% else %}
                         <img src="{% static 'img/noimg.png'%}" width="100px">
                     {% endif %}
+                </div>
+                
 		</td>
+		<!--
                 <td aria-label="Данные мониторинга" >
-                    {% if x.machines_id.is_limit %}
+                     {% if x.machines_id.is_limit %}
                         <img src="{% static 'img/true.png'%}" height="30px">
                     {% else %}
                         <img src="{% static 'img/false.png'%}" height="30px">
-                    {% endif %}
+                    {% endif %} 
                     </div>
+                </td> -->
                 </td>
-                </td>
-                <td aria-label="Данные мониторинга" >
+                <td aria-label="Причина" >
                 	{% if x.repair_reason %}
                     {{ x.repair_reason }}  
                     {% else %}
@@ -80,21 +83,24 @@
 
     </table>
 
-
+<div class="page-header">
+        <h2>Оборудование в ремонте</h2>
+    </div>
 <table class="table text-left" width="100%">
         <thead style=" text-align: center">
         <tr>
-            <th scope="col" style="width:15%">Участок</th>
-            <th scope="col" style="width:40%" colspan="2"><div style="text-align: center">
+            <th scope="col" style="width:20%">Участок</th>
+            <th scope="col" style="width:30%" colspan="2"><div style="text-align: center">
 		<!-- &machine_or_furnace_sign=false -->
 Оборудование
 
 
 </div></th>
 {#			<th>Фото оборудования</th>#}
-			<th scope="col" style="width:15%" >Лимитирующее</th>
-            <th scope="col" style="width:25%" >Причина</th>
-            <th scope="col" style="width:10%" >Дата поломки</th>
+			<th scope="col" style="width:10%" >Причина</th>
+            <th scope="col" style="width:10%" >ФИО</th>
+            <th scope="col" style="width:20%" >Комментарий</th>
+            <th scope="col" style="width:10%" >Начало ремонта</th>
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
@@ -104,28 +110,34 @@
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
                 
-		
+		<div class="repair_img {% if x.machines_id.is_limit %} limited {% endif %}">
                     {% if x.machines_id.image %}
                         <img src="{{ x.machines_id.image.url }}" height="75px">
                     {% else %}
                         <img src="{% static 'img/noimg.png'%}" width="100px">
                     {% endif %}
+        </div>
 		</td>
                 <td aria-label="Данные мониторинга" >
-                    {% if x.machines_id.is_limit %}
-                        <img src="{% static 'img/true.png'%}" height="30px">
+                   {% if x.repair_reason %}
+                    {{ x.repair_reason }}  
                     {% else %}
-                        <img src="{% static 'img/false.png'%}" height="30px">
-                    {% endif %}
+                        ПРИЧИНА НЕ УКАЗАНА
+                    {% endif %}  
                     </div>
                 </td>
                 </td>
                 <td aria-label="Данные мониторинга" >
-                	{% if x.repair_reason %}
-                    {{ x.repair_reason }}  
-                    {% else %}
-                        ПРИЧИНА НЕ УКАЗАНА
-                    {% endif %}                 
+                	{{ x.repairer_id }}              
+                    
+                    </div>
+                </td>
+                <td aria-label="Данные мониторинга" >
+                	{% if x.repair_comment %}
+                		{{ x.repair_comment|linebreaks }}   
+                	{% else %}
+                	КОММЕНТАРИЙ НЕ УКАЗАН
+                	{% endif %}          
                     
                     </div>
                 </td>

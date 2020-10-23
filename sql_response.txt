@@ -1,0 +1,2 @@
+select sum(coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start),equipment_id,repair_job_status from machines_repair_statistics
+group by equipment_id,repair_job_status;

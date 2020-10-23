@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -30,7 +30,6 @@ from .forms import UserRegistrationForm, Repairform
 from django.shortcuts import redirect
 #FOR JSON RESPONSE!!!
 from django.http import JsonResponse
-
 
 @permission_classes([permissions.AllowAny])
 class RawDataUploadView(APIView):
@@ -351,10 +350,10 @@ def repair_equipment(request,workshop_numb,area_numb):
     if request.method == "POST":
         form = Repairform(request.POST)
         machines_id = request.POST['machines_id']
-        reason_id=request.POST.get('reason_id')
+        reason_id=request.POST.get('reason_id')        
         action = request.GET['action']        
         if form.is_valid():
-            if action!='get_info' and action!= 'get_all_info' and action!= 'add_reason':
+            if action!='get_info' and action!= 'get_all_info' and action!= 'add_reason' and action!= 'add_comment':
                 Repair_rawdata1=form.save()
             if request.is_ajax():                
                 message = {'equipments' : 1 }
@@ -367,6 +366,20 @@ def repair_equipment(request,workshop_numb,area_numb):
                     reas = Repair_reason.objects.get(id=reason_id)
                     equip[0].repair_reason=reas
                     equip[0].save()
+                    message = {'response' : '1' }
+                    return JsonResponse(message)
+                if action=='add_comment':
+                    new_comment = request.POST.get('comment')
+                    equip=Repair_rawdata.objects.filter(machines_id_id=machines_id,repair_job_status=2).order_by('-date')[0:1:1]
+                    actual_comment=equip[0].repair_comment
+                    now = datetime.datetime.now()
+                    now=now.strftime("%d-%m-%Y %H:%M")
+                    if actual_comment:
+                        equip[0].repair_comment=actual_comment+'\n'+now+' '+new_comment
+                        equip[0].save()
+                    else:
+                        equip[0].repair_comment=now+' '+new_comment+' '
+                        equip[0].save()
                     message = {'response' : '1' }
                     return JsonResponse(message)
                 if action=='get_all_info':
@@ -421,6 +434,26 @@ def repair_view_data(request):
     context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments}
     return render(request,'machines/repair_view_data.html',context)
 
+def repair_statistics(request):
+    sql_query = Repair_statistics.objects.raw('''select 
+                                                    1 as id, equipment_id,
+                                                    sum(case when repair_job_status=0 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as work,
+                                                    sum(case  when repair_job_status=1 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as crush ,
+                                                    sum(case when repair_job_status=2 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as repair,
+                                                    extract (epoch from(sum(case when repair_job_status=0 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_work,
+                                                    extract (epoch from(sum(case when repair_job_status=1 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_crush,
+                                                    extract (epoch from(sum(case when repair_job_status=2 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_repair,
+                                                    extract (epoch from(sum(coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start))) as all_sum 
+                                                        from machines_repair_statistics
+                                                        group by equipment_id''')
+
+    context={'objs':sql_query}
+    #context={'lol':'lol'}
+    return render(request,'machines/repair_statistics.html',context)
+
+def main_repairer(request):
+    context={'a':123}
+    return render(request,'machines/main_repairer.html',context)
 
     
 
@@ -431,3 +464,4 @@ def ajax_stats(request):
     else:
         message = "no"
     return HttpResponse(message)
+

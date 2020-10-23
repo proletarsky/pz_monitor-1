@@ -297,7 +297,7 @@ class Repair_rawdata(models.Model):
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
     repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
     repair_reason = models.ForeignKey('Repair_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL)
-    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True)
+    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True,default=None)
 
     def __str__(self):
         return '{0}, {1}, {2}'.format(self.machines_id,self.date,self.card_id)

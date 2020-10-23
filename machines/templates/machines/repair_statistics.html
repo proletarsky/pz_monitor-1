@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+{% load admin_urls %}
+{% load static %}
+{% load has_group %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+	{% if request.user|has_group:'Руководитель производства' %}
+        <li class="sidebar-brand">
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+
+  
+
+
+<div id='pagecontent'>
+   
+
+<div class="page-header">
+        <h2>Статистика</h2>
+    </div>
+<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+        <tr>
+            <th scope="col" style="width:10%">Участок</th>            
+            <th scope="col" style="width:25%" colspan="2"><div style="text-align: center">
+            
+		<!-- &machine_or_furnace_sign=false -->
+Оборудование
+
+
+</div></th>
+<th scope="col" style="width:15%">Расписание станка</th>
+{#			<th>Фото оборудования</th>#}
+			<th scope="col" style="width:10%" >Время работы</th>
+            <th scope="col" style="width:10%" >Время простоев</th>
+            <th scope="col" style="width:10%" >Время в ремонте</th>
+            <th scope="col" style="width:30%" >График</th>
+<!--            <th scope="col" style="width:15%">Состояние</th> -->
+        </tr>
+        </thead>
+        {% for x in objs %}				
+            <tr>
+                <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.equipment.area }}</a></td>
+
+                <td aria-label="Оборудование" >({{ x.equipment.code }}) {{ x.equipment.model }}</td>
+                <td aria-label="Фото оборудования">
+                
+		<div class="repair_img {% if x.equipment.is_limit %} limited {% endif %}">
+                    {% if x.equipment.image %}
+                        <img src="{{ x.equipment.image.url }}" height="75px">
+                    {% else %}
+                        <img src="{% static 'img/noimg.png'%}" width="100px">
+                    {% endif %}
+        </div>
+		</td> 
+        <td aria-label="Данные мониторинга" >
+                    
+                    {{ x.equipment.timetable }}
+                    </div>
+                </td>               
+                <td aria-label="Данные мониторинга" >
+                    
+                    {{ x.work }}
+                    </div>
+                </td>
+                </td>
+                <td aria-label="Данные мониторинга" >                	
+                    {{ x.crush }} 
+                    </div>
+                </td>
+                <td aria-label="Данные мониторинга" >
+                	{{ x.repair }}
+                    
+                    </div>
+                </td>
+                <td aria-label=""><div style="position:relative;height:45px;border-radius:10px;width:100%;display:table;background:gray;"class="gra" id="{{ x.equipment.id }}" data-work="{{ x.ep_work }}" data-crush="{{ x.ep_crush }}" data-repair="{{ x.ep_repair }}" data-all="{{ x.ep_all_sum }}"  >
+                    <div class="work" style="border-radius:5px 0 0 5px;height:45px;vertical-align: middle;position:relative;background:#07af07;display:inline-block;"></div>
+                    <div class="crush" style="height:45px;vertical-align: middle;position:relative;background:#ea0303;display:inline-block;"></div>
+                    <div class="repair" style="border-radius:0 5px 5px 0;height:45px;vertical-align: middle;position:relative;background:#ff8d17;display:inline-block;"></div>
+                </div>
+            </td>
+                
+                    
+                
+
+          </tr>
+        {% endfor %}
+
+    </table>
+    <script type="text/javascript">
+
+
+// Copy & Paste this
+Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
+if(!Date.now) Date.now = function() { return new Date(); }
+Date.time = function() { return Date.now().getUnixTime(); }
+
+//str.replace(replacement, toReplace);
+
+        function time(x){ return new Date().getUnixTime(x) ;}
+        
+       $(document).ready(function () {
+       $( ".gra" ).each(function( index ){
+
+        /*var work = Math.floor(new Date().getTime($(this).data('work')) ),
+        crush = Math.floor(new Date().getTime($(this).data('crush')) ),
+        repair = Math.floor(new Date().getTime($(this).data('repair')) ),
+        all = work;*/
+
+        //   document.write(d.getMinutes() + ":" + d.getSeconds());
+
+        var work = parseInt($(this).data('work')),
+            crush = parseInt($(this).data('crush')),
+            repair = parseInt($(this).data('repair')),
+            all = work+crush+repair;
+
+        //all = Math.floor(new Date().getTime($(this).data('all')) );
+        
+//all = Math.floor(new Date().getTime($(this).data('all')) ),
+
+
+
+        work = work/all*100;
+        crush = crush/all*100;
+        repair = repair/all*100;
+        
+        $(this).find('.work').css('width',work+'%');
+        $(this).find('.crush').css('width',crush+'%');
+        $(this).find('.repair').css('width',repair+'%');
+       }); 
+   });
+    </script>
+</div>    
+{% endblock content %}
