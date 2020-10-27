@@ -12,3 +12,4 @@ machines/*.pyc
 celerybeat-schedule
 djangoenv/
 machines/strange_migrations/
+Monitor/media/images/machines/
