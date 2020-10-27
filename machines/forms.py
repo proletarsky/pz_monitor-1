@@ -2,7 +2,7 @@ from django import forms
 from django.forms import widgets
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
-from .models import Reason, ClassifiedInterval, Equipment, Repair_rawdata
+from .models import Reason, ClassifiedInterval, Equipment, Repair_rawdata,Area
 from django.utils import timezone
 from django.contrib.auth.models import User
 
@@ -69,5 +69,6 @@ class UserRegistrationForm(forms.ModelForm):
 class Repairform(forms.ModelForm):
     class Meta:
         model=Repair_rawdata
-        fields=('machines_id','repair_job_status','repair_reason','repair_comment')
+        fields=('machines_id','repair_job_status','repairer_master_reason','repair_reason','repair_comment')
+
 

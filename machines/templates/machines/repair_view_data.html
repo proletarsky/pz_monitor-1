@@ -18,14 +18,45 @@
 {% endblock sidebar %}
 
 {% block content %}
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script>
+
+   <!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script> -->
+<div class="form-wrapper">
+<form class="act-form" method="GET" action=".">	
+	 <div class="form-row">
+	 <label class="required" for="workshop">Участок:</label>
+     <select id="id_workshop" data-selected_id="{{ area_url_info.id }}">
+     {% for x in all_area  %}      
+      <option {% if area_url_info.id == x.id %} selected="selected" {% endif %}  value="{{x.id}}">{{x}}</option> 
+  	{% endfor %}
+  	</select>
+	 </div>	 
+	 <div class="form-row">
+	 <input id="sendform" type="submit" value="Применить">
+	 </div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	$(document).on('click','#sendform',function(e){
+		e.preventDefault();
+		var id_workshop = $('#id_workshop').val();
+		if(id_workshop!=0){
+			window.location = "/machines/repair_view_data/"+id_workshop;
+		}else{alert('Vibirite uchastok');}
+		
+	});
+
+</script>
+
     <div class="page-header">
         <h2>Неисправное оборудование</h2>
     </div>
 
 
 <div id='pagecontent'>
+
+	{% if crush_equipments %}
     <table class="table text-left" width="100%">
         <thead style=" text-align: center">
         <tr>
@@ -43,7 +74,9 @@
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
-        {% for x in crush_equipments %}				
+        
+        {% for x in crush_equipments %}		
+
             <tr>
                 <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.machines_id.area }}</a></td>
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
@@ -80,12 +113,20 @@
                 <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
             </tr>
         {% endfor %}
+  
 
     </table>
+
+
+        {% else %}
+
+        <h3>В данный момент нет неисправного оборудования</h3><br><br><br>
+        {% endif %}
 
 <div class="page-header">
         <h2>Оборудование в ремонте</h2>
     </div>
+    {% if repair_equipments %}
 <table class="table text-left" width="100%">
         <thead style=" text-align: center">
         <tr>
@@ -104,9 +145,10 @@
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
+        
         {% for x in repair_equipments %}				
             <tr>
-                <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.machines_id.area }}</a></td>
+                <td aria-label="Цех" ><a class="moreinfa" href="/machines/repair_view_data/{{area_url_info.id}}">{{ x.machines_id.area }}</a></td>
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
                 
@@ -119,8 +161,8 @@
         </div>
 		</td>
                 <td aria-label="Данные мониторинга" >
-                   {% if x.repair_reason %}
-                    {{ x.repair_reason }}  
+                   {% if x.repairer_master_reason %}
+                    {{ x.repairer_master_reason }}  
                     {% else %}
                         ПРИЧИНА НЕ УКАЗАНА
                     {% endif %}  
@@ -144,8 +186,13 @@
                 <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
             </tr>
         {% endfor %}
-
     </table>
-    
+
+{% else %}
+        <h3>В данный момент нет оборудования в ремонте</h3>
+
+        {% endif %}
+
+    </div>
 </div>    
 {% endblock content %}

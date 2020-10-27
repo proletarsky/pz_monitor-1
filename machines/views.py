@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics,Repairer_master_reason
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -370,16 +370,20 @@ def repair_equipment(request,workshop_numb,area_numb):
                     return JsonResponse(message)
                 if action=='add_comment':
                     new_comment = request.POST.get('comment')
+                    m_reason_id = request.POST.get('mreason')
                     equip=Repair_rawdata.objects.filter(machines_id_id=machines_id,repair_job_status=2).order_by('-date')[0:1:1]
                     actual_comment=equip[0].repair_comment
                     now = datetime.datetime.now()
                     now=now.strftime("%d-%m-%Y %H:%M")
-                    if actual_comment:
-                        equip[0].repair_comment=actual_comment+'\n'+now+' '+new_comment
-                        equip[0].save()
-                    else:
-                        equip[0].repair_comment=now+' '+new_comment+' '
-                        equip[0].save()
+                    if new_comment:
+                        if actual_comment:
+                            equip[0].repair_comment=actual_comment+'\n'+now+' '+new_comment
+                        else:
+                            equip[0].repair_comment=now+' '+new_comment+' '
+                    if m_reason_id:
+                        m_reason=Repairer_master_reason.objects.get(id=int(m_reason_id))
+                        equip[0].repairer_master_reason = m_reason
+                    equip[0].save()
                     message = {'response' : '1' }
                     return JsonResponse(message)
                 if action=='get_all_info':
@@ -420,18 +424,20 @@ def complex_equipments(request,complex_id):
 
 
 
-def repair_view_data(request):
-    need_id=Equipment.objects.filter(is_in_repair=True,area__id=2,repair_job_status=1)
+def repair_view_data(request,area_id):
+    all_area = Area.objects.all()
+    area_url_info = Area.objects.get(id=area_id)
+    need_id=Equipment.objects.filter(is_in_repair=True,area__id=area_id,repair_job_status=1)
     crush_equipments=[]
     for x in need_id:
         a=Repair_rawdata.objects.filter(repair_job_status=1,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
         crush_equipments.extend(a)
-    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id=2,repair_job_status=2)
+    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id=area_id,repair_job_status=2)
     repair_equipments=[]
     for x in need_id_rep:
         a=Repair_rawdata.objects.filter(repair_job_status=2,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
         repair_equipments.extend(a)
-    context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments}
+    context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'all_area':all_area,'area_url_info':area_url_info}
     return render(request,'machines/repair_view_data.html',context)
 
 def repair_statistics(request):

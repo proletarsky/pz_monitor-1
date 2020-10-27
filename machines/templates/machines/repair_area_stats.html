@@ -116,9 +116,13 @@ if (document.referrer == "") {
     <div class="mclose"></div>
   </div>
   <div class="modalblock-content row" >  
+    <div id="add-master_reason" style="display: block;">
+    <p><span>Выбрать причину поломки</span></p>  
+     {{ form.repairer_master_reason }}
+    </div>
     <div id="add-comment" style="display: block;">
         <p><span>Добавить комментарий</span><i class="info">(заполняется ремонтником)</i></p>        
-        <textarea id="comment"></textarea>
+        <textarea id="comment" placeholder="Введите комментарий"></textarea>
         <div class="row">
         <button id="addcom" type="submit" class="save btn btn-default" >Добавить</button> 
     </div>
@@ -303,7 +307,6 @@ setInterval(function(){
 
 
 var crushreason = false;
-
 /*$('#page-content-wrapper').addClass('h100');*/
 $('.container-fluid').css('display','table-cell');
 $('.equip').addClass('equip'+{{ del_result }} );
@@ -399,11 +402,22 @@ $(document).on('click','button#addcom',function(e){
     e.preventDefault();
     console.log('click');
     var form = document.getElementById("set_status_form"),
-    fd = new FormData(form), aurl = "?action=add_comment",com = $('#comment').val();
-        if (com != "") {
-            fd.append('comment',com);            
-        }else{alert('VVEDITE KOMMENTARI');return false;}
-    
+    fd = new FormData(form), aurl = "?action=add_comment",com = $('#comment').val(),mreason = $('#id_repairer_master_reason').val();
+        if (com != "" || mreason!="" ){
+            //if(com == ''){com=null;}
+            fd.append('comment',com);
+            fd.append('mreason',mreason);
+        }
+    /*    else{
+    $('.infomessage').text("Заполните поле 'Комментарий' !");
+    $('.infomessage').addClass('red');
+    $('.infobox').fadeIn();    
+    $('#info-box').css('display','table');
+   setTimeout(function() {
+     $('#info-box').fadeOut(400);}, 2000);
+            return false;
+        }
+    */
 
 $.ajax({
         url: aurl,
@@ -415,16 +429,28 @@ $.ajax({
         success: function (data) {
             //console.log(data);
             
-
-    $('.infomessage').text('Комментарий успешно добавлен!');
+    $('#comment').val('');
+    $('#id_repairer_master_reason').val('');
+    var returntext='Данные не были указаны!';
+    if(com != "" && mreason==""){
+    returntext = 'Комментарий успешно добавлен!';
+    }
+    if(com == "" && mreason!=""){
+    returntext = 'Причина успешно указана!';
+    }
+    if(com != "" && mreason!=""){
+    returntext = 'Данные успешно добавлены!';
+    }
+    $('.infomessage').text(returntext);
+    $('.infomessage').removeClass('red');
     $('.infobox').fadeIn();
     //$('#info-box').show("fade", {}, 200);
     $('#info-box').css('display','table');
    setTimeout(function() {
      $('#info-box').fadeOut(400);}, 2000);
-        }
+        }    
     });
-
+$(".mclose").click();
         //e.preventDefault();
         /*if( !$("#id_repairer_id").val() ){
             $('#id_repairer_id').parent('p').find('span').css('color','red');
@@ -445,8 +471,10 @@ getting_info = true;
 modal.css('display','block');
 $("input[name='machines_id']:hidden").val(eqid);
 $('button#savebtn').css('display','block');
+// Смена контента модального окна
 if(eqstat==1){
     //$('#id_repairer_id').css('display','inline-block');
+    $('#add-master_reason').css('display','none');
     $('#add-comment').css('display','none');
     $('#text-status').text('Взять выбранное оборудование на ремонт?');
     $('#text-status').css('display','block');
@@ -457,6 +485,7 @@ $('#crush-reason').css('display','block');
 }else{
     //$('#id_repairer_id').css('display','none');
     //$('#id_repairer_id').parent('p').find('span').css('color','#000');
+    $('#add-master_reason').css('display','block');
     $('#add-comment').css('display','block');
     $('#text-status').text('Оборудование отремонтировано?');
     $('#text-status').css('display','block');

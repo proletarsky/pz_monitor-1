@@ -1,7 +1,7 @@
 import django_filters
 from django import forms
 from django.db import models
-from .models import Equipment, Reason, ClassifiedInterval
+from .models import Equipment, Reason, ClassifiedInterval,Area
 
 
 class EquipmentFilter(django_filters.FilterSet):
@@ -16,6 +16,8 @@ class EquipmentFilter(django_filters.FilterSet):
         ]
         
         attrs = {'class': 'sr-only'}
+
+
 
 
 # for a perspective

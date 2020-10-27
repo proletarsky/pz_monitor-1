@@ -277,10 +277,15 @@ class Equipment(models.Model):
             return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
 
 
+class Repairer_master_reason(models.Model):
+    name = models.CharField(max_length=100,verbose_name='Наименование')
+    description = models.TextField(verbose_name='Описание')
+    def __str__(self):
+        return self.name
+
 class Repair_reason(models.Model):
     name = models.CharField(max_length=100,verbose_name='Наименование')
     description = models.TextField(verbose_name='Описание')
-    is_machines_operator_reason = models.BooleanField(verbose_name='Причина указывается оператором станка',blank=True,null=True)
     def __str__(self):
         return self.name
 
@@ -296,7 +301,8 @@ class Repair_rawdata(models.Model):
     )
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
     repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
-    repair_reason = models.ForeignKey('Repair_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL)
+    repairer_master_reason = models.ForeignKey('Repairer_master_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
+    repair_reason = models.ForeignKey('Repair_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
     repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True,default=None)
 
     def __str__(self):
