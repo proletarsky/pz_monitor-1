@@ -30,6 +30,7 @@ from .forms import UserRegistrationForm, Repairform
 from django.shortcuts import redirect
 #FOR JSON RESPONSE!!!
 from django.http import JsonResponse
+from .de_facto_time_interval import get_de_facto_time,chill_days
 
 @permission_classes([permissions.AllowAny])
 class RawDataUploadView(APIView):
@@ -441,21 +442,78 @@ def repair_view_data(request,area_id):
     return render(request,'machines/repair_view_data.html',context)
 
 def repair_statistics(request):
-    sql_query = Repair_statistics.objects.raw('''select 
-                                                    1 as id, equipment_id,
-                                                    sum(case when repair_job_status=0 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as work,
-                                                    sum(case  when repair_job_status=1 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as crush ,
-                                                    sum(case when repair_job_status=2 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end) as repair,
-                                                    extract (epoch from(sum(case when repair_job_status=0 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_work,
-                                                    extract (epoch from(sum(case when repair_job_status=1 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_crush,
-                                                    extract (epoch from(sum(case when repair_job_status=2 then coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start end))) as ep_repair,
-                                                    extract (epoch from(sum(coalesce(machines_repair_statistics.end,current_timestamp)-machines_repair_statistics.start))) as all_sum 
-                                                        from machines_repair_statistics
-                                                        group by equipment_id''')
+    area_id_param = request.GET['area_id_param']
+    start_interval=request.GET['start_interval']
+    end_interval=request.GET['end_interval']
+    bool_limit=request.GET['bool_limit']
 
-    context={'objs':sql_query}
-    #context={'lol':'lol'}
-    return render(request,'machines/repair_statistics.html',context)
+    # area_id_param = (2,4,5,)
+    # start_interval = '2020-10-25'
+    # end_interval = '2025-10-31'
+    # bool_limit = (False,)
+
+    if area_id_param == None:
+        area_id_param = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+    if start_interval == None:
+        start_interval = '2020-10-31'
+    if end_interval == None:
+        end_interval = '2025-10-31'
+    if bool_limit == None:
+        bool_limit == (True,False)
+
+    equip_id=Equipment.objects.filter(is_in_repair=True)
+    for x in equip_id:
+        if x.timetable=='8/5':
+            stats = Repair_statistics.objects.filter(equipment__id=x.id).order_by('-id')
+            if stats:
+                if len(stats)>1:
+                    b=stats[0]
+                    b.de_facto=get_de_facto_time(b.start_date,datetime.datetime.now().date(),b.start_time,datetime.datetime.now().time())
+                    b.save()
+                    for y in range(1,len(stats),1):
+                        a = stats[y]
+                        a.de_facto=get_de_facto_time(a.start_date,a.end_date,a.start_time,a.end_time)
+                        a.save()
+                elif len(stats)==1:
+                    a=stats[0]
+                    a.de_facto=get_de_facto_time(a.start_date,datetime.datetime.now().date(),a.start_time,datetime.datetime.now().time())
+                    a.save()
+            else:
+                continue
+        elif x.timetable=='24/7':
+            stats = Repair_statistics.objects.filter(equipment__id=x.id).order_by('-id')
+            if stats:
+                if len(stats)>1:
+                    b=stats[0]
+                    b.de_facto=datetime.datetime.now()-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                    b.save()
+                    for y in range(1,len(stats),1):
+                        a=stats[y]
+                        a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day=a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute)- datetime.datetime(year=a.start_date.year,month=a.start_date.month,day=a.start_date.day,hour=a.start_time.hour,minute=a.start_time.minute)
+                        a.save()
+                elif len(stats)==1:
+                    b=stats[0]
+                    b.de_facto=datetime.datetime.now()-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                    b.save()
+            else:
+                continue
+
+    sql_query = Repair_statistics.objects.raw('''select
+                                                    1 as id,equipment_id,
+                                                    sum(case when a.repair_job_status=0 then de_facto end) as work,
+                                                    sum(case when a.repair_job_status=1 then de_facto end) as crush,
+                                                    sum(case when a.repair_job_status=2 then de_facto end) as repair
+                                                    from machines_repair_statistics a
+                                                    join machines_equipment b on a.equipment_id=b.id
+                                                    where b.area_id in %(area_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<%(end_interval)s
+                                                    and b.is_limit in %(bool_limit)s				
+                                                    group by equipment_id 
+                                                     ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+    context={'sql_query':sql_query}
+    return render(request,'machines/test_days.html',context)
+
+
+
 
 def main_repairer(request):
     context={'a':123}

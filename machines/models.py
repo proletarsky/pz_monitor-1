@@ -227,8 +227,6 @@ class Equipment(models.Model):
     
     TIMETABLE_CHOICES = (
         ('8/5', '8 часов с выходными'),
-        ('12/5', '12 часов с выходными'),
-        ('24/5', 'круглосуточно с выходными'),
         ('24/7', 'круглосуточно без выходных'),
     )
     AVAILABLE_MACS = lambda: [(m.mac_address, m.mac_address)
@@ -263,7 +261,7 @@ class Equipment(models.Model):
         (1,'Сломан, необходим ремонт'),
         (2,'В ремонте'),
     )
-    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=2)
     red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
     in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
     is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
@@ -330,8 +328,11 @@ class Repair_statistics(models.Model):
         (1,'Сломан, необходим ремонт'),
         (2,'В ремонте'),)
     equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE)
-    start = models.DateTimeField(verbose_name='Начало периода',blank=True,null=True)
-    end = models.DateTimeField(verbose_name='Конец периода',blank=True,null=True)
+    start_date = models.DateField(verbose_name='Дата начала периода',blank=True,null=True)
+    end_date = models.DateField(verbose_name='Дата конца периода',blank=True,null=True)
+    start_time = models.TimeField(verbose_name='Время начала периода',blank=True,null=True)
+    end_time = models.TimeField(verbose_name='Время конца периода',blank=True,null=True)
+    de_facto = models.DurationField(verbose_name='Время работы с учетом расписания',blank=True,null=True)
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования',choices=JOB_STATUSES,null=True,blank=True)
 
 

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	{% for x in sql_query %}
+	ОБОРУДОВАНИЕ {{ x.equipment }}
+	<br>
+	РАСПИСАНИЕ {{ x.equipment.timetable }}
+	<br>
+	ВРЕМЯ В РАБОТЕ {{ x.work }}
+	<br>
+	ВРЕМЯ В ПРОСТОЕ {{ x.crush }}
+	<br>
+	ВРЕМЯ В РЕМОНТЕ {{ x.repair }}
+	<br>
+	{% endfor %}
+</body>
+</html>
