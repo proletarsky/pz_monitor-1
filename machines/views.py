@@ -396,7 +396,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                     #message = {'equipments' : [1234],1234]}
                     return JsonResponse(message)
                 #return JsonResponse(message)
-                return JsonResponse({'sosi':'pisos'})
+                return JsonResponse({'test_pss':'test_pss'})
             else:
                 return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
