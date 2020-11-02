@@ -49,6 +49,7 @@ def get_de_facto_time(start_date, end_date, start_time, end_time):
             de_facto_days = ((work_end - datetime.timedelta(hours=start_time.hour, minutes=start_time.minute)) + \
                              (datetime.timedelta(hours=end_time.hour, minutes=end_time.minute) - \
                               work_start)) // datetime.timedelta(hours=9, minutes=0)
+            if de_facto_days<0:de_facto_days=0
             # Часы с минутами
             de_facto_ours = ((work_end - datetime.timedelta(hours=start_time.hour, minutes=start_time.minute)) + \
                              (datetime.timedelta(hours=end_time.hour,
@@ -69,6 +70,7 @@ def get_de_facto_time(start_date, end_date, start_time, end_time):
                              (work_end - datetime.timedelta(hours=start_time.hour, minutes=start_time.minute)) + \
                              (datetime.timedelta(hours=end_time.hour, minutes=end_time.minute) - \
                               work_start)) // datetime.timedelta(hours=9, minutes=0)
+            if de_facto_days<0:de_facto_days=0
             de_facto_ours = (datetime.timedelta(hours=hour_count, minutes=0) + \
                              (work_end - datetime.timedelta(hours=start_time.hour, minutes=start_time.minute)) + \
                              (datetime.timedelta(hours=end_time.hour, minutes=end_time.minute) - \

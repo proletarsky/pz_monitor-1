@@ -5,6 +5,8 @@
 {% load has_group %}
 
 {% block sidebar %}
+<script type="text/javascript" src="{% static 'js/repair_statistics.js' %}"></script>
+
     {% if user.is_superuser %}
         <li class="sidebar-brand">
             <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
@@ -28,6 +30,51 @@
 <div class="page-header">
         <h2>Статистика</h2>
     </div>
+
+<div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
+     <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{area_id_param}}" data-bool="{{bool_limit}}" >
+     <div class="form-row">
+     <label class="required" for="workshop">Участок:</label>
+<select name="area_id_param" id="area_id_param" data-selected_id="2">
+{% for y in all_area %}                
+                    <option value="{{ y.id }}">{{ y }}</option>
+                {% endfor %}
+</select>
+</div>
+<div class="form-row">
+<!-- <ul class=" navbar-nav navbar-left" style="width: 100%;"> -->
+                {{ filter.form | bootstrap_inline }}
+
+    
+           
+    <!--  <option selected="selected" value="2">Участок №5 (лопаточный) цеха №7</option>  -->
+    
+    
+     </div> 
+
+<div class="form-group">
+    
+        <div class="">
+            <div class="checkbox">
+                
+                    <label>
+                        <input type="checkbox" name="bool_limit" id="id_empty_only" value="True"> <span>ЛИМИТИРУЮЩЕЕ</span>
+                    </label>
+                
+                
+
+                
+            </div>
+        </div>
+    
+</div>
+
+     <div class="form-row">
+     <input id="sendform" type="submit" value="Применить">
+     </div>
+    </form>
+</div>
+
 <table class="table text-left" width="100%">
         <thead style=" text-align: center">
         <tr>
@@ -48,7 +95,7 @@
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
         </tr>
         </thead>
-        {% for x in objs %}				
+        {% for x in sql_query %}				
             <tr>
                 <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.equipment.area }}</a></td>
 

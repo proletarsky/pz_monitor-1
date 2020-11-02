@@ -20,7 +20,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .parsers import CoordinatorDataParser
-from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter
+from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter,calendar_repair
 from django.utils import timezone
 import re, datetime
 from .helpers import prepare_data_for_google_charts_bar, get_ci_data_timeline
@@ -442,24 +442,35 @@ def repair_view_data(request,area_id):
     return render(request,'machines/repair_view_data.html',context)
 
 def repair_statistics(request):
-    area_id_param = request.GET['area_id_param']
-    start_interval=request.GET['start_interval']
-    end_interval=request.GET['end_interval']
-    bool_limit=request.GET['bool_limit']
+    all_area = Area.objects.all()
 
-    # area_id_param = (2,4,5,)
+    area_id_param = tuple(x for x in range(0,20,1))
+    start_interval = '2020-10-25'
+    now =datetime.datetime.now().date()
+    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>2 else '0'+str(now.day))
+    bool_limit = (False,True)
+    if request.GET.get('area_id_param'):
+        area_id_param = request.GET.get('area_id_param'),
+    if request.GET.get('start_date'):
+        start_interval=request.GET.get('start_date')
+    if request.GET.get('end_date'):
+        end_interval=request.GET.get('end_date')
+    if request.GET.get('bool_limit'):
+        bool_limit=bool(request.GET.get('bool_limit')),
+
+    # area_id_param = (2,4,5,6)
     # start_interval = '2020-10-25'
     # end_interval = '2025-10-31'
-    # bool_limit = (False,)
+    # bool_limit = (False,True)
 
-    if area_id_param == None:
-        area_id_param = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
-    if start_interval == None:
-        start_interval = '2020-10-31'
-    if end_interval == None:
-        end_interval = '2025-10-31'
-    if bool_limit == None:
-        bool_limit == (True,False)
+    # if not  area_id_param:
+    #     area_id_param = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+    # if not start_interval:
+    #     start_interval = '2020-10-31'
+    # if not end_interval:
+    #     end_interval = '2025-10-31'
+    # if  bool_limit == None:
+    #     bool_limit = (True,False)
 
     equip_id=Equipment.objects.filter(is_in_repair=True)
     for x in equip_id:
@@ -502,15 +513,21 @@ def repair_statistics(request):
                                                     1 as id,equipment_id,
                                                     sum(case when a.repair_job_status=0 then de_facto end) as work,
                                                     sum(case when a.repair_job_status=1 then de_facto end) as crush,
-                                                    sum(case when a.repair_job_status=2 then de_facto end) as repair
+                                                    sum(case when a.repair_job_status=2 then de_facto end) as repair,
+                                                    extract (epoch from(sum(case when a.repair_job_status=0 then de_facto end))) as ep_work,
+                                                    extract (epoch from(sum(case when a.repair_job_status=1 then de_facto end))) as ep_crush,
+                                                    extract (epoch from(sum(case when a.repair_job_status=2 then de_facto end))) as ep_repair
                                                     from machines_repair_statistics a
                                                     join machines_equipment b on a.equipment_id=b.id
-                                                    where b.area_id in %(area_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<%(end_interval)s
+                                                    where b.area_id in %(area_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<=%(end_interval)s
                                                     and b.is_limit in %(bool_limit)s				
                                                     group by equipment_id 
                                                      ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
-    context={'sql_query':sql_query}
-    return render(request,'machines/test_days.html',context)
+    
+    filter = calendar_repair(0,queryset=Equipment.objects.all())#queryset=ClassifiedInterval.objects.all())
+    context={'sql_query':sql_query,'all_area':all_area,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+
+    return render(request,'machines/repair_statistics.html',context)
 
 
 
