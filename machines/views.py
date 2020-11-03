@@ -449,6 +449,7 @@ def repair_statistics(request):
     now =datetime.datetime.now().date()
     end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>2 else '0'+str(now.day))
     bool_limit = (False,True)
+
     if request.GET.get('area_id_param'):
         area_id_param = request.GET.get('area_id_param'),
     if request.GET.get('start_date'):
@@ -457,20 +458,6 @@ def repair_statistics(request):
         end_interval=request.GET.get('end_date')
     if request.GET.get('bool_limit'):
         bool_limit=bool(request.GET.get('bool_limit')),
-
-    # area_id_param = (2,4,5,6)
-    # start_interval = '2020-10-25'
-    # end_interval = '2025-10-31'
-    # bool_limit = (False,True)
-
-    # if not  area_id_param:
-    #     area_id_param = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
-    # if not start_interval:
-    #     start_interval = '2020-10-31'
-    # if not end_interval:
-    #     end_interval = '2025-10-31'
-    # if  bool_limit == None:
-    #     bool_limit = (True,False)
 
     equip_id=Equipment.objects.filter(is_in_repair=True)
     for x in equip_id:
@@ -493,10 +480,11 @@ def repair_statistics(request):
                 continue
         elif x.timetable=='24/7':
             stats = Repair_statistics.objects.filter(equipment__id=x.id).order_by('-id')
+            now = datetime.datetime.now()
             if stats:
                 if len(stats)>1:
                     b=stats[0]
-                    b.de_facto=datetime.datetime.now()-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                    b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
                     b.save()
                     for y in range(1,len(stats),1):
                         a=stats[y]
@@ -504,19 +492,19 @@ def repair_statistics(request):
                         a.save()
                 elif len(stats)==1:
                     b=stats[0]
-                    b.de_facto=datetime.datetime.now()-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                    b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
                     b.save()
             else:
                 continue
 
     sql_query = Repair_statistics.objects.raw('''select
                                                     1 as id,equipment_id,
-                                                    sum(case when a.repair_job_status=0 then de_facto end) as work,
-                                                    sum(case when a.repair_job_status=1 then de_facto end) as crush,
-                                                    sum(case when a.repair_job_status=2 then de_facto end) as repair,
-                                                    extract (epoch from(sum(case when a.repair_job_status=0 then de_facto end))) as ep_work,
-                                                    extract (epoch from(sum(case when a.repair_job_status=1 then de_facto end))) as ep_crush,
-                                                    extract (epoch from(sum(case when a.repair_job_status=2 then de_facto end))) as ep_repair
+                                                    coalesce(sum(case when a.repair_job_status=0 then de_facto end),'0:00:00') as work,
+                                                    coalesce(sum(case when a.repair_job_status=1 then de_facto end),'0:00:00') as crush,
+                                                    coalesce(sum(case when a.repair_job_status=2 then de_facto end),'0:00:00') as repair,
+                                                    extract (epoch from(coalesce(sum(case when a.repair_job_status=0 then de_facto end),'0:00:00')))as ep_work,
+                                                    extract (epoch from(coalesce(sum(case when a.repair_job_status=1 then de_facto end),'0:00:00'))) as ep_crush,
+                                                    extract (epoch from(coalesce(sum(case when a.repair_job_status=2 then de_facto end),'0:00:00'))) as ep_repair
                                                     from machines_repair_statistics a
                                                     join machines_equipment b on a.equipment_id=b.id
                                                     where b.area_id in %(area_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<=%(end_interval)s
