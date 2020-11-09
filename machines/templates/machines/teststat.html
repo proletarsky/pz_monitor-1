@@ -5,8 +5,18 @@
 </head>
 <body>
 
-{% for x in repair_equipments %}
-{{ x.repair_rawdata }}
+
+{% for x in sql_crush_equipment %}
+{{ x.machines_id }}
+{{ x.count }}
+<br>
 {% endfor %}
+
+{% for y in sql_reason_stat %}
+{{ y.repairer_master_reason }}
+{{ y.count }}
+<br>
+{% endfor %}
+
 </body>
 </html>
