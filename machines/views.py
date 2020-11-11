@@ -342,6 +342,12 @@ class StatisticsView(ListView):
 
 def repair_equipment(request,workshop_numb,area_numb):
     equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('id')
+    reasons_and_comments = {}
+    for x in equipments:
+        if x.repair_job_status==2 and Repair_rawdata.objects.filter(machines_id=x.id,repair_job_status=x.repair_job_status):
+            obj=Repair_rawdata.objects.filter(machines_id=x.id,repair_job_status=x.repair_job_status).order_by('-id')[0:1:1][0]
+            if obj:
+                reasons_and_comments[obj.machines_id.id]=[obj.repairer_master_reason,obj.repair_comment]
     lenght=len(equipments)
     del_result=(lenght//10)+1
     if (del_result > 1 and lenght%10>6) or lenght==26:
@@ -385,7 +391,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                         m_reason=Repairer_master_reason.objects.get(id=int(m_reason_id))
                         equip[0].repairer_master_reason = m_reason
                     equip[0].save()
-                    message = {'response' : '1' }
+                    message = {'response' : '1' , 'newmessage': '\n'+now+' '+new_comment }
                     return JsonResponse(message)
                 if action=='get_all_info':
                     equip_info=[]                   
@@ -401,7 +407,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                 return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
         form = Repairform()    
-    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result})
+    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result,'reasons_and_comments':reasons_and_comments})
 
 
 def all_complexes(request):
@@ -438,7 +444,37 @@ def repair_view_data(request,area_id):
     for x in need_id_rep:
         a=Repair_rawdata.objects.filter(repair_job_status=2,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
         repair_equipments.extend(a)
-    context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'all_area':all_area,'area_url_info':area_url_info}
+    #context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'all_area':all_area,'area_url_info':area_url_info}
+    if request.method == "POST":
+        form = Repairform(request.POST)
+        action = request.GET['action']  
+        str_id = request.POST['id']
+        if form.is_valid():
+            if request.is_ajax(): 
+                if action=='add_comment':
+                    new_comment = request.POST.get('comment')
+                    m_reason_id = request.POST.get('mreason')
+                    equip=Repair_rawdata.objects.get(id=str_id)
+                    actual_comment=equip.repair_comment
+                    now = datetime.datetime.now()
+                    now=now.strftime("%d-%m-%Y %H:%M")
+                    if new_comment:
+                        if actual_comment:
+                            equip.repair_comment=actual_comment+'\n'+now+' '+new_comment
+                        else:
+                            equip.repair_comment=now+' '+new_comment+' '
+                    if m_reason_id:
+                        m_reason=Repairer_master_reason.objects.get(id=int(m_reason_id))
+                        equip.repairer_master_reason = m_reason
+                    equip.save()
+                    message = {'response' : '1','newmessage': '\n'+now+' '+new_comment  }
+                    return JsonResponse(message)
+                return JsonResponse({'test_pss':'test_pss'})
+            else:
+                return redirect('repair_view_data', area_id=area_id)
+    else:
+        form = Repairform()  
+    context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'form':form,'all_area':all_area,'area_url_info':area_url_info}
     return render(request,'machines/repair_view_data.html',context)
 
 
@@ -448,7 +484,7 @@ def repair_statistics(request):
     area_id_param = tuple(x for x in range(0,20,1))
     start_interval = '2020-10-25'
     now =datetime.datetime.now().date()
-    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>2 else '0'+str(now.day))
+    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
@@ -526,7 +562,7 @@ def repair_statistics_diagram(request):
     area_id_param = tuple(x for x in range(0,20,1))
     start_interval = '2020-05-25'
     now =datetime.datetime.now().date()
-    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>2 else '0'+str(now.day))
+    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
@@ -558,9 +594,9 @@ def repair_statistics_diagram(request):
                                                     group by a.repairer_master_reason_id''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context = {'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
-    return render(request,'machines/teststat.html',context)
+    return render(request,'machines/teststatnew.html',context)
 
 
 

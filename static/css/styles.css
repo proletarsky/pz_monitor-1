@@ -123,13 +123,14 @@ hr{border-top:2px solid black;}
        padding:5.5px 0;
         font-size:11px;
          }
-#comment{
+#comment,#all-comments{
     width: 100%;
     height: 82px;
      resize: none;
      padding:10px;
      margin-bottom: 20px;
 }
+#all-comments{ overflow-y: auto; background:transparent; border:none;}
 #addcom{margin:0 0 20px;}
 #text-status{border-top:2px solid black;}
 /*End in work*/
@@ -149,6 +150,25 @@ hr{border-top:2px solid black;}
     letter-spacing: 0.8px;
     font-size: 20px;
 }
+
+.green-block,.red-block,.orange-block{
+  position: relative;
+    padding: 0 20px;
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+.green-block i,.red-block i,.orange-block i{
+    width: 15px;
+    height: 15px;
+    background: red;
+    position: absolute;
+    left: 0;
+    top: 2.5px;
+}
+.green-block i{background: green;}
+.red-block i{background: red;}
+.orange-block i{background: orange;}
 .reason-block{
       display: inline-block;
     width: 50%;

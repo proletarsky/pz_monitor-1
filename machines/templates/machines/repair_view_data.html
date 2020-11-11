@@ -19,6 +19,41 @@
 
 {% block content %}
 
+         <div class="modal" style="display:none" >
+ <div class="modalblock fix-w" >
+  <div class="modalblock-header" >
+    <div class="modal-title">Изменение статуса</div>
+    <div class="mclose"></div>
+  </div>
+  <div class="modalblock-content row" >  
+
+    <div id="add-master_reason" style="display: block;">
+    <p><span>Выбрать причину поломки</span></p>  
+     {{ form.repairer_master_reason }}
+    </div>
+
+    <div id="add-comment" style="display: block;">
+        <p><span>Добавить комментарий</span></p>        
+        <textarea id="comment" placeholder="Введите комментарий"></textarea>
+    
+    </div>
+    <div class="row">
+        <button id="addcom" type="submit" class="save btn btn-default" >Добавить</button> 
+    </div>
+
+    <form id="set_status_form" method="POST" class="post-form" >{% csrf_token %}
+        {{ form.machines_id.as_hidden }}
+        <input type="hidden" name="id" id="id" /> 
+        {{ form.repair_job_status.as_hidden }}    
+
+
+        <!--<button id="change-modal" type="submit" class="save btn btn-default" >Указать причину поломки</button>-->
+       
+    </form>  
+  </div>
+ </div>
+</div>
+
    <!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script> -->
 <div class="form-wrapper">
@@ -147,7 +182,7 @@
         </thead>
         
         {% for x in repair_equipments %}				
-            <tr>
+            <tr data-strid= {{ x.id }} >
                 <td aria-label="Цех" ><a class="moreinfa" href="/machines/repair_view_data/{{area_url_info.id}}">{{ x.machines_id.area }}</a></td>
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
@@ -162,10 +197,13 @@
 		</td>
                 <td aria-label="Данные мониторинга" >
                    {% if x.repairer_master_reason %}
-                    {{ x.repairer_master_reason }}  
-                    {% else %}
-                        ПРИЧИНА НЕ УКАЗАНА
+                    <span class="real-reason" >{{ x.repairer_master_reason }}  </span>
+                    <button type="submit" class="save btn btn-default addmreason" data-reasonid="{{ x.repairer_master_reason.id }} ">Выбрать причину</button> 
+                    {% else %}                    
+                        <span class="real-reason" > ПРИЧИНА НЕ УКАЗАНА </span>
+                        <button type="submit" class="save btn btn-default addmreason" data-reasonid="0" >Выбрать причину</button> 
                     {% endif %}  
+                    
                     </div>
                 </td>
                 </td>
@@ -174,13 +212,13 @@
                     
                     </div>
                 </td>
-                <td aria-label="Данные мониторинга" >
+                <td  class="all-coms" aria-label="Данные мониторинга" >
                 	{% if x.repair_comment %}
                 		{{ x.repair_comment|linebreaks }}   
                 	{% else %}
-                	КОММЕНТАРИЙ НЕ УКАЗАН
+                	<p>КОММЕНТАРИЙ НЕ УКАЗАН</p>
                 	{% endif %}          
-                    
+                    <button type="submit" class="save btn btn-default addcomment" >Добавить комментарий</button> 
                     </div>
                 </td>
                 <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
@@ -195,4 +233,103 @@
 
     </div>
 </div>    
+
+<script type="text/javascript">
+    var modal = $('.modal');
+    $(document).on('click','.mclose',function(){ 
+    getting_info = false;
+    getting_all_info = false;
+
+    $('#change-modal').text('Указать причину поломки');
+    $('#text-status').css('display','block');
+    crushreason = false;
+    modal.css('display','none');
+});
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        $('.mclose').click();
+    }
+});
+
+$(document).on('click','.addcomment',function(e){
+    e.preventDefault();
+    modal.css('display','block');
+    $('#id').val( $(this).parents('tr').data('strid') );
+    $('#add-master_reason').css('display','none');
+    $('#add-comment').css('display','block');
+    $("input[name='repair_job_status']:hidden").val(2);
+    $("#id_repairer_master_reason").val( $($(this).parents('tr').data('strid')+' .addmreason').data('reasonid')  );
+    //$("#id_repairer_master_reason").val(reasons_and_comments_array[eqid][0]);
+    //$("#all-comments").text(reasons_and_comments_array[eqid][1]);
+});
+
+
+$(document).on('click','.addmreason',function(e){
+    e.preventDefault();
+    reasonid = parseInt($(this).data('reasonid'));
+    $('#id').val( $(this).parents('tr').data('strid') );
+    console.log
+    modal.css('display','block');
+    $('#add-master_reason').css('display','block');
+    $('#add-comment').css('display','none');
+    $("input[name='repair_job_status']:hidden").val(2);
+    $("#id_repairer_master_reason").val(reasonid);
+    $("#comment").val('');
+    //$("#all-comments").text(reasons_and_comments_array[eqid][1]);
+});
+
+
+$(document).on('click','#addcom',function(e){ 
+    e.preventDefault();
+    console.log('click');
+    var form = document.getElementById("set_status_form"),
+    fd = new FormData(form), aurl = "?action=add_comment",
+    com = $('#comment').val(),
+    mreason = $('#id_repairer_master_reason').val();  
+        if (com != "" || mreason!="" ){
+            fd.append('comment',com);
+            fd.append('mreason',mreason);
+        }
+ 
+$.ajax({
+        url: aurl,
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+    $('#comment').val('');
+    $('#id_repairer_master_reason').val('');
+    var returntext='Данные не были указаны!';
+    if(com != "" && mreason==""){
+    returntext = 'Комментарий успешно добавлен!';
+    if($("tr[data-strid="+$('#id').val()+"] .all-coms p").text()=='КОММЕНТАРИЙ НЕ УКАЗАН'){
+    $("tr[data-strid="+$('#id').val()+"] .all-coms p").text('');
+    }
+    $("tr[data-strid="+$('#id').val()+"] .all-coms p").append(data.newmessage.replace(/\n/g, '<br/>'));
+    
+    }
+    if(com == "" && mreason!=""){
+    returntext = 'Причина успешно указана!';
+    $("tr[data-strid="+$('#id').val()+"] .real-reason").text($('#id_repairer_master_reason option[value='+mreason+']').text());
+    }
+    if(com != "" && mreason!=""){
+    returntext = 'Данные успешно добавлены!';
+    $("tr[data-strid="+$('#id').val()+"] .real-reason").text($('#id_repairer_master_reason option[value='+mreason+']').text());
+    }
+    $('.infomessage').text(returntext);
+    $('.infomessage').removeClass('red');
+    $('.infobox').fadeIn();
+    $('#info-box').css('display','table');
+   setTimeout(function() {
+     $('#info-box').fadeOut(400);}, 2000);
+        }    
+    });
+$(".mclose").click();
+        return false;
+});
+
+
+</script>
 {% endblock content %}

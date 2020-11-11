@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+{% load admin_urls %}
+{% load static %}
+{% load has_group %}
+
+{% block sidebar %}
+<script type="text/javascript" src="{% static 'js/repair_statistics.js' %}"></script>
+
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+	{% if request.user|has_group:'Руководитель производства' %}
+        <li class="sidebar-brand">
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+
+  
+
+
+<div id='pagecontent'>
+   
+
+<div class="page-header">
+
+    </div>
+
+<div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
+     <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{area_id_param}}" data-bool="{{bool_limit}}" >
+     <div class="form-row">
+     <label class="required" for="workshop">Участок:</label>
+<select name="area_id_param" id="area_id_param" data-selected_id="2">
+{% for y in all_area %}                
+                    <option value="{{ y.id }}">{{ y }}</option>
+                {% endfor %}
+</select>
+</div>
+<div class="form-row">
+<!-- <ul class=" navbar-nav navbar-left" style="width: 100%;"> -->
+                {{ filter.form | bootstrap_inline }}
+
+    
+           
+    <!--  <option selected="selected" value="2">Участок №5 (лопаточный) цеха №7</option>  -->
+    
+    
+     </div> 
+
+<div class="form-group">
+    
+        <div class="">
+            <div class="checkbox">
+                
+                    <label>
+                        <input type="checkbox" name="bool_limit" id="id_empty_only" value="True"> <span>ЛИМИТИРУЮЩЕЕ</span>
+                    </label>
+                
+                
+
+                
+            </div>
+        </div>
+    
+</div>
+
+     <div class="form-row">
+     <input id="sendform" type="submit" value="Применить">
+     </div>
+    </form>
+</div>
+
+
+<!-- Styles -->
+<style>
+#chartdiv,#chartdiv1 {
+  width: 100%;
+  height: 350px;
+}
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+<!-- Chart code -->
+<script>
+
+function new_line(x) {
+	return x.replace(/ /g,"\n");
+};
+
+am4core.ready(function() {
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("chartdiv", am4charts.XYChart);
+chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+chart.data = [
+
+{% for y in sql_reason_stat %}
+  {
+    country: {% if y.repairer_master_reason %} new_line("{{ y.repairer_master_reason }}") {% else%}  "ПРИЧИНА \n НЕ \n УКАЗАНА"  {% endif %}  ,
+    visits: {{ y.count }}
+  },
+  {% endfor %}
+
+];
+
+
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.renderer.grid.template.location = 0;
+categoryAxis.dataFields.category = "country";
+categoryAxis.renderer.minGridDistance = 40;
+categoryAxis.fontSize = 11;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.min = 0;
+valueAxis.max = {{ sql_all_count.count  }};
+valueAxis.strictMinMax = true;
+valueAxis.renderer.minGridDistance = 30;
+// axis break
+var axisBreak = valueAxis.axisBreaks.create();
+axisBreak.startValue = 2100;
+axisBreak.endValue = 22900;
+//axisBreak.breakSize = 0.005;
+
+// fixed axis break
+var d = (axisBreak.endValue - axisBreak.startValue) / (valueAxis.max - valueAxis.min);
+axisBreak.breakSize = 0.05 * (1 - d) / d; // 0.05 means that the break will take 5% of the total value axis height
+
+// make break expand on hover
+var hoverState = axisBreak.states.create("hover");
+hoverState.properties.breakSize = 1;
+hoverState.properties.opacity = 0.1;
+hoverState.transitionDuration = 1500;
+
+axisBreak.defaultState.transitionDuration = 1000;
+
+var series = chart.series.push(new am4charts.ColumnSeries());
+series.dataFields.categoryX = "country";
+series.dataFields.valueY = "visits";
+series.columns.template.tooltipText = "{valueY.value}";
+series.columns.template.tooltipY = 0;
+series.columns.template.strokeOpacity = 0;
+
+series.columns.template.adapter.add("fill", function(fill, target) {
+  return chart.colors.getIndex(target.dataItem.index);
+});
+
+
+
+/////////////////////
+
+
+
+
+
+
+var chart1 = am4core.create("chartdiv1", am4charts.XYChart);
+chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+chart1.data = [
+
+{% for x in sql_crush_equipment  %}
+  {
+    country: {% if x.machines_id %} new_line("{{ x.machines_id }}") {% endif %} ,
+    visits: {{ x.count }}
+  },
+  {% endfor %}
+
+];
+
+
+var categoryAxis = chart1.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.renderer.grid.template.location = 0;
+categoryAxis.dataFields.category = "country";
+categoryAxis.renderer.minGridDistance = 40;
+categoryAxis.fontSize = 11;
+
+var valueAxis = chart1.yAxes.push(new am4charts.ValueAxis());
+valueAxis.min = 0;
+valueAxis.max = 5;
+valueAxis.strictMinMax = true;
+valueAxis.renderer.minGridDistance = 30;
+// axis break
+var axisBreak = valueAxis.axisBreaks.create();
+axisBreak.startValue = 2100;
+axisBreak.endValue = 22900;
+//axisBreak.breakSize = 0.005;
+
+// fixed axis break
+var d = (axisBreak.endValue - axisBreak.startValue) / (valueAxis.max - valueAxis.min);
+axisBreak.breakSize = 0.05 * (1 - d) / d; // 0.05 means that the break will take 5% of the total value axis height
+
+// make break expand on hover
+var hoverState = axisBreak.states.create("hover");
+hoverState.properties.breakSize = 1;
+hoverState.properties.opacity = 0.1;
+hoverState.transitionDuration = 1500;
+
+axisBreak.defaultState.transitionDuration = 1000;
+
+var series = chart1.series.push(new am4charts.ColumnSeries());
+series.dataFields.categoryX = "country";
+series.dataFields.valueY = "visits";
+series.columns.template.tooltipText = "{valueY.value}";
+series.columns.template.tooltipY = 0;
+series.columns.template.strokeOpacity = 0;
+
+series.columns.template.adapter.add("fill", function(fill, target) {
+  return chart1.colors.getIndex(target.dataItem.index);
+});
+
+
+
+
+
+
+
+
+
+///////////////////
+
+}); // end am4core.ready()
+</script>
+
+<!-- HTML -->
+<h2>Причины неисправностей</h2>
+<div id="chartdiv"></div>
+<h2>Количество поломок за выбранный период</h2>
+<div id="chartdiv1"></div>
+<!--
+
+{% for y in sql_reason_stat %}
+{{ y.repairer_master_reason }}
+{{ y.count }}
+{% endfor %}
+-->
+
+    <script type="text/javascript">
+
+
+// Copy & Paste this
+Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
+if(!Date.now) Date.now = function() { return new Date(); }
+Date.time = function() { return Date.now().getUnixTime(); }
+
+//str.replace(replacement, toReplace);
+
+        function time(x){ return new Date().getUnixTime(x) ;}
+        
+       $(document).ready(function () {
+       $( ".gra" ).each(function( index ){
+
+        /*var work = Math.floor(new Date().getTime($(this).data('work')) ),
+        crush = Math.floor(new Date().getTime($(this).data('crush')) ),
+        repair = Math.floor(new Date().getTime($(this).data('repair')) ),
+        all = work;*/
+
+        //   document.write(d.getMinutes() + ":" + d.getSeconds());
+
+        var work = parseInt($(this).data('work')),
+            crush = parseInt($(this).data('crush')),
+            repair = parseInt($(this).data('repair')),
+            all = work+crush+repair;
+
+        //all = Math.floor(new Date().getTime($(this).data('all')) );
+        
+//all = Math.floor(new Date().getTime($(this).data('all')) ),
+
+
+
+        work = work/all*100;
+        crush = crush/all*100;
+        repair = repair/all*100;
+        
+        $(this).find('.work').css('width',work+'%');
+        $(this).find('.crush').css('width',crush+'%');
+        $(this).find('.repair').css('width',repair+'%');
+       }); 
+   });
+    </script>
+</div>    
+{% endblock content %}

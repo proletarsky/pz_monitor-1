@@ -7,7 +7,6 @@
     <title>Пролетарский завод - внутренний портал</title>
 
     {% load static %}
- 
 
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -121,6 +120,8 @@ if (document.referrer == "") {
      {{ form.repairer_master_reason }}
     </div>
     <div id="add-comment" style="display: block;">
+        <p><span>Все комментарии</span></p>
+        <textarea readonly id="all-comments"></textarea> 
         <p><span>Добавить комментарий</span><i class="info">(заполняется ремонтником)</i></p>        
         <textarea id="comment" placeholder="Введите комментарий"></textarea>
         <div class="row">
@@ -154,7 +155,7 @@ if (document.referrer == "") {
     {% if e.is_limit %}
     limited
     {% endif %}
-    stat{{ e.repair_job_status }}">
+    stat{{ e.repair_job_status }}" >
  <div class="equip-inner">
   <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
   
@@ -175,7 +176,20 @@ if (document.referrer == "") {
 
 <script>
 var getting_info = false,
-getting_all_info = false;
+getting_all_info = false,
+reasons_and_comments_array = [];
+
+function set_reason_and_comments_array(x,y,z){
+    reasons_and_comments_array[x]=[y,z];
+}
+
+
+{% for x,y in reasons_and_comments.items %}
+set_reason_and_comments_array( {{x}} ,{{y.0.id}}, `{{ y.1 }}`  );
+{% endfor %}
+
+console.log(reasons_and_comments_array );
+
 
 //$('#countdown').css('display','none');
 
@@ -268,6 +282,7 @@ getting_all_info = false;
 setInterval(function(){
         if(!getting_info && !getting_all_info){
             getting_all_info= true;
+            // PODOZRITELNAYA FIGNUA!!!!!!!!!!!!!!!!!!!!!!!
             $("input[name='machines_id']:hidden").val(15);
         var form = document.getElementById("set_status_form"),        
         fd = new FormData(form);        
@@ -433,13 +448,17 @@ $.ajax({
     $('#id_repairer_master_reason').val('');
     var returntext='Данные не были указаны!';
     if(com != "" && mreason==""){
-    returntext = 'Комментарий успешно добавлен!';
+    returntext = 'Комментарий успешно добавлен!';    
     }
     if(com == "" && mreason!=""){
     returntext = 'Причина успешно указана!';
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0]=parseInt(mreason);
     }
     if(com != "" && mreason!=""){
     returntext = 'Данные успешно добавлены!';
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0]=parseInt(mreason);
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1]=reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage;
+    
     }
     $('.infomessage').text(returntext);
     $('.infomessage').removeClass('red');
@@ -492,6 +511,10 @@ $('#crush-reason').css('display','block');
 $('#crush-reason').css('display','none');
     $('#change-modal').css('display','none');
     $("input[name='repair_job_status']:hidden").val(0);
+    $("#id_repairer_master_reason").val(reasons_and_comments_array[eqid][0]);
+    $("#all-comments").text(reasons_and_comments_array[eqid][1]);
+    
+    //alert(reasons_and_comments_array[eqid][0])
 }
 }else{return false;}
 });

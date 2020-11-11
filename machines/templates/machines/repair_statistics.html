@@ -28,7 +28,7 @@
    
 
 <div class="page-header">
-        <h2>Статистика</h2>
+        <h2>Учёт времени работы и ремонта</h2>
     </div>
 
 <div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
@@ -115,17 +115,14 @@
                     {{ x.equipment.timetable }}
                     </div>
                 </td>               
-                <td aria-label="Данные мониторинга" >
-                    
-                    {{ x.work }}
-                    </div>
+                <td class="dates" aria-label="Данные мониторинга" >{{ x.work }}</div>
                 </td>
                 </td>
-                <td aria-label="Данные мониторинга" >                	
+                <td class="dates" aria-label="Данные мониторинга" >                	
                     {{ x.crush }} 
                     </div>
                 </td>
-                <td aria-label="Данные мониторинга" >
+                <td  class="dates" aria-label="Данные мониторинга" >
                 	{{ x.repair }}
                     
                     </div>
@@ -135,6 +132,9 @@
                     <div class="crush" style="height:45px;vertical-align: middle;position:relative;background:#ea0303;display:inline-block;"></div>
                     <div class="repair" style="border-radius:0 5px 5px 0;height:45px;vertical-align: middle;position:relative;background:#ff8d17;display:inline-block;"></div>
                 </div>
+                <span class="green-block"><i></i>Работа: <b>0%</b></span>
+                <span class="red-block"><i></i>Неисправно: <b>0%</b></span>
+                <span class="orange-block"><i></i>В ремонте:<b>0%</b></span>
             </td>
                 
                     
@@ -184,6 +184,10 @@ Date.time = function() { return Date.now().getUnixTime(); }
         $(this).find('.work').css('width',work+'%');
         $(this).find('.crush').css('width',crush+'%');
         $(this).find('.repair').css('width',repair+'%');
+         $(this).parent().find('.green-block b').text((work.toFixed(2))+'%');
+         $(this).parent().find('.red-block b').text((crush.toFixed(2))+'%');
+         $(this).parent().find('.orange-block b').text((repair.toFixed(2))+'%');
+
        }); 
    });
     </script>

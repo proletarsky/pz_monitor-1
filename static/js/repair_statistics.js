@@ -13,7 +13,23 @@ location.hash = urlParams.toString();
 }
 */
 
-
+/*
+  $('.dates').each(function( index ) {    
+    var text = $(this).text(),splArr = text.split(','),newtext='';
+    console.log(splArr[0]);
+   if(splArr[0] && splArr[0]!=''){
+     var newsplArr = splArr[0].split(' ');
+     newsplArr = newsplArr[0].slice(-1);
+     var newday = '';
+     if(newsplArr=='1'){newday = 'день';}
+     if(newsplArr=='2' || newsplArr=='3' || newsplArr=='4'){newday = 'дня';}
+     if(newsplArr=='0' || newsplArr=='5' || newsplArr=='6' || newsplArr=='7' || newsplArr=='8' || newsplArr=='9'){newday = 'дней';}
+     if(splArr[1] && splArr[1]!=''){
+     $(this).text(splArr[0]+' '+newday+splArr[1]);
+   }
+   }
+});
+*/
 
 $("#id_empty_only").on('change', function() {
   if ($(this).is(':checked')) {
