@@ -185,7 +185,7 @@ function set_reason_and_comments_array(x,y=null,z=null){
 
 
 {% for x,y in reasons_and_comments.items %}
-set_reason_and_comments_array( {{x}} ,{{y.0.id}}, `{{ y.1 }}`  );
+set_reason_and_comments_array( {{x}} ,{% if y.0.id %} {{y.0.id}} {% else %} null {% endif %}  , `{{ y.1 }}`  );
 {% endfor %}
 
 console.log(reasons_and_comments_array );
