@@ -56,7 +56,9 @@
 
    <!-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="{% static 'js/equipment_list.js' %}"></script> -->
+<div class="page-header"></div>
 <div class="form-wrapper">
+<div class="page-header">
 <form class="act-form" method="GET" action=".">	
 	 <div class="form-row">
 	 <label class="required" for="workshop">Участок:</label>
@@ -69,7 +71,9 @@
 	 <div class="form-row">
 	 <input id="sendform" type="submit" value="Применить">
 	 </div>
+    </div>
 	</form>
+
 </div>
 
 <script type="text/javascript">
@@ -145,7 +149,7 @@
                     
                     </div>
                 </td>
-                <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
+                <td aria-label="">{{ x.date | date:"Y-m-d H:i" }}</td>
             </tr>
         {% endfor %}
   
@@ -221,7 +225,7 @@
                     <button type="submit" class="save btn btn-default addcomment" >Добавить комментарий</button> 
                     </div>
                 </td>
-                <td aria-label="">{{ x.date | date:"Y-m-d H:m" }}</td>
+                <td aria-label="">{{ x.date | date:"Y-m-d H:i" }}</td>
             </tr>
         {% endfor %}
     </table>

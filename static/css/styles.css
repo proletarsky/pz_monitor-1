@@ -150,6 +150,11 @@ hr{border-top:2px solid black;}
     letter-spacing: 0.8px;
     font-size: 20px;
 }
+.all-coms p{
+    max-height: 100px;
+    overflow: auto;
+    margin: 7.5px 0;
+}
 
 .green-block,.red-block,.orange-block{
   position: relative;
