@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_filters',
     'bootstrapform',
     'googlecharts',
+    'sanctuary',
     
     # 'djcelery_email',
 ]
