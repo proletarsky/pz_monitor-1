@@ -24,6 +24,7 @@ from .view import main_index, register, edit, validate, not_validate, validate_p
 urlpatterns = [
                   url(r'^$', main_index),
                   url(r'^machines/', include('machines.urls')),
+                  url(r'^sanctuary/',include('sanctuary.urls')),
                   url(r'^admin/', admin.site.urls),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
                   url(r'^accounts/register/$', register, name='register'),

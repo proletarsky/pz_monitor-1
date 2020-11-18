@@ -4,6 +4,9 @@ from django.db import models
 class Catalog(models.Model):
 	name = models.CharField(max_length=100,verbose_name='Наименование')
 
+	def __str__(self):
+		return self.name
+
 
 #Модель с объектами
 class Object_list(models.Model):
