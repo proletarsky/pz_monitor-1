@@ -1,0 +1,131 @@
+.sidebar-wrapper {
+    z-index: 1000;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    /* height: 56px; */    
+    margin-left: 0;
+}
+
+.main-menu-wrapper{
+        display: table-cell !important; 
+        vertical-align: middle !important;
+}
+.sidebar-block{
+    position: relative;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: table;
+    text-align: center;
+     max-width: 720px;
+         margin: 0 auto;
+         background: #353535;
+}
+
+#sidebar-wrapper{
+    background: #546986 !important;
+    border-bottom:none;
+}
+.inner-main-menu-block a span{
+        background: #546986 !important;
+}
+
+.sidebar-block li{
+    display: table-cell;
+}
+
+.sidebar-block li a{
+    font-size: 16px;
+        font-weight: 600;
+    color: #e6e6e6;
+    font-family:Helvetica,sans-serif;
+}
+
+.header-block{
+    padding-top: 0;
+    margin: 0 auto;
+    width: 100%;
+    background: #000000;
+    top: 0;
+    height: 430px;
+    max-height: 500px;
+    position: relative;
+    display: table;
+}
+
+.logo-text{
+    font-size: 62px;
+    color: white;
+    position: relative;
+    text-align: center;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    letter-spacing: 1px;
+    display: table-cell;
+    vertical-align: middle;
+    height: 100%;
+}
+
+.select-wrapper{
+    display: table;
+    text-align: center;
+    margin: 0 auto;
+    position: relative;
+    min-height: 430px;
+    width: 100%;
+    padding: 50px 0;
+}
+.select-block{
+    display: inline-block;
+    vertical-align: top;
+    width: 142px;
+    height: 142px;
+    border-radius: 30px;
+    position: relative;
+    margin: 20px;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.objects-block{
+display: inline-block;
+    vertical-align: top;
+    width:20%;
+    min-width: 250px;
+    height: 142px;
+    position: relative;
+    margin: 15px;
+    background-size: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 5px solid #FFF;
+    border-radius: 5px;
+}
+
+.active-block{box-shadow: 0 0 5px rgb(0,150,0);
+z-index: 1;
+}
+.deactive-block{
+    box-shadow: 0 0 5px rgb(210,0,0);
+    z-index: 2;
+    }
+.object-ip{
+    width: 100%;
+    display: table;
+    color: #000;    
+    font-size: 32px;
+}
+.object-name{
+    color:#000;
+    font-size: 21px;    
+    display: table;
+    width: 100%;
+}
+.statistic-ico{background-image:url('/static/img/statistics.png'); }
+.monitor-ico{background-image:url('/static/img/3-ico.png');}
+.batary-ico{background-image:url('/static/img/1-ico.png');}
+.settings-ico{background-image:url('/static/img/4.png');}

@@ -46,13 +46,12 @@ function getDatetime(str){
     }
 }
 
-$(document.body).on('change',"#type_workshop",function (e) {
+$(document.body).on('change',"#type_workshop",function (e){
    var optVal= $("#type_workshop option:selected").val();
    if($('#type_w').val()!=optVal){
    $('#type_w').val(optVal);
    $('#sendform').click();
    }
-   
 });
 
 function dateParser(value) {
