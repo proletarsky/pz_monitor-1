@@ -108,22 +108,26 @@ display: inline-block;
 
 .active-block{box-shadow: 0 0 5px rgb(0,150,0);
 z-index: 1;
+background:#00ffac;
 }
 .deactive-block{
     box-shadow: 0 0 5px rgb(210,0,0);
     z-index: 2;
+    background: #da3333;
     }
 .object-ip{
     width: 100%;
     display: table;
     color: #000;    
     font-size: 32px;
+    font-weight: bold;
 }
 .object-name{
     color:#000;
     font-size: 21px;    
     display: table;
     width: 100%;
+        font-weight: bold;
 }
 .statistic-ico{background-image:url('/static/img/statistics.png'); }
 .monitor-ico{background-image:url('/static/img/3-ico.png');}

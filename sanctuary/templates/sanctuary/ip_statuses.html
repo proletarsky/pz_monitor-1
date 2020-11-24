@@ -91,6 +91,9 @@
     padding: 15px 20px;
     border-radius: 5px;">
 	{% for x in all_catalogs %}
+	<option value="none" selected disabled hidden> 
+          Выберите каталог 
+      </option> 
 	<option style="color:#000;" value="{{ x.id }}" >{{ x }}</option>
 	{% endfor %}	
 	</select>
@@ -135,6 +138,18 @@
 </div>
 <script type="text/javascript">
 $( document ).ready(function(){
+
+
+var urlParams = new URLSearchParams(window.location.search);
+if(urlParams.toString()!=''){
+if(urlParams.has('catalog_id')){
+var exists = 0 != $('#catalog_id option[value='+parseInt(urlParams.get('catalog_id'))+']').length;
+if(exists){$('#catalog_id').val(parseInt(urlParams.get('catalog_id')));}
+}
+
+//location.hash = urlParams.toString();
+}
+
 
    //$('document.body').on('change',"#catalog_id",function(e) {
    	$('#catalog_id').change(function(){
