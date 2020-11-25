@@ -607,6 +607,7 @@ box-shadow: 0 2px 5px #bfbfbf;
   transition: all 0.5s ease;
   overflow:hidden;
 padding:5px 0;
+top:0;
 }
 
 #wrapper.toggled #sidebar-wrapper {

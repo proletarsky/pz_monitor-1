@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пролетарский завод - внутренний портал</title>
+
+    {% load static %}
+    {% load bootstrap %}
+
+<script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+
+    <script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.js'%}"></script>
+    <script src="{% static 'js/datepicker-ru.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.js' %}"></script>
+
+    <!-- Bootstrap -->
+    <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/stylesforsanctuary.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+<link rel="icon" type="image/png" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-icon-precomposed" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-startup-image" href="/static/img/pzfavicon.png">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" />
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="76x76" >
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="152x152">
+</head>
+<body class="black">
+
+
+<div id="sidebar-wrapper">
+<div class="pz-logo">
+        <a href="/sanctuary/main_page" style="display: block;">
+            <img src="/static/img/pzlogo.png" alt="">
+        </a>
+</div>
+ <ul class="nav navbar-nav navbar-right">
+            
+                <li class="loginb">
+                    <a href="/accounts/login/" id="login">
+                        <span class="glyphicon glyphicon-log-in"></span> Вход</a>
+                </li>
+            
+        </ul>
+
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="/sanctuary/ip_statuses"><span class="glyphicon"></span>Активность</a>
+                </li>
+                 <li class="sidebar-brand">
+                    <a href="#"><span class="glyphicon "></span>Учёт работы</a>
+                </li>
+                <li class="sidebar-brand">
+                    <a href="/sanctuary/diagram_statistics"><span class="glyphicon "></span>Статистика</a>
+                </li>
+               
+			</ul>
+        </div>
+
+
+<!-- <div class="header-block"><h1 class="logo-text"></h1></div> -->
+
+<div id="wrapper">
+
+<div id='pagecontent'>
+   
+
+<div class="page-header">
+        <h2>Учёт времени работы и ремонта</h2>
+    </div>
+
+<div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
+     <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{catalog_id_param}}" data-bool="{{bool_limit}}" >
+     <div class="form-row">
+     <label class="required" for="workshop">Каталог:</label>
+<select name="catalog_id_param" id="catalog_id_param" data-selected_id="2">
+{% for x in all_catalogs %}
+	<option value="none" selected disabled hidden> 
+          Выберите каталог 
+      </option> 
+	<option style="color:#000;" value="{{ x.id }}" >{{ x }}</option>
+	{% endfor %}
+</select>
+</div>
+
+<div class="form-row">
+<!-- <ul class=" navbar-nav navbar-left" style="width: 100%;"> -->
+                {{ filter.form | bootstrap_inline }}
+
+    
+           
+    <!--  <option selected="selected" value="2">Участок №5 (лопаточный) цеха №7</option>  -->
+    
+    
+     </div> 
+
+<div class="form-row">
+<!-- <ul class=" navbar-nav navbar-left" style="width: 100%;"> -->
+              
+    
+           
+    <!--  <option selected="selected" value="2">Участок №5 (лопаточный) цеха №7</option>  -->
+    
+    
+     </div> 
+
+
+
+     <div class="form-row">
+     <input id="sendform" type="submit" value="Применить">
+     </div>
+    </form>
+</div>
+
+<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+        <tr>
+            <th scope="col" style="width:10%">Каталог</th>            
+            <th scope="col" style="width:40%" colspan="1"><div style="text-align: center">
+            
+		<!-- &machine_or_furnace_sign=false -->
+Объект
+
+
+</div></th>
+<!-- <th scope="col" style="width:15%">Расписание станка</th>-->
+{#			<th>Фото оборудования</th>#}
+			<th scope="col" style="width:10%" >Время работы</th>
+            <th scope="col" style="width:10%" >Время простоев</th>
+            <!-- <th scope="col" style="width:10%" >Время в ремонте</th>-->
+            <th scope="col" style="width:30%" >График</th>
+<!--            <th scope="col" style="width:15%">Состояние</th> -->
+        </tr>
+        </thead>
+        {% for x in sql_query %}				
+            <tr>
+                <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.ip_object.catalog }}</a></td>
+
+                <td aria-label="Оборудование" >{{ x.ip_object }}</td>
+
+     <!--   <td aria-label="Данные мониторинга" >
+                    
+                    {{ x.equipment.timetable }}
+                    </div>
+                </td>               -->
+                <td class="dates" aria-label="Данные мониторинга" >{{ x.work }}</div>
+                </td>
+                </td>
+                <td class="dates" aria-label="Данные мониторинга" >                	
+                    {{ x.crush }} 
+                    </div>
+                </td>
+
+                <td aria-label=""><div style="position:relative;height:45px;border-radius:10px;width:100%;display:table;background:gray;"class="gra" id="{{ x.equipment.id }}" data-work="{{ x.ep_work }}" data-crush="{{ x.ep_crush }}" data-repair="{{ x.ep_repair }}" data-all="{{ x.ep_all_sum }}"  >
+                    <div class="work" style="border-radius:5px 0 0 5px;height:45px;vertical-align: middle;position:relative;background:#07af07;display:inline-block;"></div>
+                    <div class="crush" style="height:45px;vertical-align: middle;position:relative;background:#ea0303;display:inline-block;"></div>
+                    <div class="repair" style="border-radius:0 5px 5px 0;height:45px;vertical-align: middle;position:relative;background:#ff8d17;display:inline-block;"></div>
+                </div>
+                <span class="green-block"><i></i>Работа: <b>0%</b></span>
+                <span class="red-block"><i></i>Неисправно: <b>0%</b></span>                
+            </td>
+                
+                    
+                
+
+          </tr>
+        {% endfor %}
+
+    </table>
+    <script type="text/javascript">
+
+
+// Copy & Paste this
+Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
+if(!Date.now) Date.now = function() { return new Date(); }
+Date.time = function() { return Date.now().getUnixTime(); }
+
+//str.replace(replacement, toReplace);
+
+        function time(x){ return new Date().getUnixTime(x) ;}
+        
+       $(document).ready(function () {
+       $( ".gra" ).each(function( index ){
+
+        /*var work = Math.floor(new Date().getTime($(this).data('work')) ),
+        crush = Math.floor(new Date().getTime($(this).data('crush')) ),
+        repair = Math.floor(new Date().getTime($(this).data('repair')) ),
+        all = work;*/
+
+        //   document.write(d.getMinutes() + ":" + d.getSeconds());
+
+        var work = parseInt($(this).data('work')),
+            crush = parseInt($(this).data('crush')),            
+            all = work+crush;
+
+        //all = Math.floor(new Date().getTime($(this).data('all')) );
+        
+//all = Math.floor(new Date().getTime($(this).data('all')) ),
+
+
+
+        work = work/all*100;
+        crush = crush/all*100;
+        //repair = repair/all*100;
+        
+        $(this).find('.work').css('width',work+'%');
+        $(this).find('.crush').css('width',crush+'%');
+        //(this).find('.repair').css('width',repair+'%');
+         $(this).parent().find('.green-block b').text((work.toFixed(2))+'%');
+         $(this).parent().find('.red-block b').text((crush.toFixed(2))+'%');         
+
+       }); 
+   });
+    </script>
+</div>    
+
+
+</div>
+<div class="footer">
+
+    <div class="footer-pz-logo-osk">
+        <a href="http://www.aoosk.ru" target="_blank">
+            <img src="/static/img/OSKLogo.png" alt="">
+        </a>
+    </div>
+    <div class="footer-pz-logo">
+        <a href="/">
+            <img src="/static/img/pzLogo.png" alt="">
+        </a>
+    </div>
+</div>
+<script type="text/javascript">
+$( document ).ready(function(){
+    $('#id_start_date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd"
+    });
+
+    $('#id_end_date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd"
+    });
+
+
+var fform = $('.act-form');
+if(fform.data('area_id')){$('#catalog_id_param').val(fform.data('area_id'));}
+if(fform.data('start')){$('#id_start_date').val(fform.data('start'));}
+if(fform.data('end')){$('#id_end_date').val(fform.data('end'));}
+
+/*
+var urlParams = new URLSearchParams(window.location.search);
+if(urlParams.toString()!=''){
+if(urlParams.has('catalog_id')){
+var exists = 0 != $('#catalog_id_param option[value='+parseInt(urlParams.get('catalog_id_param'))+']').length;
+if(exists){$('#catalog_id_param').val(parseInt(urlParams.get('catalog_id_param')));}
+}
+//location.hash = urlParams.toString();
+}
+*/
+
+   //$('document.body').on('change',"#catalog_id",function(e) {
+   	$('#catalog_id').change(function(){
+   	console.log(123);
+   $('#sendform').click();   
+});
+
+
+});
+</script>
+
+
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!-- <script src="'bootstrap/js/bootstrap.min.js"></script> -->
+</body>
+</html>
+
+
