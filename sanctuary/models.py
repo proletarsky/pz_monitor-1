@@ -11,9 +11,9 @@ class Catalog(models.Model):
 #Модель с объектами
 class Object_list(models.Model):
     JOB_STATUSES = ((True,'Соединение установлено'),(False,'Соединение разорвано'),)
-    ip = models.CharField(max_length=20, verbose_name='IP адрес')
+    ip = models.CharField(max_length=100, verbose_name='IP адрес')
     name = models.CharField(max_length=100,verbose_name = 'Наименование')
-    description = models.CharField(max_length=50,verbose_name='Обозначение')
+    description = models.CharField(max_length=100,verbose_name='Обозначение')
     active_status = models.BooleanField(verbose_name='Текущий статус', choices=JOB_STATUSES,null=False,default=True)
     catalog = models.ForeignKey(Catalog,verbose_name='Каталог',on_delete=models.SET_NULL,null=True,blank=True)
 
@@ -25,7 +25,7 @@ class Object_list(models.Model):
 #Модель для добавления данных с сервиса-обхода
 class Connection_data(models.Model):
     date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
-    ip = models.CharField(max_length=20, verbose_name='IP адрес')
+    ip = models.CharField(max_length=100, verbose_name='IP адрес')
     active_status = models.BooleanField(verbose_name='Текущий статус',null=False)
 
 
