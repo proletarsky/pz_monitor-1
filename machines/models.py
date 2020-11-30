@@ -336,6 +336,16 @@ class Repair_statistics(models.Model):
     repair_job_status = models.IntegerField(verbose_name='Статус оборудования',choices=JOB_STATUSES,null=True,blank=True)
 
 
+class Repair_history(models.Model):
+    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE)
+    crush_date = models.DateTimeField(verbose_name='Дата и время поломки',blank=True,null=True,auto_now_add=True)
+    repair_date = models.DateTimeField(verbose_name='Дата и время взятия в ремонт',blank=True,null=True,auto_now_add=True)
+    return_to_work_date=models.DateTimeField(verbose_name='Дата и время возврата к работе',null=True,blank=True,auto_now_add=True)
+    first_reason = models.ForeignKey(Repair_reason,verbose_name='Первичная причина',null=True,blank=True,on_delete=models.SET_NULL,default=None)
+    master_reason = models.ForeignKey(Repairer_master_reason,verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
+    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True,default=None)
+    repairer = models.ForeignKey(Repairer,verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
+
 
 class ClassifiedInterval(models.Model):
     # AVAILABLE_USER_REASON = lambda: [(str(r), str(r)) for r in Reason.objects.filter(is_operator=True)]
