@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics,Repairer_master_reason
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics,Repairer_master_reason,Repair_history
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -597,6 +597,49 @@ def repair_statistics_diagram(request):
     context = {'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/teststatnew.html',context)
+
+
+def repair_history(request):
+    all_area = Area.objects.all()
+    area_id_param = tuple(x.id for x in all_area)
+
+    all_repairers=Repairer.objects.all()
+    repairer_id_param = tuple(x.id for x in all_repairers)
+    start_interval = '2020-05-25'
+    now =datetime.datetime.now().date()
+    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+    all_equipments = Equipment.objects.filter(is_in_repair=True)
+    equipment_id_param=tuple(x.id for x in all_equipments)
+    bool_limit = (False,True)
+
+    if request.GET.get('area_id_param'):
+        area_id_param = request.GET.get('area_id_param'),
+    if request.GET.get('start_date'):
+        start_interval=request.GET.get('start_date')
+    if request.GET.get('end_date'):
+        end_interval=request.GET.get('end_date')
+    if request.GET.get('bool_limit'):
+        bool_limit=bool(request.GET.get('bool_limit')),
+    if request.GET.get('repairer_id_param'):
+    	repairer_id_param = request.GET.get('repairer_id_param'),
+    if request.GET.get('equipment_id_param'):
+    	equipment_id_param = request.GET.get('equipment_id_param'),
+
+    sql_query = Repair_history.objects.raw('''select 1 as id,b.area_id,a.equipment_id,crush_date,repair_date,return_to_work_date,repairer_id,first_reason_id,master_reason_id,repair_comment
+                                                        from machines_repair_history a
+                                                        join machines_equipment b on a.equipment_id=b.id
+                                                        where return_to_work_date is not null
+                                                        and b.area_id in %(area_id_param)s 
+                                                        and a.equipment_id in %(equipment_id_param)s
+                                                        and a.repairer_id in %(repairer_id_param)s
+                                                        and b.is_limit in %(bool_limit)s
+                                                        and a.crush_date >=%(start_interval)s
+                                                        and a.return_to_work_date <=( date %(end_interval)s + integer '1')
+                                                        order by id desc''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit,'repairer_id_param':repairer_id_param,'equipment_id_param':equipment_id_param})
+    filter = calendar_repair(0,queryset=Equipment.objects.all())
+    context = {'all_area':all_area,'all_repairers':all_repairers,'all_equipments':all_equipments,'sql_query':sql_query,'filter':filter,'repairer_id_param':repairer_id_param[0],'area_id_param':area_id_param[0],'equipment_id_param':equipment_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    return render(request,'machines/repair_history.html',context)
+
 
 
 
