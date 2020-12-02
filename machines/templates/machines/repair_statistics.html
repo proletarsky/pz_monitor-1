@@ -36,7 +36,8 @@
      <div class="form-row">
      <label class="required" for="workshop">Участок:</label>
 <select name="area_id_param" id="area_id_param" data-selected_id="2">
-{% for y in all_area %}                
+    <option selected="selected" disabled="disabled">Выбрать Участок</option>
+{% for y in all_area %}                                    
                     <option value="{{ y.id }}">{{ y }}</option>
                 {% endfor %}
 </select>

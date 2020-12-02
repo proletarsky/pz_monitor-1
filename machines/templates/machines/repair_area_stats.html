@@ -150,7 +150,7 @@ if (document.referrer == "") {
 
 
   <div class="form-wrapper">
-{% for e in equipments %}   
+{% for e in equipments %}
     <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" data-class="stat{{ e.repair_job_status }}" class="equip 
     {% if e.is_limit %}
     limited
@@ -179,14 +179,35 @@ var getting_info = false,
 getting_all_info = false,
 reasons_and_comments_array = [];
 
+var entityMap = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '/': '&#x2F;',
+  '`': '&#x60;',
+  '=': '&#x3D;'
+};
+
+
+
+function escapeHtml (string) {
+  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+
 function set_reason_and_comments_array(x,y=null,z=null){
     if(z=='None'){z='';}
+
     reasons_and_comments_array[x]=[y,z];
 }
 
 
 {% for x,y in reasons_and_comments.items %}
-set_reason_and_comments_array( {{x}} ,{% if y.0.id %} {{y.0.id}} {% else %} null {% endif %}  , `{{ y.1 }}`  );
+set_reason_and_comments_array( {{x}} ,{% if y.0.id %} {{y.0.id}} {% else %} null {% endif %}  ,  `{{ y.1 | safe }}`   );
 {% endfor %}
 
 console.log(reasons_and_comments_array );
@@ -229,6 +250,7 @@ var timerId = setInterval(function(){
                 $(new_status_block).removeClass(new_status_block.data('class')).addClass('stat'+parseInt(data.equip_status));
                     $(new_status_block).data('class','stat'+parseInt(data.equip_status));
                     $(new_status_block).data('status',parseInt(data.equip_status));
+                    set_reason_and_comments_array( real_id , null   ,  `None`   );
                     $('#countdown').css('display','none');
                     modal.css('display','none');
                     timerBlock.text(x);
@@ -299,7 +321,8 @@ setInterval(function(){
                         if(data.equipments){
                         data.equipments.forEach(function(currentValue,index,arr){
                             var status_block = $(".form-wrapper").find("[data-eid='"+data.equipments[index][0]+"']");
-                            if(parseInt(status_block.data('status'))!= data.equipments[index][1] ){                                
+                            if(parseInt(status_block.data('status'))!= data.equipments[index][1] ){ 
+                                set_reason_and_comments_array( index , null   ,  `None`   );             
                                 $(status_block).removeClass(status_block.data('class')).addClass('stat'+parseInt(data.equipments[index][1]));
                                 $(status_block).data('class','stat'+parseInt(data.equipments[index][1]));
                                 $(status_block).data('status',parseInt(data.equipments[index][1]));
@@ -452,16 +475,51 @@ $.ajax({
     var returntext='Данные не были указаны!';
     if(com != "" && mreason==""){
     returntext = 'Комментарий успешно добавлен!';
-    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1]=reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage; 
+    var options = parseInt( $("input[name='machines_id']:hidden").val() ) in reasons_and_comments_array && 1 in reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())] ? reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] : '';
+    if (options){
+
+     reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] =reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage; 
+    }else{
+        if(parseInt($("input[name='machines_id']:hidden").val()) in reasons_and_comments_array){
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] = [];
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] = data.newmessage;
+        }else{
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())] = []
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] = [];
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] = data.newmessage;
+        }
+    }
+
     }
     if(com == "" && mreason!=""){
     returntext = 'Причина успешно указана!';
-    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0]=parseInt(mreason);
+    var options1 = parseInt($("input[name='machines_id']:hidden")) in reasons_and_comments_array && 0 in reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())] ? reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0] : false;
+    if (options1){
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0] =parseInt(mreason);
+    }else{        
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0] = parseInt(mreason);
+    }
+
     }
     if(com != "" && mreason!=""){
     returntext = 'Данные успешно добавлены!';
+    var options2 = parseInt($("input[name='machines_id']:hidden").val()) in reasons_and_comments_array && 1 in reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())] ? reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] : false,
+    options3 = parseInt($("input[name='machines_id']:hidden").val()) in reasons_and_comments_array && 0 in reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())] ? reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0] : false;
+
+    if (options2){
+        
     reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0]=parseInt(mreason);    
-    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1]=reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage;
+    }else{       
+        reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][0] = parseInt(mreason);
+    }
+
+     if (options3){
+        
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] =reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage; 
+    }else{     
+    reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] =  reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] + data.newmessage;
+        //reasons_and_comments_array[parseInt($("input[name='machines_id']:hidden").val())][1] = data.newmessage;
+    }    
 
     }
     $('.infomessage').text(returntext);
@@ -515,8 +573,14 @@ $('#crush-reason').css('display','block');
 $('#crush-reason').css('display','none');
     $('#change-modal').css('display','none');
     $("input[name='repair_job_status']:hidden").val(0);
+    var options = eqid in reasons_and_comments_array && 0 in reasons_and_comments_array[eqid] ? reasons_and_comments_array[eqid][0] : '';
+    if(options!=''){
     $("#id_repairer_master_reason").val(reasons_and_comments_array[eqid][0]);
-    if(reasons_and_comments_array[eqid][1] !='None'){
+    }else{
+    $("#id_repairer_master_reason").val();
+    }
+    var options1 = eqid in reasons_and_comments_array && 1 in reasons_and_comments_array[eqid] ? reasons_and_comments_array[eqid][1] : '';
+    if(options1!='' && reasons_and_comments_array[eqid][1] !='None'){
     $("#all-comments").text(reasons_and_comments_array[eqid][1]);
     }else{$("#all-comments").text('');}
     

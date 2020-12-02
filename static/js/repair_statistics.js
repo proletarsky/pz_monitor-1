@@ -97,7 +97,7 @@ $('.show-hide-button').click(function (e) {
 
 
 var fform = $('.act-form');
-if(fform.data('area_id')){$('#area_id_param').val(fform.data('area_id'));}
+//if(fform.data('area_id')){$('#area_id_param').val(fform.data('area_id'));}
 if(fform.data('start')){$('#id_start_date').val(fform.data('start'));}
 if(fform.data('end')){$('#id_end_date').val(fform.data('end'));}
 if( fform.data('bool') && fform.data('bool')=='True' ){$('#id_empty_only').prop("checked", true);}

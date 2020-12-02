@@ -32,6 +32,7 @@ from django.shortcuts import redirect
 from django.http import JsonResponse
 from .de_facto_time_interval import get_de_facto_time,chill_days
 
+
 @permission_classes([permissions.AllowAny])
 class RawDataUploadView(APIView):
     parser_classes = (CoordinatorDataParser,)
@@ -339,6 +340,10 @@ class StatisticsView(ListView):
 	#return render(request,'machines/test.html',{'equipments':equipments,'form':form})
     #,'lenght':lenght,'del_result':del_result
 
+def html_special_chars(text):
+    if(text):
+        return text.replace(u"`",u'"')
+    
 
 def repair_equipment(request,workshop_numb,area_numb):
     equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('id')
@@ -377,6 +382,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                     return JsonResponse(message)
                 if action=='add_comment':
                     new_comment = request.POST.get('comment')
+                    new_comment = new_comment.replace("`","'")
                     m_reason_id = request.POST.get('mreason')
                     equip=Repair_rawdata.objects.filter(machines_id_id=machines_id,repair_job_status=2).order_by('-date')[0:1:1]
                     actual_comment=equip[0].repair_comment
@@ -407,7 +413,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                 return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
         form = Repairform()    
-    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result,'reasons_and_comments':reasons_and_comments})
+    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result,'reasons_and_comments':reasons_and_comments })
 
 
 def all_complexes(request):
@@ -453,6 +459,7 @@ def repair_view_data(request,area_id):
             if request.is_ajax(): 
                 if action=='add_comment':
                     new_comment = request.POST.get('comment')
+                    new_comment = new_comment.replace("`","'")
                     m_reason_id = request.POST.get('mreason')
                     equip=Repair_rawdata.objects.get(id=str_id)
                     actual_comment=equip.repair_comment
@@ -611,35 +618,41 @@ def repair_history(request):
     all_equipments = Equipment.objects.filter(is_in_repair=True)
     equipment_id_param=tuple(x.id for x in all_equipments)
     bool_limit = (False,True)
-
-    if request.GET.get('area_id_param'):
-        area_id_param = request.GET.get('area_id_param'),
-    if request.GET.get('start_date'):
-        start_interval=request.GET.get('start_date')
-    if request.GET.get('end_date'):
-        end_interval=request.GET.get('end_date')
-    if request.GET.get('bool_limit'):
-        bool_limit=bool(request.GET.get('bool_limit')),
-    if request.GET.get('repairer_id_param'):
-    	repairer_id_param = request.GET.get('repairer_id_param'),
-    if request.GET.get('equipment_id_param'):
-    	equipment_id_param = request.GET.get('equipment_id_param'),
-
-    sql_query = Repair_history.objects.raw('''select 1 as id,b.area_id,a.equipment_id,crush_date,repair_date,return_to_work_date,repairer_id,first_reason_id,master_reason_id,repair_comment
+    if request.is_ajax():
+        if request.GET.get('area_id_param'):
+            area_id = request.GET.get('area_id_param')
+            equipments = all_equipments.get(area__id=area_id)
+            message = {'equipments' : equipments }
+            return JsonResponse(message)
+        else:
+            return JsonResponse({'error':1})
+    else:
+        if request.GET.get('area_id_param'):
+            area_id_param = request.GET.get('area_id_param'),
+        if request.GET.get('start_date'):
+            start_interval=request.GET.get('start_date')
+        if request.GET.get('end_date'):
+            end_interval=request.GET.get('end_date')
+        if request.GET.get('bool_limit'):
+            bool_limit=bool(request.GET.get('bool_limit')),
+        if request.GET.get('repairer_id_param'):
+            repairer_id_param = request.GET.get('repairer_id_param'),
+        if request.GET.get('equipment_id_param'):
+            equipment_id_param = request.GET.get('equipment_id_param'),
+        sql_query = Repair_history.objects.raw('''select 1 as id,b.area_id,a.equipment_id,crush_date,repair_date,return_to_work_date,repairer_id,first_reason_id,master_reason_id,repair_comment
                                                         from machines_repair_history a
                                                         join machines_equipment b on a.equipment_id=b.id
                                                         where return_to_work_date is not null
                                                         and b.area_id in %(area_id_param)s 
-                                                        and a.equipment_id in %(equipment_id_param)s
+                                                        and b.id in %(equipment_id_param)s
                                                         and a.repairer_id in %(repairer_id_param)s
                                                         and b.is_limit in %(bool_limit)s
                                                         and a.crush_date >=%(start_interval)s
                                                         and a.return_to_work_date <=( date %(end_interval)s + integer '1')
-                                                        order by id desc''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit,'repairer_id_param':repairer_id_param,'equipment_id_param':equipment_id_param})
-    filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'all_area':all_area,'all_repairers':all_repairers,'all_equipments':all_equipments,'sql_query':sql_query,'filter':filter,'repairer_id_param':repairer_id_param[0],'area_id_param':area_id_param[0],'equipment_id_param':equipment_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
-    return render(request,'machines/repair_history.html',context)
-
+                                                        order by a.id desc''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit,'repairer_id_param':repairer_id_param,'equipment_id_param':equipment_id_param})
+        filter = calendar_repair(0,queryset=Equipment.objects.all())
+        context = {'all_area':all_area,'all_repairers':all_repairers,'all_equipments':all_equipments,'sql_query':sql_query,'filter':filter,'repairer_id_param':repairer_id_param[0],'area_id_param':area_id_param[0],'equipment_id_param':equipment_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+        return render(request,'machines/repair_history.html',context)
 
 
 
