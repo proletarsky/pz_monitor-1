@@ -488,14 +488,20 @@ def repair_view_data(request,area_id):
 def repair_statistics(request):
     all_area = Area.objects.all()
 
-    area_id_param = tuple(x for x in range(0,20,1))
+    area_id_param = tuple(x.id for x in all_area)
+    return_area = 0
     start_interval = '2020-10-25'
     now =datetime.datetime.now().date()
     end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
-        area_id_param = request.GET.get('area_id_param'),
+        if request.GET.get('area_id_param')=='0':
+            area_id_param = tuple(x.id for x in all_area)
+            return_area = 0
+        else:    
+            area_id_param = request.GET.get('area_id_param'),
+            return_area = area_id_param[0]
     if request.GET.get('start_date'):
         start_interval=request.GET.get('start_date')
     if request.GET.get('end_date'):
@@ -557,7 +563,7 @@ def repair_statistics(request):
                                                      ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())#queryset=ClassifiedInterval.objects.all())
-    context={'sql_query':sql_query,'all_area':all_area,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context={'sql_query':sql_query,'all_area':all_area,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/repair_statistics.html',context)
 
@@ -566,14 +572,20 @@ def repair_statistics_diagram(request):
 
     all_area = Area.objects.all()
 
-    area_id_param = tuple(x for x in range(0,20,1))
+    area_id_param = tuple(x.id for x in all_area)
+    return_area = 0
     start_interval = '2020-05-25'
     now =datetime.datetime.now().date()
     end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
-        area_id_param = request.GET.get('area_id_param'),
+        if request.GET.get('area_id_param')=='0':
+            area_id_param = tuple(x.id for x in all_area)
+            return_area = 0
+        else:    
+            area_id_param = request.GET.get('area_id_param'),
+            return_area = area_id_param[0]
     if request.GET.get('start_date'):
         start_interval=request.GET.get('start_date')
     if request.GET.get('end_date'):
@@ -601,7 +613,7 @@ def repair_statistics_diagram(request):
                                                     group by a.repairer_master_reason_id''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':area_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context = {'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/teststatnew.html',context)
 
@@ -609,9 +621,10 @@ def repair_statistics_diagram(request):
 def repair_history(request):
     all_area = Area.objects.all()
     area_id_param = tuple(x.id for x in all_area)
-
+    return_area = 0
     all_repairers=Repairer.objects.all()
     repairer_id_param = tuple(x.id for x in all_repairers)
+    return_repairer=0
     start_interval = '2020-05-25'
     now =datetime.datetime.now().date()
     end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
@@ -619,7 +632,7 @@ def repair_history(request):
     equipment_id_param=tuple(x.id for x in all_equipments)
     bool_limit = (False,True)
     if request.is_ajax():
-        if request.GET.get('area_id_param'):
+        if request.GET.get('area_id_param') and request.GET.get('area_id_param')!='0':
             area_id = request.GET.get('area_id_param')
             equipments = all_equipments.get(area__id=area_id)
             message = {'equipments' : equipments }
@@ -628,7 +641,12 @@ def repair_history(request):
             return JsonResponse({'error':1})
     else:
         if request.GET.get('area_id_param'):
-            area_id_param = request.GET.get('area_id_param'),
+            if request.GET.get('area_id_param')=='0':
+                area_id_param = tuple(x.id for x in all_area)
+                return_area = 0
+            else:
+                area_id_param = request.GET.get('area_id_param'),
+                return_area=area_id_param[0]
         if request.GET.get('start_date'):
             start_interval=request.GET.get('start_date')
         if request.GET.get('end_date'):
@@ -636,7 +654,12 @@ def repair_history(request):
         if request.GET.get('bool_limit'):
             bool_limit=bool(request.GET.get('bool_limit')),
         if request.GET.get('repairer_id_param'):
-            repairer_id_param = request.GET.get('repairer_id_param'),
+            if request.GET.get('repairer_id_param')=='0':
+                repairer_id_param=tuple(x.id for x in all_repairers)
+                return_repairer = 0
+            else:
+                repairer_id_param = request.GET.get('repairer_id_param'),
+                return_repairer=repairer_id_param[0]
         if request.GET.get('equipment_id_param'):
             equipment_id_param = request.GET.get('equipment_id_param'),
         sql_query = Repair_history.objects.raw('''select 1 as id,b.area_id,a.equipment_id,crush_date,repair_date,return_to_work_date,repairer_id,first_reason_id,master_reason_id,repair_comment
@@ -651,7 +674,7 @@ def repair_history(request):
                                                         and a.return_to_work_date <=( date %(end_interval)s + integer '1')
                                                         order by a.id desc''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit,'repairer_id_param':repairer_id_param,'equipment_id_param':equipment_id_param})
         filter = calendar_repair(0,queryset=Equipment.objects.all())
-        context = {'all_area':all_area,'all_repairers':all_repairers,'all_equipments':all_equipments,'sql_query':sql_query,'filter':filter,'repairer_id_param':repairer_id_param[0],'area_id_param':area_id_param[0],'equipment_id_param':equipment_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+        context = {'all_area':all_area,'all_repairers':all_repairers,'all_equipments':all_equipments,'sql_query':sql_query,'filter':filter,'repairer_id_param':return_repairer,'area_id_param':return_area,'equipment_id_param':equipment_id_param[0],'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
         return render(request,'machines/repair_history.html',context)
 
 

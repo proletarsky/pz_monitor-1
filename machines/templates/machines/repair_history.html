@@ -35,8 +35,9 @@
      <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{area_id_param}}" data-bool="{{bool_limit}}" >
      <div class="form-row">
      <label class="required" for="workshop">Участок:</label>
-<select name="area_id_param" id="area_id_param" data-selected_id="2">
+<select name="area_id_param" id="area_id_param" data-selected_id="2" data-area_id_param="{{area_id_param}}" >
 	<option selected="selected" disabled="disabled">Выбрать Участок</option>
+	<option value="0" >Все участки</option>
 {% for y in all_area %}                
                     <option value="{{ y.id }}">{{ y }}</option>
                 {% endfor %}
@@ -47,8 +48,9 @@
 
      <div class="form-row">
      <label class="required" for="workshop">ФИО ремонтника:</label>
-<select name="repairer_id_param" id="repairer_id_param" data-selected_id="2">
+<select name="repairer_id_param" id="repairer_id_param" data-selected_id="2" data-repairer_id_param="{{repairer_id_param}}" >
 	<option selected="selected" disabled="disabled">Выбрать ФИО</option>
+	<option value="0" >Все ремонтники</option>
 {% for y in all_repairers %}                
                     <option value="{{ y.id }}">{{ y }}</option>
                 {% endfor %}
@@ -201,6 +203,12 @@ Date.time = function() { return Date.now().getUnixTime(); }
         function time(x){ return new Date().getUnixTime(x) ;}
         
        $(document).ready(function () {
+
+var area = $('#area_id_param');
+area.val( $(area).data('area_id_param') );
+
+var repairer = $('#repairer_id_param');
+repairer.val( $(repairer).data('repairer_id_param') );
 
 var repair_comment = $('.repair_comment');
 $.each($('.repair_comment'),function(index,value){  

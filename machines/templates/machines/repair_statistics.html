@@ -35,8 +35,9 @@
      <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{area_id_param}}" data-bool="{{bool_limit}}" >
      <div class="form-row">
      <label class="required" for="workshop">Участок:</label>
-<select name="area_id_param" id="area_id_param" data-selected_id="2">
+<select name="area_id_param" id="area_id_param" data-selected_id="{{area_id_param}}"  data-area_id_param="{{area_id_param}}" >
     <option selected="selected" disabled="disabled">Выбрать Участок</option>
+    <option value="0" >Все участки</option>
 {% for y in all_area %}                                    
                     <option value="{{ y.id }}">{{ y }}</option>
                 {% endfor %}
@@ -48,7 +49,7 @@
 
     
            
-    <!--  <option selected="selected" value="2">Участок №5 (лопаточный) цеха №7</option>  -->
+
     
     
      </div> 
@@ -158,6 +159,13 @@ Date.time = function() { return Date.now().getUnixTime(); }
         function time(x){ return new Date().getUnixTime(x) ;}
         
        $(document).ready(function () {
+
+
+    var area = $('#area_id_param');
+    area.val( $(area).data('area_id_param') );
+     
+    
+
        $( ".gra" ).each(function( index ){
 
         /*var work = Math.floor(new Date().getTime($(this).data('work')) ),
