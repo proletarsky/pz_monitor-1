@@ -98,6 +98,6 @@ def diagram_statistics(request):
 
 
 def cpu_stat(request):
-    all_objects = Object_list.objects.filter(is_in_monitoring_cpu=True)
+    all_objects = Object_list.objects.filter(is_in_monitoring_cpu=True).order_by('-id')
     return render(request,'sanctuary/cpu_stat.html',{'all_objects':all_objects})
 
