@@ -49,29 +49,11 @@
 
 <div id="sidebar-wrapper">
 <div class="pz-logo">
-        <a href="/" style="display: block;">
+        <a href="#" style="display: block;">
             <img src="/static/img/pzlogo.png" alt="">
         </a>
 </div>
- <ul class="nav navbar-nav navbar-right">
-            {% if user.is_authenticated %}
-                <li class="login_as">
-                    <a href="#" id="login_as">
-                        <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
-                    </a>
-                </li>
-                <li class="logoutb">
-                    <a href="{% url 'logout' %}" id="logout">
-                        <span class="glyphicon glyphicon-log-out"></span> Выход
-                    </a>
-                </li>
-            {% else %}
-                <li class="loginb">
-                    <a href="{% url 'login' %}" id="login">
-                        <span class="glyphicon glyphicon-log-in"></span> Вход</a>
-                </li>
-            {% endif %}
-        </ul>
+
 
             <ul class="sidebar-nav">
                 <li class="sidebar-brand"> {{ equipments.0.area  }}</li>
@@ -596,12 +578,12 @@ $('#crush-reason').css('display','none');
  <div class="footer">
 
     <div class="footer-pz-logo-osk">
-        <a href="http://www.aoosk.ru" target="_blank">
+        <a href="#" >
             <img src="{% static 'img/OSKLogo.png' %}" alt>
         </a>
     </div>
     <div class="footer-pz-logo">
-        <a href="/">
+        <a href="#">
             <img src="{% static 'img/pzLogo.png' %}" alt>
         </a>
     </div>
