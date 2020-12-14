@@ -7,17 +7,19 @@
     <title>Пролетарский завод - внутренний портал</title>
 
     {% load static %}
+    {% load bootstrap %}
+
 <script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
-<!--
+
     <script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/jquery-ui.js'%}"></script>
     <script src="{% static 'js/datepicker-ru.js' %}"></script>
     <script src="{% static 'js/jquery.inputmask.js' %}"></script>
--->
+
     <!-- Bootstrap -->
     <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
 
@@ -43,8 +45,6 @@
 <link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="152x152">
 </head>
 <body class="black">
-
-
 <div id="sidebar-wrapper">
 <div class="pz-logo">
         <a href="/sanctuary/main_page" style="display: block;">
@@ -80,49 +80,38 @@
 <!-- <div class="header-block"><h1 class="logo-text"></h1></div> -->
 
 <div id="wrapper">
-<div class="form-wrapper" style="padding-top:120px;text-align:center;">
-<div class="row">
-<form action="/sanctuary/ip_statuses" method="GET" >
-	<div class="form-row">
-	 <!-- <label class="required" for="workshop">Цех:</label>-->
-	<select id="catalog_id" name="catalog_id" style="    font-size:20px;
-    vertical-align: middle;
-    line-height: normal;
-    background: transparent;
-    color: #000;
-    padding: 15px 20px;
-    border-radius: 5px;">
-	{% for x in all_catalogs %}
-	<option value="none" selected disabled hidden> 
-          Выберите каталог 
-      </option> 
-	<option style="color:#000;" value="{{ x.id }}" >{{ x }}</option>
-	{% endfor %}	
-	</select>
-</div>	
-	<input id="sendform" type="submit" value="Найти" style="font-size: 20px;
-    vertical-align: middle;
-    line-height: normal;
-    background: transparent;
-    color: white;
-   	padding: 15px 20px;
-    border:1px solid #767676;
-    border-radius: 5px;
-    display: none;
-    ">
-</form>
-</div>
-<div class="select-wrapper">
 
-	{% for x in ip_objects_active %}	
-	<div class="objects-block {% if x.active_status %}active-block{% else %}deactive-block{% endif %}" >
-	<span class="object-ip">{{ x.ip }}</span>
-	<span class="object-name">{{ x.name }}</span>
-	</div>
-	{% endfor %}
-</div>
+<div id='pagecontent'>
+   
 
+<div class="page-header" style="padding-top: 90px; text-align: center;">
+        <h2>Мониторинг производительности</h2>
+    </div>
+	<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+            <th scope="col" style="width:16%">Каталог</th>            
+			<th scope="col" style="width:16%" >IP адрес</th>
+            <th scope="col" style="width:16%" >Наименование</th>
+            <th scope="col" style="width:16%" >Нагрузка на ЦПУ</th>
+            <th scope="col" style="width:16%" >Нагрузка на оперативную память</th>
+            <th scope="col" style="width:16%" >Нагрузка на диск С</th>
+        </thead>
+        <tbody>
+        	{% for x in all_objects %}
 
+			<tr>
+       			<td>{{ x.catalog }}</td>
+        		<td>{{ x.ip }}</td>
+        		<td>{{ x.name }}</td>        		
+        		<td>{{ x.cpu }}%</td>
+        		<td>{{ x.ram }}%</td>
+        		<td>{{ x.disk }}%</td>
+        	</tr>
+{% endfor %}
+        	
+
+        </tbody>
+</table>
 </div>
 </div>
 <div class="footer">
@@ -138,36 +127,5 @@
         </a>
     </div>
 </div>
-<script type="text/javascript">
-$( document ).ready(function(){
-
-
-var urlParams = new URLSearchParams(window.location.search);
-if(urlParams.toString()!=''){
-if(urlParams.has('catalog_id')){
-var exists = 0 != $('#catalog_id option[value='+parseInt(urlParams.get('catalog_id'))+']').length;
-if(exists){$('#catalog_id').val(parseInt(urlParams.get('catalog_id')));}
-}
-
-//location.hash = urlParams.toString();
-}
-
-
-   //$('document.body').on('change',"#catalog_id",function(e) {
-   	$('#catalog_id').change(function(){
-   	console.log(123);
-   $('#sendform').click();   
-});
-
-
-});
-</script>
-
-
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-<!--script src="'bootstrap/js/bootstrap.min.js"></script> -->
 </body>
 </html>
-
-

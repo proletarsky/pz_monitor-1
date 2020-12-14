@@ -74,7 +74,9 @@
                 <li class="sidebar-brand">
                     <a href="/sanctuary/diagram_statistics"><span class="glyphicon "></span>Статистика</a>
                 </li>
-               
+                <li class="sidebar-brand">
+                    <a href="/sanctuary/cpu_stat"><span class="glyphicon "></span>Производительность</a>
+                </li>
 			</ul>
         </div>
 
@@ -102,16 +104,6 @@
 
 <script type="text/javascript" src="{% static 'js/repair_statistics.js' %}"></script>
 
-    {% if user.is_superuser %}
-        <li class="sidebar-brand">
-            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
-        </li>
-    {% endif %}
-	{% if request.user|has_group:'Руководитель производства' %}
-        <li class="sidebar-brand">
-            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
-        </li>
-    {% endif %}
 
 
   

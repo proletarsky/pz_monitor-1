@@ -97,4 +97,7 @@ def diagram_statistics(request):
     return render(request,'sanctuary/diagram_statistics.html',{'sql_query':sql_query,'all_catalogs':all_catalogs,'filter':filter,'start_interval':start_interval,'end_interval':end_interval,'catalog_id_param':catalog_id_param[0]})
 
 
+def cpu_stat(request):
+    all_objects = Object_list.objects.filter(is_in_monitoring_cpu=True)
+    return render(request,'sanctuary/cpu_stat.html',{'all_objects':all_objects})
 
