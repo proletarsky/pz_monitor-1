@@ -16,6 +16,11 @@ class Object_list(models.Model):
     description = models.CharField(max_length=100,verbose_name='Обозначение')
     active_status = models.BooleanField(verbose_name='Текущий статус', choices=JOB_STATUSES,null=False,default=True)
     catalog = models.ForeignKey(Catalog,verbose_name='Каталог',on_delete=models.SET_NULL,null=True,blank=True)
+    is_in_monitoring_cpu = models.BooleanField(verbose_name='Участвует в мониторинге параметров сервера',default=False,null=True,blank=True)
+    os = models.CharField(max_length=50,verbose_name='Операционная система',null=True,blank=True)
+    cpu=models.FloatField(max_length=50,verbose_name='ЦПУ',null=True,blank=True)
+    ram = models.FloatField(max_length=50,verbose_name='Память',null=True,blank=True)
+    disk= models.FloatField(max_length=50,verbose_name='Диск',null=True,blank=True)
 
     def __str__(self):
         msg = self.name+' '+self.ip
@@ -46,3 +51,12 @@ class Sidebar_statistics(models.Model):
     end_time = models.TimeField(verbose_name='Время конца периода',blank=True,null=True)
     de_facto = models.DurationField(verbose_name='Время работы с учетом расписания',blank=True,null=True)
     status = models.BooleanField(verbose_name='Текущий статус',null=True,blank=True)
+
+
+#Модель для добавления данных по ЦПУ,памяти и загрузки дисков
+class CPU_RAM_DISK(models.Model):
+    date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
+    ip = models.CharField(max_length=100, verbose_name='IP адрес')
+    cpu=models.FloatField(max_length=50,verbose_name='ЦПУ')
+    ram = models.FloatField(max_length=50,verbose_name='Память')
+    disk= models.FloatField(max_length=50,verbose_name='Диск')
