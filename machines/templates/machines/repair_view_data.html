@@ -63,6 +63,7 @@
 	 <div class="form-row">
 	 <label class="required" for="workshop">Участок:</label>
      <select id="id_workshop" data-selected_id="{{ area_url_info.id }}">
+        <option value="" selected >Все участки</option>
      {% for x in all_area  %}      
       <option {% if area_url_info.id == x.id %} selected="selected" {% endif %}  value="{{x.id}}">{{x}}</option> 
   	{% endfor %}
@@ -80,9 +81,13 @@
 	$(document).on('click','#sendform',function(e){
 		e.preventDefault();
 		var id_workshop = $('#id_workshop').val();
-		if(id_workshop!=0){
-			window.location = "/machines/repair_view_data/"+id_workshop;
-		}else{alert('Vibirite uchastok');}
+		//if(id_workshop!=0){
+            if(id_workshop!=''){
+			window.location = "/machines/repair_view_data/?area_url_info="+id_workshop;
+        }else{
+            window.location = "/machines/repair_view_data/";
+        }
+		//}else{alert('Vibirite uchastok');}
 		
 	});
 
@@ -117,7 +122,7 @@
         {% for x in crush_equipments %}		
 
             <tr>
-                <td aria-label="Цех" ><a class="moreinfa" href="#">{{ x.machines_id.area }}</a></td>
+                <td aria-label="Цех" ><a class="moreinfa" href="/machines/repair_view_data/?area_url_info={{x.machines_id.area.id}}">{{ x.machines_id.area }}</a></td>
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
                 
@@ -187,7 +192,7 @@
         
         {% for x in repair_equipments %}				
             <tr data-strid= {{ x.id }} >
-                <td aria-label="Цех" ><a class="moreinfa" href="/machines/repair_view_data/{{area_url_info.id}}">{{ x.machines_id.area }}</a></td>
+                <td aria-label="Цех" ><a class="moreinfa" href="/machines/repair_view_data/?area_url_info={{x.machines_id.area.id}}">{{ x.machines_id.area }}</a></td>
                 <td aria-label="Оборудование" >({{ x.machines_id.code }}) {{ x.machines_id.model }}</td>
                 <td aria-label="Фото оборудования">
                 

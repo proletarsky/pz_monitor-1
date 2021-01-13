@@ -437,15 +437,19 @@ def complex_equipments(request,complex_id):
 
 
 
-def repair_view_data(request,area_id):
+def repair_view_data(request):
     all_area = Area.objects.all()
-    area_url_info = Area.objects.get(id=area_id)
-    need_id=Equipment.objects.filter(is_in_repair=True,area__id=area_id,repair_job_status=1)
+    area_id = [ x.id for x in all_area]
+    area_url_info = ''
+    if request.GET.get('area_url_info'):
+        area_id=request.GET.get('area_url_info')
+        area_url_info = Area.objects.get(id=area_id)
+    need_id=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,repair_job_status=1)
     crush_equipments=[]
     for x in need_id:
         a=Repair_rawdata.objects.filter(repair_job_status=1,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
         crush_equipments.extend(a)
-    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id=area_id,repair_job_status=2)
+    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,repair_job_status=2)
     repair_equipments=[]
     for x in need_id_rep:
         a=Repair_rawdata.objects.filter(repair_job_status=2,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
@@ -478,7 +482,7 @@ def repair_view_data(request,area_id):
                     return JsonResponse(message)
                 return JsonResponse({'test_pss':'test_pss'})
             else:
-                return redirect('repair_view_data', area_id=area_id)
+                return redirect('repair_view_data')
     else:
         form = Repairform()  
     context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'form':form,'all_area':all_area,'area_url_info':area_url_info}
