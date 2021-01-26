@@ -31,6 +31,7 @@ from django.shortcuts import redirect
 #FOR JSON RESPONSE!!!
 from django.http import JsonResponse
 from .de_facto_time_interval import get_de_facto_time,chill_days
+from django.db.models.functions import Coalesce
 
 
 @permission_classes([permissions.AllowAny])
@@ -494,9 +495,9 @@ def repair_statistics(request):
 
     area_id_param = tuple(x.id for x in all_area)
     return_area = 0
-    start_interval = '2020-10-25'
+    start_interval = '2020-11-01'
     now =datetime.datetime.now().date()
-    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+    end_interval = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
@@ -508,48 +509,270 @@ def repair_statistics(request):
             return_area = area_id_param[0]
     if request.GET.get('start_date'):
         start_interval=request.GET.get('start_date')
+        if start_interval < '2020-11-01': start_interval='2020-11-01'
     if request.GET.get('end_date'):
         end_interval=request.GET.get('end_date')
+        if end_interval > (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))): end_interval = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     if request.GET.get('bool_limit'):
         bool_limit=bool(request.GET.get('bool_limit')),
+    #Если начало интервала меньше даты начала статистики,а конец интервала больше даты конца статистики, то считаем полную статистику по станкам 
+    if start_interval == '2020-11-01' and end_interval == (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))):
+        equip_id=Equipment.objects.filter(is_in_repair=True)
+        for x in equip_id:
+            if x.timetable=='8/5':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        b.end_date=None
+                        b.end_time=None
+                        b.de_facto=get_de_facto_time(b.start_date,datetime.datetime.now().date(),b.start_time,datetime.datetime.now().time())
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a = stats[y]
+                            a.de_facto=get_de_facto_time(a.start_date,a.end_date,a.start_time,a.end_time)
+                            a.save()
+                    elif len(stats)==1:
+                        a=stats[0]
+                        a.end_date=None
+                        a.end_time=None
+                        a.de_facto=get_de_facto_time(a.start_date,datetime.datetime.now().date(),a.start_time,datetime.datetime.now().time())
+                        a.save()
+                else:
+                    continue
+            elif x.timetable=='24/7':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                now = datetime.datetime.now()
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        b.end_date=None
+                        b.end_time=None
+                        b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a=stats[y]
+                            a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day=a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute)- datetime.datetime(year=a.start_date.year,month=a.start_date.month,day=a.start_date.day,hour=a.start_time.hour,minute=a.start_time.minute)
+                            a.save()
+                    elif len(stats)==1:
+                        b=stats[0]
+                        b.end_date=None
+                        b.end_time=None
+                        b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        b.save()
+                else:
+                    continue
 
-    equip_id=Equipment.objects.filter(is_in_repair=True)
-    for x in equip_id:
-        if x.timetable=='8/5':
-            stats = Repair_statistics.objects.filter(equipment__id=x.id).order_by('-id')
-            if stats:
-                if len(stats)>1:
-                    b=stats[0]
-                    b.de_facto=get_de_facto_time(b.start_date,datetime.datetime.now().date(),b.start_time,datetime.datetime.now().time())
-                    b.save()
-                    for y in range(1,len(stats),1):
-                        a = stats[y]
-                        a.de_facto=get_de_facto_time(a.start_date,a.end_date,a.start_time,a.end_time)
-                        a.save()
-                elif len(stats)==1:
-                    a=stats[0]
-                    a.de_facto=get_de_facto_time(a.start_date,datetime.datetime.now().date(),a.start_time,datetime.datetime.now().time())
+    #Если меняем фильтр старта
+    elif start_interval > '2020-11-01' and end_interval == (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))):
+        equip_id=Equipment.objects.filter(is_in_repair=True)
+        now = datetime.datetime.now()
+        for x in equip_id:
+            start_1 = datetime.date(year=int(start_interval[0:4:1]),month=int(start_interval[5:7:1]),day=int(start_interval[8:10:1]))
+            start_1_time = datetime.time(hour=7,minute=00)
+            timetable_check = Repair_statistics.objects.filter(equipment_id=x.id).order_by('id')
+
+            if timetable_check:
+                timetable_check_id = timetable_check[0]
+                if timetable_check_id.start_date>start_1:
+                    start_1=timetable_check_id.start_date
+
+            if x.timetable=='8/5':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a = stats[0]
+                    a.end_date = datetime.datetime.now().date()
+                    a.end_time = datetime.datetime.now().time()
                     a.save()
-            else:
-                continue
-        elif x.timetable=='24/7':
-            stats = Repair_statistics.objects.filter(equipment__id=x.id).order_by('-id')
-            now = datetime.datetime.now()
-            if stats:
-                if len(stats)>1:
-                    b=stats[0]
-                    b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
-                    b.save()
-                    for y in range(1,len(stats),1):
-                        a=stats[y]
-                        a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day=a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute)- datetime.datetime(year=a.start_date.year,month=a.start_date.month,day=a.start_date.day,hour=a.start_time.hour,minute=a.start_time.minute)
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_1  ,start_date__lte=end_interval).order_by('id')
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        b.de_facto = get_de_facto_time(start_1,b.end_date,start_1_time,b.end_time)
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a = stats[y]
+                            a.de_facto=get_de_facto_time(a.start_date,a.end_date,a.start_time,a.end_time)
+                            a.save()
+                    elif len(stats)==1:
+                        b=stats[0]
+                        b.de_facto = get_de_facto_time(start_1,datetime.datetime.now().date(),start_1_time,datetime.datetime.now().time())
+                        b.save()
+
+            elif x.timetable =='24/7':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a = stats[0]
+                    a.end_date = datetime.datetime.now().date()
+                    a.end_time = datetime.datetime.now().time()
+                    a.save()
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_1  ,start_date__lte=end_interval).order_by('id')
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        #b.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        b.de_facto = datetime.datetime(year=b.end_date.year,month=b.end_date.month,day = b.end_date.day,hour=b.end_time.hour,minute=b.end_time.minute) - datetime.datetime(year=start_1.year,month=start_1.month,day=start_1.day,hour=start_1_time.hour,minute=start_1_time.minute)
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a = stats[y]
+                            a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day=a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute)- datetime.datetime(year=a.start_date.year,month=a.start_date.month,day=a.start_date.day,hour=a.start_time.hour,minute=a.start_time.minute)
+                            a.save()
+                    elif len(stats)==1:
+                        b = stats[0]
+                        #b.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        b.de_facto = datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute) - datetime.datetime(year=start_1.year,month=start_1.month,day=start_1.day,hour=start_1_time.hour,minute=start_1_time.minute)
+                        b.save()
+    #Если меняем дату финиша
+    elif start_interval == '2020-11-01' and end_interval < (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))):
+        equip_id=Equipment.objects.filter(is_in_repair=True)
+        now = datetime.datetime.now()
+        for x in equip_id:
+            end_1 = datetime.date(year=int(end_interval[0:4:1]),month=int(end_interval[5:7:1]),day=int(end_interval[8:10:1]))
+            end_1_time = datetime.time(hour=23,minute=59)
+            timetable_check = Repair_statistics.objects.filter(equipment_id=x.id).order_by('id')
+            if timetable_check:
+                timetable_check_id = timetable_check[0]
+                if timetable_check_id.start_date>end_1:
+                    stats = Repair_statistics.objects.filter(equipment_id=x.id)
+                    for x in stats:
+                        x.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        x.save()
+                    continue
+
+            if x.timetable=='8/5':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a = stats[0]
+                    a.end_date = datetime.datetime.now().date()
+                    a.end_time = datetime.datetime.now().time()
+                    a.save()
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_interval  ,start_date__lte=end_1).order_by('-id')
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        b.de_facto = get_de_facto_time(b.start_date,end_1,b.start_time,end_1_time)
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a=stats[y]
+                            a.de_facto=get_de_facto_time(a.start_date,a.end_date,a.start_time,a.end_time)
+                            a.save()
+                    elif len(stats)==1:
+                        b=stats[0]
+                        b.de_facto=get_de_facto_time(b.start_date,end_1,b.start_time,end_1_time)
+                        b.save()
+
+            if x.timetable=='24/7':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a=stats[0]
+                    a.end_date=datetime.datetime.now().date()
+                    a.end_time=datetime.datetime.now().time()
+                    a.save()
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_interval  ,start_date__lte=end_1).order_by('-id')
+                if stats:
+                    if len(stats)>1:
+                        b=stats[0]
+                        b.de_facto=datetime.datetime(year=end_1.year,month=end_1.month,day = end_1.day,hour=end_1_time.hour,minute=end_1_time.minute) - datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        b.save()
+                        for y in range(1,len(stats),1):
+                            a=stats[y]
+                            a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day=a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute)- datetime.datetime(year=a.start_date.year,month=a.start_date.month,day=a.start_date.day,hour=a.start_time.hour,minute=a.start_time.minute)
+                            a.save()
+                    elif len(stats)==1:
+                        b=stats[0]
+                        b.de_facto = datetime.datetime(year=end_1.year,month=end_1.month,day = end_1.day,hour=end_1_time.hour,minute=end_1_time.minute) - datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        b.save()
+
+    #Если меняли дату старта и финиша                    
+    elif start_interval > '2020-11-01' and end_interval < (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))):
+        equip_id=Equipment.objects.filter(is_in_repair=True)
+        now = datetime.datetime.now()
+        for x in equip_id:
+            start_1 = datetime.date(year=int(start_interval[0:4:1]),month=int(start_interval[5:7:1]),day=int(start_interval[8:10:1]))
+            start_1_time = datetime.time(hour=7,minute=00)
+            end_1 = datetime.date(year=int(end_interval[0:4:1]),month=int(end_interval[5:7:1]),day=int(end_interval[8:10:1]))
+            end_1_time = datetime.time(hour=23,minute=59)
+            timetable_check = Repair_statistics.objects.filter(equipment_id=x.id).order_by('id')
+            if timetable_check:
+                timetable_check_id = timetable_check[0]
+                if timetable_check_id.start_date>end_1:
+                    stats = Repair_statistics.objects.filter(equipment_id=x.id)
+                    for x in stats:
+                        x.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        x.save()
+                    continue
+                if timetable_check_id.start_date>start_1:
+                    start_1=timetable_check_id.start_date
+
+            if x.timetable == '8/5':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a=stats[0]
+                    a.end_date=datetime.datetime.now().date()
+                    a.end_time=datetime.datetime.now().time()
+                    a.save()
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_1  ,start_date__lte=end_1).order_by('id')
+                if stats:
+                    if len(stats)==2:
+                        a=stats[0]
+                        b=stats[1]
+                        a.de_facto=get_de_facto_time(start_1,a.end_date,start_1_time,a.end_time)
+                        b.de_facto=get_de_facto_time(b.start_date,end_1,b.start_time,end_1_time)
                         a.save()
-                elif len(stats)==1:
-                    b=stats[0]
-                    b.de_facto=datetime.datetime(year=now.year,month=now.month,day=now.day,hour=now.hour,minute=now.minute)-datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
-                    b.save()
-            else:
-                continue
+                        b.save()
+                    elif len(stats)==1:
+                        a=stats[0]
+                        a.de_facto = get_de_facto_time(start_1,end_1,start_1_time,end_1_time)
+                        a.save()
+                    elif len(stats)>2:
+                        a=stats[0]
+                        b=stats.reverse()[0]
+                        a.de_facto=get_de_facto_time(start_1,a.end_date,start_1_time,a.end_time)
+                        b.de_facto=get_de_facto_time(b.start_date,end_1,b.start_time,end_1_time)
+                        a.save()
+                        b.save()
+                        for y in range(1,len(stats)-1,1):
+                            q=stats[y]
+                            q.de_facto=get_de_facto_time(q.start_date,q.end_date,q.start_time,q.end_time)
+                            q.save()
+
+            if x.timetable == '24/7':
+                stats = Repair_statistics.objects.filter(equipment_id=x.id).order_by('-id')
+                if stats:
+                    a=stats[0]
+                    a.end_date=datetime.datetime.now().date()
+                    a.end_time=datetime.datetime.now().time()
+                    a.save()
+                stats = Repair_statistics.objects.filter(equipment_id=x.id,end_date__gte=start_1  ,start_date__lte=end_1).order_by('id')
+                if stats:
+                    if len(stats)==2:
+                        a=stats[0]
+                        b=stats[1]
+                        #a.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day = a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute) - datetime.datetime(year=start_1.year,month=start_1.month,day=start_1.day,hour=start_1_time.hour,minute=start_1_time.minute)
+                        b.de_facto = datetime.datetime(year=end_1.year,month=end_1.month,day = end_1.day,hour=end_1_time.hour,minute=end_1_time.minute) - datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        #b.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        a.save()
+                        b.save()
+                    elif len(stats)==1:
+                        a=stats[0]
+                        #a.de_facto=datetime.timedelta(days=0,hours=0,minutes=0)
+                        a.de_facto =  datetime.datetime(year=end_1.year,month=end_1.month,day = end_1.day,hour=end_1_time.hour,minute=end_1_time.minute) - datetime.datetime(year=start_1.year,month=start_1.month,day=start_1.day,hour=start_1_time.hour,minute=start_1_time.minute)
+                        a.save()
+                    elif len(stats)>2:
+                        a=stats[0]
+                        b=stats.reverse()[0]
+                        a.de_facto=datetime.datetime(year=a.end_date.year,month=a.end_date.month,day = a.end_date.day,hour=a.end_time.hour,minute=a.end_time.minute) - datetime.datetime(year=start_1.year,month=start_1.month,day=start_1.day,hour=start_1_time.hour,minute=start_1_time.minute)
+                        b.de_facto = datetime.datetime(year=end_1.year,month=end_1.month,day = end_1.day,hour=end_1_time.hour,minute=end_1_time.minute) - datetime.datetime(year=b.start_date.year,month=b.start_date.month,day=b.start_date.day,hour=b.start_time.hour,minute=b.start_time.minute)
+                        a.save()
+                        b.save()
+                        for y in range(1,len(stats)-1,1):
+                            q=stats[y]
+                            q.de_facto = datetime.datetime(year=q.end_date.year,month=q.end_date.month,day=q.end_date.day,hour=q.end_time.hour,minute=q.end_time.minute)- datetime.datetime(year=q.start_date.year,month=q.start_date.month,day=q.start_date.day,hour=q.start_time.hour,minute=q.start_time.minute)
+                            q.save()
+
+
+
 
     sql_query = Repair_statistics.objects.raw('''select
                                                     1 as id,equipment_id,
@@ -561,8 +784,9 @@ def repair_statistics(request):
                                                     extract (epoch from(coalesce(sum(case when a.repair_job_status=2 then de_facto end),'0:00:00'))) as ep_repair
                                                     from machines_repair_statistics a
                                                     join machines_equipment b on a.equipment_id=b.id
-                                                    where b.area_id in %(area_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<=%(end_interval)s
-                                                    and b.is_limit in %(bool_limit)s				
+                                                    where b.area_id in %(area_id_param)s 
+                                                    and b.is_limit in %(bool_limit)s
+                                                    and (%(start_interval)s<=coalesce(a.end_date,current_timestamp) and %(end_interval)s>=a.start_date)
                                                     group by equipment_id 
                                                      ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
     
