@@ -569,7 +569,7 @@ def repair_statistics(request):
         now = datetime.datetime.now()
         for x in equip_id:
             start_1 = datetime.date(year=int(start_interval[0:4:1]),month=int(start_interval[5:7:1]),day=int(start_interval[8:10:1]))
-            start_1_time = datetime.time(hour=7,minute=00)
+            start_1_time = datetime.time(hour=17,minute=00)
             timetable_check = Repair_statistics.objects.filter(equipment_id=x.id).order_by('id')
 
             if timetable_check:
@@ -689,7 +689,7 @@ def repair_statistics(request):
         now = datetime.datetime.now()
         for x in equip_id:
             start_1 = datetime.date(year=int(start_interval[0:4:1]),month=int(start_interval[5:7:1]),day=int(start_interval[8:10:1]))
-            start_1_time = datetime.time(hour=7,minute=00)
+            start_1_time = datetime.time(hour=17,minute=00)
             end_1 = datetime.date(year=int(end_interval[0:4:1]),month=int(end_interval[5:7:1]),day=int(end_interval[8:10:1]))
             end_1_time = datetime.time(hour=23,minute=59)
             timetable_check = Repair_statistics.objects.filter(equipment_id=x.id).order_by('id')
