@@ -265,14 +265,20 @@ class Equipment(models.Model):
     red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
     in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
     is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
-    # image = models.ImageField(blank=True, null=True)
-    # sm_image = models.ImageField(blank=True, null=True)
+    problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев',default=False,blank=True,null=True)
+    dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя',blank=True,null=True)
 
     def __str__(self):
         if self.area is None:
             return '{0} - {1}, цех {2}'.format(self.code, self.model,self.workshop)
         else:
             return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
+
+class Minute_interval(models.Model):
+    start = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
+    end = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
+    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
 
 
 class Repairer_master_reason(models.Model):
