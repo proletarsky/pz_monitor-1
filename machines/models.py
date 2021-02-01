@@ -275,8 +275,8 @@ class Equipment(models.Model):
             return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
 
 class Minute_interval(models.Model):
-    start = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
-    end = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
+    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
     equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
     work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
 
