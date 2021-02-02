@@ -279,6 +279,22 @@ class Minute_interval(models.Model):
     ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
     equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
     work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
+    hour = models.ForeignKey('Hour_interval',verbose_name = 'Промежуток входит в часовой интервал',null=True,blank=True,on_delete=models.CASCADE)
+
+class Hour_interval(models.Model):
+    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
+    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
+    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,blank=True, limit_choices_to={'is_operator': True})
+    trinity = models.ForeignKey('Trinity_interval',verbose_name = 'Промежуток входит в 3-часовой интервал',null=True,blank=True,on_delete=models.CASCADE)
+
+class Trinity_interval(models.Model):
+    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
+    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
+    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,blank=True, limit_choices_to={'is_operator': True})
 
 
 class Repairer_master_reason(models.Model):
