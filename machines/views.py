@@ -12,7 +12,7 @@ from django.http.response import HttpResponse
 from django.core.paginator import Paginator
 from django.views.generic import ListView, View
 from django.views.generic import DetailView, UpdateView
-from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics,Repairer_master_reason,Repair_history
+from .models import Equipment, RawData, Reason, ClassifiedInterval, GraphicsData, Area, Workshop, Repairer,Repair_rawdata , Complex,Repair_reason,Repair_statistics,Repairer_master_reason,Repair_history,Minute_interval,Hour_interval,Trinity_interval
 from .serializers import RawDataSerializer
 from .forms import ReasonForm, ClassifiedIntervalFormSet, EquipmentDetailForm
 from rest_framework import viewsets, permissions, status, authentication
@@ -169,6 +169,15 @@ class EquipmentWorksDetailView(UpdateView):
         graph_qs = GraphicsData.objects.filter(equipment=self.object, date__gte=start_time,
                                                date__lte=end_time).order_by('date')
         context['rawdata'] = [[gd.date, gd.value] for gd in graph_qs]
+
+        start_new_limits = datetime.datetime(year=self.filter_date.year,month=self.filter_date.month,day=self.filter_date.day,hour=0,minute=0)#,second=0)
+        end_new_limits = start_new_limits + datetime.timedelta(days=1)
+
+
+        context['minute_interval'] = Minute_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
+        context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
+        context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
+        
 
         if self.request.POST:
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)
