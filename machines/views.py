@@ -174,10 +174,10 @@ class EquipmentWorksDetailView(UpdateView):
         end_new_limits = start_new_limits + datetime.timedelta(days=1)
 
 
-        context['minute_interval'] = Minute_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
-        context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
-        context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits)
-        
+        context['minute_interval'] = Minute_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+        context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+        context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+        context['new_algoritm'] = self.object.problem_machine
 
         if self.request.POST:
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)

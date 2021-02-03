@@ -64,9 +64,7 @@
                                 {% endif %}>
 </div>
                     </th>
-                    <th>
-                        <a href="{% url 'classifiedinterval-list' %}">Все простои</a>
-                    </th>
+                    <!-- <th><a href="{% url 'classifiedinterval-list' %}">Все простои</a></th>-->
 <!--
                     <th class="text-right">
                         <input type="submit" class="btn btn-primary text-right" id="btn_save_and_go"
@@ -84,7 +82,7 @@
     </div>
 
 
-
+<h3 style="padding-bottom:20px;">График работы</h3>
     <div id="my-graph" style="text-align: center;"></div>
 {% endif %}
 
@@ -186,7 +184,7 @@ explorer: {
 -->
 {% else %}
 
-
+{% if new_algoritm is not True %} 
 <div class="table-responsive">
     <table class="table">
         {{ intervals.management_form }}
@@ -231,16 +229,253 @@ explorer: {
     </table>
 </div>
 </div>
+{% endif %}
 </form>
 
 {% endif %}
+</div>
 
-{{ minute_interval }}
-{{ hour_interval }}
-{{ trinity_interval }}
+
+<style>
+    .True_status{background:#13da64;}
+    .False_status{background:#ff2b2b;}
+    .tf-item{
+    position:relative;;
+    display: inline-block;
+    height: 60px;    
+    border-right: 1px solid #5a5a5a;
+    border-top: 1px solid #5a5a5a;
+    border-bottom: 1px solid #5a5a5a;
+    vertical-align: top;    
+}
+    .new-wrapper{display:table;width:100%;text-align:left;border-left: 1px solid #5a5a5a;margin-bottom:20px;}
+    .inner-new-wrapper{display:table;width:100%;text-align:left;border-left:1px solid #5a5a5a;margin-bottom:20px;top:-80px;
+    position: relative;}
+    .trinity,.trinity2{width:12.5%;}
+
+    .trinity:first-child:before{
+        position:absolute;
+        left:0;
+        bottom:-17.5px;
+        content:attr(data-starting);
+        width:50%;
+        height:15px; 
+        text-align: left;    
+    }
+    .trinity:last-child:after{
+        right:0;
+    }
+    .trinity:after{
+        position:absolute;
+        right:-15px;
+        bottom:-17.5px;
+        content:attr(data-ending);
+        width:50%;
+        height:15px;     
+        text-align: right;
+    }
+    .hour,.hour2{width:4.16%;}
+    .hour:first-child:before{
+        position:absolute;
+        left:0;
+        bottom:-17.5px;
+        content:attr(data-starting);
+        width:50%;
+        height:15px; 
+        text-align: left;    
+    }
+    .hour:last-child:after{right:0;}
+    .hour:after{
+        position:absolute;
+        right:-15px;
+        bottom:-17.5px;
+        content:attr(data-ending);
+        width:50%;
+        height:15px;     
+        text-align: right;
+    }
+    .minute{width:1.38888%;}
+    .main-new-wrapper{position:relative;margin-top:20px;padding:0 15px 0 0;}
+    .default_status{background:#c7c7c7;}
+</style>
+{% if new_algoritm %}
+
+ <!--<div class="new-wrapper">
+    {% for x in trinity_interval %}    
+    <div class="tf-item trinity2 {{ x.work_check }}_status" data-status="{{ x.work_check }}" data-starting="{{ x.starting | date:"H:i" }}" data-ending="{{ x.ending | date:"H:i" }}" ></div>
+    {% endfor%}
+</div>-->
+
+<div class="main-new-wrapper" >
+<h3 style="padding-bottom:20px;">Диаграмма работы и простоев</h3>
+<div class="new-wrapper">
+   <div class="tf-item trinity default_status" data-starting="00:00" data-ending="03:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="03:00" data-ending="06:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="06:00" data-ending="09:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="09:00" data-ending="12:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="12:00" data-ending="15:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="15:00" data-ending="18:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="18:00" data-ending="21:00" ></div>
+   <div class="tf-item trinity default_status" data-starting="21:00" data-ending="00:00" ></div>   
+</div>
+
+
+<div class="new-wrapper">
+   <div class="tf-item hour default_status" data-starting="00:00" data-ending="01:00" ></div>
+   <div class="tf-item hour default_status" data-starting="01:00" data-ending="02:00" ></div>
+   <div class="tf-item hour default_status" data-starting="02:00" data-ending="03:00" ></div>
+   <div class="tf-item hour default_status" data-starting="03:00" data-ending="04:00" ></div>
+   <div class="tf-item hour default_status" data-starting="04:00" data-ending="05:00" ></div>
+   <div class="tf-item hour default_status" data-starting="05:00" data-ending="06:00" ></div>
+   <div class="tf-item hour default_status" data-starting="06:00" data-ending="07:00" ></div>
+   <div class="tf-item hour default_status" data-starting="07:00" data-ending="08:00" ></div>
+   <div class="tf-item hour default_status" data-starting="08:00" data-ending="09:00" ></div>
+   <div class="tf-item hour default_status" data-starting="09:00" data-ending="10:00" ></div>
+   <div class="tf-item hour default_status" data-starting="10:00" data-ending="11:00" ></div>
+   <div class="tf-item hour default_status" data-starting="11:00" data-ending="12:00" ></div>
+   <div class="tf-item hour default_status" data-starting="12:00" data-ending="13:00" ></div>
+   <div class="tf-item hour default_status" data-starting="13:00" data-ending="14:00" ></div>
+   <div class="tf-item hour default_status" data-starting="14:00" data-ending="15:00" ></div>
+   <div class="tf-item hour default_status" data-starting="15:00" data-ending="16:00" ></div>
+   <div class="tf-item hour default_status" data-starting="16:00" data-ending="17:00" ></div>
+   <div class="tf-item hour default_status" data-starting="17:00" data-ending="18:00" ></div>
+   <div class="tf-item hour default_status" data-starting="18:00" data-ending="19:00" ></div>
+   <div class="tf-item hour default_status" data-starting="19:00" data-ending="20:00" ></div>
+   <div class="tf-item hour default_status" data-starting="20:00" data-ending="21:00" ></div>
+   <div class="tf-item hour default_status" data-starting="21:00" data-ending="22:00" ></div>
+   <div class="tf-item hour default_status" data-starting="22:00" data-ending="23:00" ></div>
+   <div class="tf-item hour default_status" data-starting="23:00" data-ending="00:00" ></div>    
+</div>
+
+
+<div class="new-wrapper">
+   <div class="tf-item minute default_status" data-starting="00:00" data-ending="00:20" ></div>
+   <div class="tf-item minute default_status" data-starting="00:20" data-ending="00:40" ></div>
+   <div class="tf-item minute default_status" data-starting="00:40" data-ending="01:00" ></div>
+   <div class="tf-item minute default_status" data-starting="01:00" data-ending="01:20" ></div>
+   <div class="tf-item minute default_status" data-starting="01:20" data-ending="01:40" ></div>
+   <div class="tf-item minute default_status" data-starting="01:40" data-ending="02:00" ></div>
+   <div class="tf-item minute default_status" data-starting="02:00" data-ending="02:20" ></div>
+   <div class="tf-item minute default_status" data-starting="02:20" data-ending="02:40" ></div>
+   <div class="tf-item minute default_status" data-starting="02:40" data-ending="03:00" ></div>
+   <div class="tf-item minute default_status" data-starting="03:00" data-ending="03:20" ></div>
+   <div class="tf-item minute default_status" data-starting="03:20" data-ending="03:40" ></div>
+   <div class="tf-item minute default_status" data-starting="03:40" data-ending="04:00" ></div>
+   <div class="tf-item minute default_status" data-starting="04:00" data-ending="04:20" ></div>
+   <div class="tf-item minute default_status" data-starting="04:20" data-ending="04:40" ></div>
+   <div class="tf-item minute default_status" data-starting="04:40" data-ending="05:00" ></div>
+   <div class="tf-item minute default_status" data-starting="05:00" data-ending="05:20" ></div>
+   <div class="tf-item minute default_status" data-starting="05:20" data-ending="05:40" ></div>
+   <div class="tf-item minute default_status" data-starting="05:40" data-ending="06:00" ></div>
+   <div class="tf-item minute default_status" data-starting="06:00" data-ending="06:20" ></div>
+   <div class="tf-item minute default_status" data-starting="06:20" data-ending="06:40" ></div>
+   <div class="tf-item minute default_status" data-starting="06:40" data-ending="07:00" ></div>
+   <div class="tf-item minute default_status" data-starting="07:00" data-ending="07:20" ></div>
+   <div class="tf-item minute default_status" data-starting="07:20" data-ending="07:40" ></div>
+   <div class="tf-item minute default_status" data-starting="07:40" data-ending="08:00" ></div>
+   <div class="tf-item minute default_status" data-starting="08:00" data-ending="08:20" ></div>
+   <div class="tf-item minute default_status" data-starting="08:20" data-ending="08:40" ></div>
+   <div class="tf-item minute default_status" data-starting="08:40" data-ending="09:00" ></div>
+   <div class="tf-item minute default_status" data-starting="09:00" data-ending="09:20" ></div>
+   <div class="tf-item minute default_status" data-starting="09:20" data-ending="09:40" ></div>
+   <div class="tf-item minute default_status" data-starting="09:40" data-ending="10:00" ></div>
+   <div class="tf-item minute default_status" data-starting="10:00" data-ending="10:20" ></div>
+   <div class="tf-item minute default_status" data-starting="10:20" data-ending="10:40" ></div>
+   <div class="tf-item minute default_status" data-starting="10:40" data-ending="11:00" ></div>
+   <div class="tf-item minute default_status" data-starting="11:00" data-ending="11:20" ></div>
+   <div class="tf-item minute default_status" data-starting="11:20" data-ending="11:40" ></div>
+   <div class="tf-item minute default_status" data-starting="11:40" data-ending="12:00" ></div>
+   <div class="tf-item minute default_status" data-starting="12:00" data-ending="12:20" ></div>
+   <div class="tf-item minute default_status" data-starting="12:20" data-ending="12:40" ></div>
+   <div class="tf-item minute default_status" data-starting="12:40" data-ending="13:00" ></div>
+   <div class="tf-item minute default_status" data-starting="13:00" data-ending="13:20" ></div>
+   <div class="tf-item minute default_status" data-starting="13:20" data-ending="13:40" ></div>
+   <div class="tf-item minute default_status" data-starting="13:40" data-ending="14:00" ></div>
+   <div class="tf-item minute default_status" data-starting="14:00" data-ending="14:20" ></div>
+   <div class="tf-item minute default_status" data-starting="14:20" data-ending="14:40" ></div>
+   <div class="tf-item minute default_status" data-starting="14:40" data-ending="15:00" ></div>
+   <div class="tf-item minute default_status" data-starting="15:00" data-ending="15:20" ></div>
+   <div class="tf-item minute default_status" data-starting="15:20" data-ending="15:40" ></div>
+   <div class="tf-item minute default_status" data-starting="15:40" data-ending="16:00" ></div>   
+   <div class="tf-item minute default_status" data-starting="16:00" data-ending="16:20" ></div>
+   <div class="tf-item minute default_status" data-starting="16:20" data-ending="16:40" ></div>
+   <div class="tf-item minute default_status" data-starting="16:40" data-ending="17:00" ></div>
+   <div class="tf-item minute default_status" data-starting="17:00" data-ending="17:20" ></div>
+   <div class="tf-item minute default_status" data-starting="17:20" data-ending="17:40" ></div>
+   <div class="tf-item minute default_status" data-starting="17:40" data-ending="18:00" ></div>
+   <div class="tf-item minute default_status" data-starting="18:00" data-ending="18:20" ></div>
+   <div class="tf-item minute default_status" data-starting="18:20" data-ending="18:40" ></div>
+   <div class="tf-item minute default_status" data-starting="18:40" data-ending="19:00" ></div>
+   <div class="tf-item minute default_status" data-starting="19:00" data-ending="19:20" ></div>
+   <div class="tf-item minute default_status" data-starting="19:20" data-ending="19:40" ></div>
+   <div class="tf-item minute default_status" data-starting="19:40" data-ending="20:00" ></div>
+   <div class="tf-item minute default_status" data-starting="20:00" data-ending="20:20" ></div>
+   <div class="tf-item minute default_status" data-starting="20:20" data-ending="20:40" ></div>
+   <div class="tf-item minute default_status" data-starting="20:40" data-ending="21:00" ></div>
+   <div class="tf-item minute default_status" data-starting="21:00" data-ending="21:20" ></div>
+   <div class="tf-item minute default_status" data-starting="21:20" data-ending="21:40" ></div>
+   <div class="tf-item minute default_status" data-starting="21:40" data-ending="22:00" ></div>
+   <div class="tf-item minute default_status" data-starting="22:00" data-ending="22:20" ></div>
+   <div class="tf-item minute default_status" data-starting="22:20" data-ending="22:40" ></div>
+   <div class="tf-item minute default_status" data-starting="22:40" data-ending="23:00" ></div>
+   <div class="tf-item minute default_status" data-starting="23:00" data-ending="23:20" ></div>
+   <div class="tf-item minute default_status" data-starting="23:20" data-ending="23:40" ></div>
+   <div class="tf-item minute default_status" data-starting="23:40" data-ending="00:00" ></div>       
+</div>
+
+</div>
+
+{% endif %}
+
+<script type="text/javascript">
+    $(document).ready(function() {
+var starting = 0;
+{% if new_algoritm %} 
+    {% for x in trinity_interval %}    
+    //alert("{{ x.starting | date:"H:i" }}");
+    starting = String("{{ x.starting | date:"H:i" }}");
+    //sortobjects(starting);
+    //console.log(String('{{ x.starting | date:"H:i" }}'));
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    $('.trinity[data-starting="'+starting+'"]').removeClass('default_status').addClass('{{ x.work_check}}_status');    
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    //console.log('starting:'+starting);
+{% endfor %}
+
+
+{% for x in hour_interval %}    
+    //alert("{{ x.starting | date:"H:i" }}");
+    starting = String("{{ x.starting | date:"H:i" }}");
+    //sortobjects(starting);
+    //console.log(String('{{ x.starting | date:"H:i" }}'));
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    $('.hour[data-starting="'+starting+'"]').removeClass('default_status').addClass('{{ x.work_check}}_status');    
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    //console.log('starting:'+starting);
+{% endfor %}
+
+{% for x in minute_interval %}    
+    //alert("{{ x.starting | date:"H:i" }}");
+    starting = String("{{ x.starting | date:"H:i" }}");
+    //sortobjects(starting);
+    //console.log(String('{{ x.starting | date:"H:i" }}'));
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    $('.minute[data-starting="'+starting+'"]').removeClass('default_status').addClass('{{ x.work_check}}_status');    
+    //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
+    //console.log('starting:'+starting);
+{% endfor %}
+
+
+
+{% endif %}
+
+});
+
+</script>
 
 <div id="test_charts"></div>
 <div id="test_charts2"></div>
 <script type="text/javascript" src="{% static 'js/print.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/work_detail.js' %}"></script>
 {% endblock content %}
+
