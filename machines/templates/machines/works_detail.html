@@ -37,7 +37,8 @@
 
 
 {% if user_can_update  %}
-        <form action="." method="post">
+        <!-- <form action="." method="post">-->
+            <form action="" method="get">
     {% else %}
         <form action="" method="get">
     {% endif %}
@@ -443,7 +444,7 @@ explorer: {
     <div id="add-master_reason" style="display: block;">
     <p><span>Выбрать причину простоя</span></p>  
      <select id="reason_list" name="reason_list" >
-      <option default >Выбрать причину</option>
+      <option default value="0" >Выбрать причину</option>
      {% for x in reason_list %}
       <option value="{{x.id}}">{{x}}</option>
      {% endfor %}

@@ -317,16 +317,22 @@ class StatisticsView(ListView):
     template_name = 'machines/statistics.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-
+        
+        return_machine=0
+        return_workshop=0
         workshop_id =  [x.workshop_number for x in Workshop.objects.all()]
         if self.request.GET.get('workshop_id'):
             workshop_id = self.request.GET.get('workshop_id'),
+            return_workshop = int(workshop_id[0])
 
         equip_id=None
         if self.request.GET.get('equip_id'):
             equip_id = int(self.request.GET.get('equip_id'))
+            return_machine = int(equip_id)
 
         context = super().get_context_data(**kwargs)
+        context['return_machine'] = return_machine
+        context['return_workshop'] = return_workshop
         filter = StatisticsFilter(self.request.GET, queryset=ClassifiedInterval.objects.all())
         context['filter'] = filter
         start_date = self.request.GET.get('start_date');

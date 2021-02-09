@@ -7,7 +7,7 @@ import collections
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 from datetime import timedelta, datetime
-from machines.models import ClassifiedInterval, Equipment
+from machines.models import ClassifiedInterval, Equipment, Hour_interval
 
 
 sort_order = {
@@ -59,10 +59,15 @@ def get_ci_data_timeline():
     start = end - timedelta(days=1)
     graph_data = {}
     for eq in Equipment.objects.all():#filter(problem_machine=False):
-        cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
-        data = [['-', ci.automated_classification.description, ci.automated_classification.code,
-                 max(ci.start, start), ci.end] for ci in cis]
-        graph_data[eq.id] = data
+        if eq.problem_machine==False:
+            cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
+            data = [['-', ci.automated_classification.description, ci.automated_classification.code,
+                     max(ci.start, start), ci.end] for ci in cis]
+            graph_data[eq.id] = data
+        elif eq.problem_machine==True:
+            cis = Hour_interval.objects.filter(ending__gte=start, equipment=eq).order_by('starting')
+            data = [['-','Оборудование работает' if ci.work_check == True else 'Простой','000' if ci.work_check == True else '001',max(ci.starting,start),ci.ending] for ci in cis]
+            graph_data[eq.id] = data
     return json.dumps(graph_data, cls=DjangoJSONEncoder)
 
 
