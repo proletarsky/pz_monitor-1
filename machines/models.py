@@ -485,7 +485,7 @@ class ClassifiedInterval(models.Model):
                                           end__in=qs.values('end')).update(automated_classification=sys_stop_reason)
 
     @staticmethod
-    def get_statistics(start, end, by_workshop=False, equipment=None):
+    def get_statistics(start, end,workshop_id, by_workshop=False, equipment=None):
         '''
         calculates statistics for period
         :param start: start of period (string YYYY-mm-dd)
@@ -509,7 +509,7 @@ class ClassifiedInterval(models.Model):
         # check equipment
         #18.08.2020 Шабанов изменение филтрации поиска моделей
         if equipment is None:
-            equipment_id_list = [eq.id for eq in Equipment.objects.filter(is_in_monitoring=True).order_by('-workshop', 'id')]
+            equipment_id_list = [eq.id for eq in Equipment.objects.filter(is_in_monitoring=True,workshop__in=workshop_id).order_by('-workshop', 'id')]
         elif isinstance(equipment, list):
             equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
                                  [id for id in equipment if isinstance(id, int)])

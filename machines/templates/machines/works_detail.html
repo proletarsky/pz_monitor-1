@@ -241,9 +241,9 @@ explorer: {
 
 <style>
     .True_status{background:#13da64;}
-    .False_status{background:#ff2b2b;}
+    .False_status{background:#ff2b2b;cursor:pointer;}
     .tf-item{
-    position:relative;;
+    position:relative;
     display: inline-block;
     height: 60px;    
     border-right: 1px solid #5a5a5a;
@@ -312,14 +312,14 @@ explorer: {
 <div class="main-new-wrapper" >
 <h3 style="padding-bottom:20px;">Диаграмма работы и простоев</h3>
 <div class="new-wrapper">
-   <div class="tf-item trinity default_status" data-starting="00:00" data-ending="03:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="03:00" data-ending="06:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="06:00" data-ending="09:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="09:00" data-ending="12:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="12:00" data-ending="15:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="15:00" data-ending="18:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="18:00" data-ending="21:00" ></div>
-   <div class="tf-item trinity default_status" data-starting="21:00" data-ending="00:00" ></div>   
+   <div class="tf-item trinity default_status" data-starting="00:00" data-ending="03:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="03:00" data-ending="06:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="06:00" data-ending="09:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="09:00" data-ending="12:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="12:00" data-ending="15:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="15:00" data-ending="18:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="18:00" data-ending="21:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>
+   <div class="tf-item trinity default_status" data-starting="21:00" data-ending="00:00" data-oid=0  data-reason='0' data-reason_id=0 ></div>   
 </div>
 
 
@@ -430,8 +430,133 @@ explorer: {
 
 {% endif %}
 
+
+    {% if user.is_superuser %}
+ <div class="modal" style="display:none" >
+ <div class="modalblock fix-w" >
+  <div class="modalblock-header" >
+    <div class="modal-title">Выбор причины</div>
+    <div class="mclose"></div>
+  </div>
+  <div class="modalblock-content row" >  
+
+    <div id="add-master_reason" style="display: block;">
+    <p><span>Выбрать причину простоя</span></p>  
+     <select id="reason_list" name="reason_list" >
+      <option default >Выбрать причину</option>
+     {% for x in reason_list %}
+      <option value="{{x.id}}">{{x}}</option>
+     {% endfor %}
+     </select>
+
+    </div>
+
+
+    <div class="row">
+        <button id="addcom" type="submit" class="save btn btn-default" >Указать</button> 
+    </div>
+
+    <form id="set_status_form" method="POST" class="post-form" >
+      {% csrf_token %}
+        <input type="hidden" name="trinity_id" id="trinity_id" value="0" /> 
+        <!-- <input type="hidden" name="id" id="id" value="0" /> -->
+        <!--<button id="change-modal" type="submit" class="save btn btn-default" >Указать причину поломки</button>-->
+{{ intervals.management_form }}
+    </form>  
+      
+  </div>
+ </div>
+</div>
+{% endif %}
+
+
 <script type="text/javascript">
     $(document).ready(function() {
+
+
+var modal = $('.modal');
+    $(document).on('click','.mclose',function(){ 
+    getting_info = false;
+    getting_all_info = false;
+
+    $('#change-modal').text('Указать причину поломки');
+    $('#text-status').css('display','block');
+    crushreason = false;
+    modal.css('display','none');
+    
+    //$('#trinity_id').val( 0 );
+    //$('#reason_list').val( 0 );
+
+});
+$(document).keyup(function(e) {
+     if (e.key === "Escape") { // escape key maps to keycode `27`
+        $('.mclose').click();
+    }
+});
+
+
+$(document).on('click','.trinity.False_status',function(){
+  modal.css('display','block');
+  //if( $(this).data('reason_id')!=0 ){
+    $('#reason_list').val( parseInt($(this).attr('data-reason_id')));
+  //}
+
+  $('#trinity_id').val( parseInt($(this).data('oid')) );
+});
+  
+
+{% if user.is_superuser %}
+$(document).on('click','#addcom',function(e){ 
+    e.preventDefault();
+    console.log('click');
+    var form = document.getElementById("set_status_form"),
+    fd = new FormData(form), aurl = "",
+    reason = $('#reason_list').val(), trinity_id = $('#trinity_id').val();
+        if (reason!="" ){        
+            fd.append('reason_id',reason);
+        }
+ 
+$.ajax({
+        url: aurl,
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',        
+        success: function (){
+          //.attr( "data-reason_id" , trinity_reason_id );
+      var returntext='Данные не были указаны!';    
+      //$('.trinity.False_status[data-oid="'+trinity_id+'"]').attr('data-reason_id', $('#reason_list').val() );
+    /*
+    $('.infomessage').text(returntext);
+    $('.infomessage').removeClass('red');
+    $('.infobox').fadeIn();
+    $('#info-box').css('display','table');
+   setTimeout(function(){
+     $('#info-box').fadeOut(400);}, 2000);
+   */
+        }
+      
+    }).done(function() {
+      $('.trinity[data-oid="'+trinity_id+'"]').attr('data-reason_id', $('#reason_list').val() );
+
+
+    $('.infomessage').text('Причина успешно указана');
+    $('.infomessage').removeClass('red');
+    $('.infobox').fadeIn();
+    $('#info-box').css('display','table');
+   setTimeout(function() {
+     $('#info-box').fadeOut(400);}, 2000);
+           
+
+
+
+    });
+$(".mclose").click();
+        return false;
+});
+
+{% endif %}
 var starting = 0;
 {% if new_algoritm %} 
     {% for x in trinity_interval %}    
@@ -440,11 +565,17 @@ var starting = 0;
     //sortobjects(starting);
     //console.log(String('{{ x.starting | date:"H:i" }}'));
     //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
-    $('.trinity[data-starting="'+starting+'"]').removeClass('default_status').addClass('{{ x.work_check}}_status');    
+    var trinity_obj = $('.trinity[data-starting="'+starting+'"]');
+    trinity_obj.removeClass('default_status').addClass('{{ x.work_check}}_status');
+    //trinity_obj.text({{ x.id }});
+    var trinity_id = {{ x.id }}, trinity_reason = '{{ x.user_reason }}', trinity_reason_id = '{{ x.user_reason.id }}' ;
+    trinity_obj.attr( "data-oid" ,trinity_id );
+    trinity_obj.attr( "data-reason" , trinity_reason );
+    trinity_obj.attr( "data-reason_id" , trinity_reason_id );
+    
     //$('.trinity[data-starting="{{ x.starting | date:"H:i" }}"]').removeClass('default_status').addClass('True_status');
     //console.log('starting:'+starting);
 {% endfor %}
-
 
 {% for x in hour_interval %}    
     //alert("{{ x.starting | date:"H:i" }}");

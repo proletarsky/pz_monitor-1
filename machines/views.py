@@ -178,8 +178,17 @@ class EquipmentWorksDetailView(UpdateView):
         context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
         context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
         context['new_algoritm'] = self.object.problem_machine
+        context['reason_list'] = Reason.objects.filter(is_operator=True)
 
         if self.request.POST:
+            if self.object.problem_machine:
+                if self.request.POST.get('reason_id') and self.request.POST.get('trinity_id'):
+                    trinity_id = self.request.POST.get('trinity_id')
+                    reason_id = self.request.POST.get('reason_id')
+                    reason = Reason.objects.get(id = reason_id)
+                    trinity = Trinity_interval.objects.get(id = trinity_id)
+                    trinity.user_reason = reason
+                    trinity.save()
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)
         else:
             context['intervals'] = ClassifiedIntervalFormSet(queryset=interval_qs)
@@ -308,13 +317,25 @@ class StatisticsView(ListView):
     template_name = 'machines/statistics.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
+
+        workshop_id =  [x.workshop_number for x in Workshop.objects.all()]
+        if self.request.GET.get('workshop_id'):
+            workshop_id = self.request.GET.get('workshop_id'),
+
+        equip_id=None
+        if self.request.GET.get('equip_id'):
+            equip_id = int(self.request.GET.get('equip_id'))
+
         context = super().get_context_data(**kwargs)
         filter = StatisticsFilter(self.request.GET, queryset=ClassifiedInterval.objects.all())
         context['filter'] = filter
         start_date = self.request.GET.get('start_date');
         end_date = self.request.GET.get('end_date');
+
+        context['machines'] = Equipment.objects.filter(is_in_monitoring=True)
+        context['workshops'] = Workshop.objects.all()
         if start_date is not None and start_date!='' and end_date is not None and end_date!='':
-            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
+            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id))
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
         else:
@@ -323,7 +344,7 @@ class StatisticsView(ListView):
             sunday = monday + datetime.timedelta(days = 6)
             start_date = str(monday)
             end_date = str(sunday)
-            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date))
+            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id))
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
         return context
