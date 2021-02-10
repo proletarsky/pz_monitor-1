@@ -146,7 +146,7 @@ class EquipmentWorksDetailView(UpdateView):
         if (timezone.localdate() - self.filter_date).days <= 0:
             self.filter_date = timezone.localdate()
             end_time = timezone.now()
-            start_time = timezone.now() - datetime.timedelta(days=1)
+            start_time = datetime.datetime(year = timezone.now().date().year, month = timezone.now().date().month, day = timezone.now().date().day, hour = 0, minute = 0)#- datetime.timedelta(days=1)
         else:
             start_time = timezone.make_aware(datetime.datetime.combine(self.filter_date, datetime.datetime.min.time()))
             end_time = start_time + datetime.timedelta(days=1)
