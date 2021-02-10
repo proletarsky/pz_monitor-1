@@ -15,7 +15,7 @@
             <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
         </li>
     {% endif %}
-	{% if request.user|has_group:'Руководитель производства' %}
+  {% if request.user|has_group:'Руководитель производства' %}
         <li class="sidebar-brand">
             <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
         </li>
@@ -148,7 +148,7 @@ explorer: {
 {% if not object.machine_or_furnace_sign %}
             height: '450'
 {% else %}
-	    height:'30%'
+      height:'30%'
 {% endif %}
             }
         {% endoptions %}
@@ -169,8 +169,8 @@ explorer: {
     font-size: 16px;
     font-weight: 600;color:#FFF;
 " class="w3-button w3-white w3-round-small w3-right" id="PRINT_BTN">
-			Печать 🖶
-		</button>
+      Печать 🖶
+    </button>
 <!--
 <a id="PRINT_BTN" style="
     padding: 7.5px 12.5px;
@@ -252,7 +252,16 @@ explorer: {
     border-bottom: 1px solid #5a5a5a;
     vertical-align: top;    
 }
-    .new-wrapper{display:table;width:100%;text-align:left;border-left: 1px solid #5a5a5a;margin-bottom:20px;}
+    .new-wrapper{
+    display: table;
+    width: 100%;
+    text-align: left;
+    border-left: 1px solid #8e8e8e;
+    margin-bottom: 20px;
+    left: 40px;
+    position: relative;
+    padding-right: 175px;
+    }
     .inner-new-wrapper{display:table;width:100%;text-align:left;border-left:1px solid #5a5a5a;margin-bottom:20px;top:-80px;
     position: relative;}
     .trinity,.trinity2{width:12.5%;}
@@ -474,6 +483,10 @@ explorer: {
 <script type="text/javascript">
     $(document).ready(function() {
 
+setTimeout(function(){
+var graph_weight = $("div[dir=ltr]").width();
+$('.main-new-wrapper').css('max-width',graph_weight+'px');
+}, 1500);
 
 var modal = $('.modal');
     $(document).on('click','.mclose',function(){ 
