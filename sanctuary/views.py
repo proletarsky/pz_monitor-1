@@ -65,7 +65,7 @@ def sidebar_ip_statistics(request):
                                                     from sanctuary_sidebar_statistics a
                                                     join sanctuary_object_list b on a.ip_object_id=b.id
                                                     where b.catalog_id in %(catalog_id_param)s and start_date >= %(start_interval)s and coalesce(end_date,current_date)<=%(end_interval)s                                 				
-                                                    group by ip_object_id 
+                                                    group by ip_object_id
                                                      ''',params = {'catalog_id_param':catalog_id_param,'start_interval':start_interval,'end_interval':end_interval})
     filter = calendar_sanctuary(0,queryset=Object_list.objects.all())
     return render(request,'sanctuary/sidebar_statistics.html',{'sql_query':sql_query,'all_catalogs':all_catalogs,'filter':filter,'start_interval':start_interval,'end_interval':end_interval,'catalog_id_param':catalog_id_param[0]})

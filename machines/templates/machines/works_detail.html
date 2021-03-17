@@ -38,7 +38,8 @@
 
 {% if user_can_update  %}
         <!-- <form action="." method="post">-->
-            <form action="" method="get">
+        <!-- <form action="?date={{ form.date.value |date:'c'  }}" method="post"> -->
+        <form action="." method="post" onchange="function(){this.setAttribute("method", "GET");}" >
     {% else %}
         <form action="" method="get">
     {% endif %}

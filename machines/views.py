@@ -173,10 +173,10 @@ class EquipmentWorksDetailView(UpdateView):
         start_new_limits = datetime.datetime(year=self.filter_date.year,month=self.filter_date.month,day=self.filter_date.day,hour=0,minute=0)#,second=0)
         end_new_limits = start_new_limits + datetime.timedelta(days=1)
 
-
-        context['minute_interval'] = Minute_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
-        context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
-        context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+        if self.object.problem_machine:
+            context['minute_interval'] = Minute_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+            context['hour_interval'] = Hour_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
+            context['trinity_interval'] = Trinity_interval.objects.filter(equipment_id=self.object.id,starting__gte=start_new_limits,ending__lte=end_new_limits).order_by('id')
         context['new_algoritm'] = self.object.problem_machine
         context['reason_list'] = Reason.objects.filter(is_operator=True)
 
@@ -197,6 +197,7 @@ class EquipmentWorksDetailView(UpdateView):
 
     def form_valid(self, form):
         form = EquipmentDetailForm(self.request.POST)
+
         if form.is_valid():
             self.filter_date = form.cleaned_data.get('date', timezone.localdate())
 

@@ -61,7 +61,7 @@ def get_ci_data_timeline():
     for eq in Equipment.objects.all():#filter(problem_machine=False):
         if eq.problem_machine==False:
             cis = ClassifiedInterval.objects.filter(end__gte=start, equipment=eq).order_by('start')
-            data = [['-', ci.automated_classification.description, ci.automated_classification.code,
+            data = [['-', ci.automated_classification.description if ci.user_classification==None else ci.user_classification.description , ci.automated_classification.code ,
                      max(ci.start, start), ci.end] for ci in cis]
             graph_data[eq.id] = data
         elif eq.problem_machine==True:
