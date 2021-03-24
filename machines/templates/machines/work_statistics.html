@@ -1,0 +1,322 @@
+{% load static %}
+{% load bootstrap %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пролетарский завод - внутренний портал</title>
+
+    {% load static %}
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> -->
+
+    <script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/jquery-ui.js'%}"></script>
+    <script src="{% static 'js/datepicker-ru.js' %}"></script>
+    <script src="{% static 'js/jquery.inputmask.js' %}"></script>
+
+    <!-- Bootstrap -->
+    <!--link href="bootstrap/css/bootstrap.css" rel="stylesheet"-->
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/jquery-ui.css' %}">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+<link rel="icon" type="image/png" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-icon-precomposed" href="/static/img/pzfavicon.png">
+<link rel="apple-touch-startup-image" href="/static/img/pzfavicon.png">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" />
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="76x76" >
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="120x120">
+<link href="/static/img/pzlogo.png" rel="apple-touch-icon" sizes="152x152">
+</head>
+<body>
+
+<div id="sidebar-wrapper">
+<div class="pz-logo">
+        <a href="/" style="display: block;">
+            <img src="/static/img/pzlogo.png" alt="">
+        </a>
+</div>
+ <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+                <li class="login_as">
+                    <a href="#" id="login_as">
+                        <span class="glyphicon glyphicon-user"></span> {{ request.user.username }}
+                    </a>
+                </li>
+                <li class="logoutb">
+                    <a href="{% url 'logout' %}" id="logout">
+                        <span class="glyphicon glyphicon-log-out"></span> Выход
+                    </a>
+                </li>
+            {% else %}
+                <li class="loginb">
+                    <a href="{% url 'login' %}" id="login">
+                        <span class="glyphicon glyphicon-log-in"></span> Вход</a>
+                </li>
+            {% endif %}
+        </ul>
+
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="/machines"><span class="glyphicon glyphicon-scale"></span> Оборудование</a>
+                </li>
+                <li class="sidebar-brand">
+                    <a href="/machines/statistics"><span class="glyphicon glyphicon-stats"></span>  Статистика</a>
+                </li>
+                {% block sidebar %}
+
+{% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+
+
+                {% endblock sidebar %}
+<!--                                <li class="sidebar-brand">
+                    <a href="http://www.proletarsky.ru" target="_blank"><span class="glyphicon glyphicon-globe"></span> Официальный сайт</a>
+        </li> -->
+<!--                <li class="sidebar-brand">
+                    <a href="http://phonebook" target="_blank"><span class="glyphicon glyphicon-book"></span> Телефонная книга</a>
+        </li> -->
+      </ul>
+        </div>  
+<div id="wrapper" class="toggled">
+
+<!-- <a class="goback" href="#" onclick="goBack()">❮ Вернуться</a> -->
+<!-- <a class="goback" href="#">❮ Вернуться</a> -->
+
+    <!--Главная страница-->
+    <div id="page-content-wrapper">
+        <div class="container-fluid text-center">
+         
+<div class="page-header">
+        <h2>Статистика работы оборудования</h2>
+    </div>
+
+<div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
+     <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;"  data-start="{{start_date}}" data-end="{{end_date}}" >
+
+<div class="form-row">
+<!-- <label class="required" for="equipment_id_param">Участок:</label> -->
+<select name="equipment_id_param" id="equipment_id_param" data-selected_id="{{return_object_id}}" >
+<option value="0" >Все оборудование</option>
+				{% for x in equipments %}                
+                    <option {% if return_object_id == x.id  %} selected="true" {% endif %} value="{{ x.id }}">{{ x }}</option>
+                {% endfor %}
+</select>
+</div>
+
+<div class="form-row">
+                {{ filter.form | bootstrap_inline }}    
+     </div> 
+
+<div class="form-group">
+    
+    
+</div>
+
+     <div class="form-row">
+     <input id="sendform" type="submit" value="Применить">
+     </div>
+    </form>
+</div>
+
+<h3>График работы</h3>
+  <div style="height:350px;margin:0 auto;" id="chartdiv"></div>
+<h3>Диаграмма работы</h3>
+  <div style="height:350px;margin:0 auto;" id="chartContainer"></div>
+  
+
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script type="text/javascript" src="{% static 'js/repair_statistics.js' %}"></script>
+<!-- Chart code -->
+<script>
+
+function new_line(x) {
+	return x.replace(/ /g,"\n");
+};
+
+am4core.ready(function(){
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("chartContainer", am4charts.XYChart);
+chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+chart.data = [
+
+{% for x,y in graphics_data.items %}
+  {
+    country: new_line("{{ y.starting }}")  ,
+    visits: parseInt({{ y.percent }})
+  },
+  {% endfor %}
+
+];
+
+
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.renderer.grid.template.location = 0;
+categoryAxis.dataFields.category = "country";
+categoryAxis.renderer.minGridDistance = 40;
+categoryAxis.fontSize = 11;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.min = 0;
+valueAxis.max = 100; //MAXXXXXXXXXXXXXXXXXXXXXXXx
+valueAxis.strictMinMax = true;
+valueAxis.renderer.minGridDistance = 10;
+// axis break
+var axisBreak = valueAxis.axisBreaks.create();
+axisBreak.startValue = 2100;
+axisBreak.endValue = 22900;
+//axisBreak.breakSize = 0.005;
+
+// fixed axis break
+var d = (axisBreak.endValue - axisBreak.startValue) / (valueAxis.max - valueAxis.min);
+axisBreak.breakSize = 0.05 * (1 - d) / d; // 0.05 means that the break will take 5% of the total value axis height
+
+// make break expand on hover
+var hoverState = axisBreak.states.create("hover");
+hoverState.properties.breakSize = 1;
+hoverState.properties.opacity = 0.1;
+hoverState.transitionDuration = 1500;
+
+axisBreak.defaultState.transitionDuration = 1000;
+
+var series = chart.series.push(new am4charts.ColumnSeries());
+series.dataFields.categoryX = "country";
+series.dataFields.valueY = "visits";
+series.columns.template.tooltipText = "{valueY.value}";
+series.columns.template.tooltipY = 0;
+series.columns.template.strokeOpacity = 0;
+
+series.columns.template.adapter.add("fill", function(fill, target) {
+  return chart.colors.getIndex(target.dataItem.index);
+});
+
+
+
+
+
+
+
+
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+// Create chart instance
+var chart1 = am4core.create("chartdiv", am4charts.XYChart);
+
+// Add data
+chart1.data = [{% for x,y in graphics_data.items %}
+  {
+    'date': new_line("{{ y.starting }}")  ,
+    'value': parseInt({{ y.percent }})
+  },
+  {% endfor %} 
+
+  ];
+
+// Set input format for the dates
+chart1.dateFormatter.inputDateFormat = "yyyy-MM-dd";
+
+// Create axes
+var dateAxis = chart1.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart1.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart1.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value}"
+series.strokeWidth = 2;
+series.minBulletDistance = 15;
+
+// Drop-shaped tooltips
+series.tooltip.background.cornerRadius = 20;
+series.tooltip.background.strokeOpacity = 0;
+series.tooltip.pointerOrientation = "vertical";
+series.tooltip.label.minWidth = 40;
+series.tooltip.label.minHeight = 40;
+series.tooltip.label.textAlign = "middle";
+series.tooltip.label.textValign = "middle";
+
+// Make bullets grow on hover
+var bullet = series.bullets.push(new am4charts.CircleBullet());
+bullet.circle.strokeWidth = 2;
+bullet.circle.radius = 4;
+bullet.circle.fill = am4core.color("#fff");
+
+var bullethover = bullet.states.create("hover");
+bullethover.properties.scale = 1.3;
+
+// Make a panning cursor
+chart1.cursor = new am4charts.XYCursor();
+chart1.cursor.behavior = "panXY";
+chart1.cursor.xAxis = dateAxis;
+chart1.cursor.snapToSeries = series;
+
+// Create vertical scrollbar and place it before the value axis
+//chart1.scrollbarY = new am4core.Scrollbar();
+//chart1.scrollbarY.parent = chart1.leftAxesContainer;
+//chart1.scrollbarY.toBack();
+
+// Create a horizontal scrollbar with previe and place it underneath the date axis
+//chart1.scrollbarX = new am4charts.XYChartScrollbar();
+//chart1.scrollbarX.series.push(series);
+//chart1.scrollbarX.parent = chart1.bottomAxesContainer;
+
+dateAxis.start = 0.79;
+//dateAxis.keepSelection = true;
+
+
+//////
+
+
+}); // end am4core.ready()
+</script>
+
+
+			<div id="info-box" class="infobox"><p class="infomessage"></p></div>
+        </div>
+    </div>
+</div>
+ <div class="footer">
+
+    <div class="footer-pz-logo-osk">
+        <a href="#" >
+            <img src="{% static 'img/OSKLogo.png' %}" alt>
+        </a>
+    </div>
+    <div class="footer-pz-logo">
+        <a href="#">
+            <img src="{% static 'img/pzLogo.png' %}" alt>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

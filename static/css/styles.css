@@ -193,8 +193,25 @@ hr{border-top:2px solid black;}
     border: 1px solid;
     border-radius: 5px;
 }
+.won1:after{content:'Работает';background:#3c763d;}
+.won2:after{content:'Простой';background:#7b7b7b;}
+.won1:after,.won2:after{
+position: absolute;
+left:0;
+top:0;
+border-radius: 5px 0 5px 0;
+border: 1px solid #797979;
+color:#FFF;
+z-index: 3;
+border-top: none;
+border-left: none;
+letter-spacing: 0.8px;
+font-size: 12px;
+padding: 2.5px 5px;
+font-weight: bold;
+}
 .limited:before{
-      position: absolute;
+    position: absolute;
     background: #464646;
     content: "LIMITED";
     z-index: 3;

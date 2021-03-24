@@ -23,8 +23,10 @@
 {% endblock sidebar %}
 
 {% block content %}
-
 <img class="worksimg" src="/media/{{object.image}}" alt="123" />
+
+{% if object.repair_job_status == 1 %} <div class="stat1" style="display: table; margin: 10px auto; padding: 5px 10px; border-radius: 4px; color: white; font-weight: bold;">Неисправен</div> {% endif %}
+{% if object.repair_job_status == 2 %} <div class="stat2" style="display: table; margin: 10px auto; padding: 5px 10px; border-radius: 4px; color: white; font-weight: bold;">В ремонте</div> {% endif %}
 
 <div id="forprint">
 <div class="page-header">

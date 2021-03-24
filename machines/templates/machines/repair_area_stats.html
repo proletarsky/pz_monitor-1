@@ -73,6 +73,7 @@
 			</ul>
         </div>	
 <div id="wrapper" class="toggled">
+    
 <script>
 function goBack() {
 console.log(document.referrer);
@@ -131,6 +132,7 @@ if (document.referrer == "") {
 <div class="equip-wrapper row">
 
 
+
   <div class="form-wrapper">
 {% for e in equipments %}
     <div data-eid="{{ e.id }}" data-status="{{ e.repair_job_status }}" data-class="stat{{ e.repair_job_status }}" class="equip 
@@ -140,7 +142,6 @@ if (document.referrer == "") {
     stat{{ e.repair_job_status }}" >
  <div class="equip-inner">
   <img src="/media/{{ e.image }}" alt="Мониторинг оборудования" />
-  
   <span>{{ e }}</span>
  </div>
 </div>
@@ -521,6 +522,17 @@ $(".mclose").click();
         }*/
         return false;
 });
+
+
+
+var a = [{{ work_or_not }}];
+
+for (var prop in a[0]) {
+  console.log("obj." + prop + " = " + a[0][prop]);
+  $('[data-eid='+prop+']').addClass("won"+a[0][prop]);
+
+}
+
 
 
 $(document).on('click','.equip',function(){

@@ -235,6 +235,9 @@ def index(request):
     return render(request, 'machines/equipment_list.html', context)
 
 
+def statistics1(request):
+    return render(request,'machines/statistics1.html')
+
 def register(request):
     """
     User registration view
@@ -318,7 +321,6 @@ class StatisticsView(ListView):
     template_name = 'machines/statistics.html'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        
         return_machine=0
         return_workshop=0
         workshop_id =  [x.workshop_number for x in Workshop.objects.all()]
@@ -386,11 +388,19 @@ def html_special_chars(text):
 def repair_equipment(request,workshop_numb,area_numb):
     equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('id')
     reasons_and_comments = {}
+    work_or_not={}
     for x in equipments:
         if x.repair_job_status==2 and Repair_rawdata.objects.filter(machines_id=x.id,repair_job_status=x.repair_job_status):
             obj=Repair_rawdata.objects.filter(machines_id=x.id,repair_job_status=x.repair_job_status).order_by('-id')[0:1:1][0]
             if obj:
                 reasons_and_comments[obj.machines_id.id]=[obj.repairer_master_reason,obj.repair_comment]
+        if x.is_in_monitoring:
+            if x.problem_machine:
+                check = Minute_interval.objects.filter(equipment_id=x.id).order_by('-id')[0:1:1][0]
+                work_or_not[x.id]= 1 if check.work_check else 2
+            else:
+                check = ClassifiedInterval.objects.filter(equipment_id=x.id).order_by('-id')[0:1:1][0]
+                work_or_not[x.id]=check.automated_classification.id
     lenght=len(equipments)
     del_result=(lenght//10)+1
     if (del_result > 1 and lenght%10>6) or lenght==26:
@@ -451,7 +461,7 @@ def repair_equipment(request,workshop_numb,area_numb):
                 return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
     else:
         form = Repairform()    
-    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result,'reasons_and_comments':reasons_and_comments })
+    return render(request,'machines/repair_area_stats.html',{'equipments':equipments,'form':form,'lenght':lenght,'del_result':del_result,'reasons_and_comments':reasons_and_comments,'work_or_not':work_or_not })
 
 
 def all_complexes(request):
@@ -831,6 +841,104 @@ def repair_statistics(request):
     context={'sql_query':sql_query,'all_area':all_area,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/repair_statistics.html',context)
+
+
+
+def work_statistics(request):
+    count_objects = len(Equipment.objects.filter(is_in_monitoring=True,machine_or_furnace_sign=True))
+
+    old_algoritm_objects = Equipment.objects.filter(is_in_monitoring=True,machine_or_furnace_sign=True,problem_machine=False)
+    old_algoritm_id = tuple(x.id for x in old_algoritm_objects)
+    new_algoritm_objects = Equipment.objects.filter(is_in_monitoring=True,machine_or_furnace_sign=True,problem_machine=True)
+    new_algoritm_id = tuple(x.id for x in new_algoritm_objects)
+    return_object_id = 0
+    delta_days = 15
+
+    if request.GET.get('equipment_id_param'):
+        if request.GET.get('equipment_id_param')!='0':
+            obj = Equipment.objects.get(id = request.GET.get('equipment_id_param'))
+            if obj:
+                if obj.problem_machine:
+                    new_algoritm_id = int(request.GET.get('equipment_id_param')),0
+                    old_algoritm_id = 0,0
+                    return_object_id = int(new_algoritm_id[0])
+                    count_objects = 1
+                else:
+                    old_algoritm_id = int(request.GET.get('equipment_id_param')),0
+                    new_algoritm_id = 0,0
+                    return_object_id = int(old_algoritm_id[0])
+                    count_objects = 1
+
+
+    now = datetime.datetime.now()
+    end_date = datetime.datetime.now().date()
+    start_date = end_date - datetime.timedelta(days=delta_days)
+    end_date = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+    start_date = str(start_date.year)+'-'+(str(start_date.month) if len(str(start_date.month))>=2 else '0'+str(start_date.month))+'-'+(str(start_date.day) if len(str(start_date.day))>=2 else '0'+str(start_date.day))
+    end_1 = datetime.date(year=int(end_date[0:4:1]),month=int(end_date[5:7:1]),day=int(end_date[8:10:1]))
+    start_1 = datetime.date(year=int(start_date[0:4:1]),month=int(start_date[5:7:1]),day=int(start_date[8:10:1]))
+    if request.GET.get('end_date'):
+        end_date =  request.GET.get('end_date')
+        if end_date > (str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))): end_date = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+        end_1 = datetime.date(year=int(end_date[0:4:1]),month=int(end_date[5:7:1]),day=int(end_date[8:10:1]))
+    if request.GET.get('start_date'):
+        start_date = request.GET.get('start_date')
+        #if start_date < '2021-03-01': start_date='2021-03-01'
+        start_1 = datetime.date(year=int(start_date[0:4:1]),month=int(start_date[5:7:1]),day=int(start_date[8:10:1]))
+
+    if end_1 and start_1:
+        delta_days = (end_1 - start_1).days
+
+    graphics_data = {}
+
+    kek = {}
+    for x in range(0,delta_days+1):
+
+        starting = start_1 + datetime.timedelta(days=x)
+        ending = start_1 + datetime.timedelta(days=x+1)
+
+        starting = str(starting.year)+'-'+(str(starting.month) if len(str(starting.month))>=2 else '0'+str(starting.month))+'-'+(str(starting.day) if len(str(starting.day))>=2 else '0'+str(starting.day))
+        ending = str(ending.year)+'-'+(str(ending.month) if len(str(ending.month))>=2 else '0'+str(ending.month))+'-'+(str(ending.day) if len(str(ending.day))>=2 else '0'+str(ending.day))
+
+        sql_query = ClassifiedInterval.objects.raw('''select 1 as id,%(starting)s as starting,coalesce(((EXTRACT(EPOCH FROM (
+                                                                                        select sum(X.sum)from (
+                                                                                                                select sum(LEAST (a.end,%(ending)s)-GREATEST (a.start,%(starting)s)),
+                                                                                                                       equipment_id 
+                                                                                                                       from machines_classifiedinterval a 
+                                                                                                                       where automated_classification_id=1 
+                                                                                                                       and a.start <= %(ending)s 
+                                                                                                                       AND a.end >= %(starting)s 
+                                                                                                                       and equipment_id in %(old_algoritm_id)s
+                                                                                                                       group by equipment_id
+                                                                                                                union
+                                                                                                                select sum(ending-starting),equipment_id 
+                                                                                                                       from machines_hour_interval 
+                                                                                                                       where work_check=True 
+                                                                                                                       and starting >=%(starting)s
+                                                                                                                       and ending <=%(ending)s
+                                                                                                                       and equipment_id in %(new_algoritm_id)s
+                                                                                                                       group by equipment_id
+                                                                                                                ) as X)
+                                                                                                                )/3600)/(%(count_objects)s*24))*100,0) as percent''',
+                                                                                                                params = {'ending':ending,'starting':starting,'old_algoritm_id':old_algoritm_id,'new_algoritm_id':new_algoritm_id,'count_objects':count_objects})
+        
+        graphics_data[x]=sql_query[0]
+        kek[starting]=ending
+
+                                                     
+    equipments = Equipment.objects.filter(is_in_monitoring=True,machine_or_furnace_sign=True)
+    filter = calendar_repair(0,queryset=Equipment.objects.all())
+    context = {'equipments':equipments,'return_object_id':return_object_id,'start_date':start_date,'end_date':end_date,'count_objects':count_objects,'graphics_data':graphics_data,'filter':filter,'old_algoritm_id':old_algoritm_id,'new_algoritm_id':new_algoritm_id,'delta_days':delta_days,'kek':kek}
+    
+    return render(request,'machines/work_statistics.html',context)
+
+
+
+
+
+    
+    
+
 
 
 def repair_statistics_diagram(request):
