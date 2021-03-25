@@ -123,6 +123,16 @@
 </div>
 
 <div class="form-row">
+<!-- <label class="required" for="equipment_id_param">Участок:</label> -->
+<select name="workshop_id_param" id="workshop_id_param" data-selected_id="{{return_workshop_id}}" >
+<option value="0" >Все цеха</option>
+                {% for x in all_workshops %}                
+                    <option {% if return_workshop_id == x.pk  %} selected="true" {% endif %} value="{{ x.pk }}">{{ x }}</option>
+                {% endfor %}
+</select>
+</div>
+
+<div class="form-row">
                 {{ filter.form | bootstrap_inline }}    
      </div> 
 
@@ -137,9 +147,9 @@
     </form>
 </div>
 
-<h3>График работы</h3>
+<h3>График динамики эффективности работы оборудования</h3>
   <div style="height:350px;margin:0 auto;" id="chartdiv"></div>
-<h3>Диаграмма работы</h3>
+<h3>Диаграмма динамики эффективности работы оборудования</h3>
   <div style="height:350px;margin:0 auto;" id="chartContainer"></div>
   
 
@@ -213,10 +223,11 @@ series.columns.template.tooltipText = "{valueY.value}";
 series.columns.template.tooltipY = 0;
 series.columns.template.strokeOpacity = 0;
 
+/*
 series.columns.template.adapter.add("fill", function(fill, target) {
   return chart.colors.getIndex(target.dataItem.index);
 });
-
+*/
 
 
 

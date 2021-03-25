@@ -853,6 +853,17 @@ def work_statistics(request):
     new_algoritm_id = tuple(x.id for x in new_algoritm_objects)
     return_object_id = 0
     delta_days = 15
+    all_workshops = Workshop.objects.all()
+    workshop_id = tuple(x.pk for x in all_workshops)
+    return_workshop_id=0
+
+
+    if request.GET.get('workshop_id_param'):
+        if request.GET.get('workshop_id_param')!='0':
+            workshop_id = int(request.GET.get('workshop_id_param')),0
+            return_workshop_id=int(workshop_id[0])
+            workshop_equipment = Equipment.objects.filter(workshop_id = request.GET.get('workshop_id_param'),is_in_monitoring=True,machine_or_furnace_sign=True)
+            count_objects = len(workshop_equipment)
 
     if request.GET.get('equipment_id_param'):
         if request.GET.get('equipment_id_param')!='0':
@@ -868,6 +879,7 @@ def work_statistics(request):
                     new_algoritm_id = 0,0
                     return_object_id = int(old_algoritm_id[0])
                     count_objects = 1
+
 
 
     now = datetime.datetime.now()
@@ -903,32 +915,34 @@ def work_statistics(request):
         sql_query = ClassifiedInterval.objects.raw('''select 1 as id,%(starting)s as starting,coalesce(((EXTRACT(EPOCH FROM (
                                                                                         select sum(X.sum)from (
                                                                                                                 select sum(LEAST (a.end,%(ending)s)-GREATEST (a.start,%(starting)s)),
-                                                                                                                       equipment_id 
+                                                                                                                       a.equipment_id 
                                                                                                                        from machines_classifiedinterval a 
+                                                                                                                       join machines_equipment b on a.equipment_id=b.id
                                                                                                                        where automated_classification_id=1 
                                                                                                                        and a.start <= %(ending)s 
                                                                                                                        AND a.end >= %(starting)s 
-                                                                                                                       and equipment_id in %(old_algoritm_id)s
+                                                                                                                       and equipment_id in %(old_algoritm_id)s and b.workshop_id in %(workshop_id)s
                                                                                                                        group by equipment_id
                                                                                                                 union
-                                                                                                                select sum(ending-starting),equipment_id 
-                                                                                                                       from machines_hour_interval 
+                                                                                                                select sum(a.ending-a.starting),a.equipment_id 
+                                                                                                                       from machines_hour_interval  a
+                                                                                                                       join machines_equipment b on a.equipment_id=b.id 
                                                                                                                        where work_check=True 
                                                                                                                        and starting >=%(starting)s
                                                                                                                        and ending <=%(ending)s
-                                                                                                                       and equipment_id in %(new_algoritm_id)s
+                                                                                                                       and equipment_id in %(new_algoritm_id)s and b.workshop_id in %(workshop_id)s
                                                                                                                        group by equipment_id
                                                                                                                 ) as X)
                                                                                                                 )/3600)/(%(count_objects)s*24))*100,0) as percent''',
-                                                                                                                params = {'ending':ending,'starting':starting,'old_algoritm_id':old_algoritm_id,'new_algoritm_id':new_algoritm_id,'count_objects':count_objects})
+                                                                                                                params = {'ending':ending,'starting':starting,'old_algoritm_id':old_algoritm_id,'new_algoritm_id':new_algoritm_id,'count_objects':count_objects,'workshop_id':workshop_id})
         
         graphics_data[x]=sql_query[0]
-        kek[starting]=ending
+        
 
                                                      
     equipments = Equipment.objects.filter(is_in_monitoring=True,machine_or_furnace_sign=True)
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'equipments':equipments,'return_object_id':return_object_id,'start_date':start_date,'end_date':end_date,'count_objects':count_objects,'graphics_data':graphics_data,'filter':filter,'old_algoritm_id':old_algoritm_id,'new_algoritm_id':new_algoritm_id,'delta_days':delta_days,'kek':kek}
+    context = {'equipments':equipments,'all_workshops':all_workshops,'return_workshop_id':return_workshop_id,'return_object_id':return_object_id,'start_date':start_date,'end_date':end_date,'graphics_data':graphics_data,'filter':filter}
     
     return render(request,'machines/work_statistics.html',context)
 
