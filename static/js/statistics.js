@@ -206,11 +206,16 @@ function drawChart() {
 
     console.log('qqweqweqewqew');
 console.log(new_total_array_data_filter_ON);
-
-    var auto_data_chart = new google.visualization.BarChart(document.getElementById("id-plant"));
+var id_plant = document.getElementById("id-plant"),
+    id_pland_userdate = document.getElementById("id-plant-userdata");
+if(id_plant){
+    var auto_data_chart = new google.visualization.BarChart(id_plant);
+  }
+  if(id_pland_userdate){
     var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
-    auto_data_chart.draw(auto_data, options_auto);
-    user_data_chart.draw(user_data, options_user_total);
+  }
+   if(id_plant){  auto_data_chart.draw(auto_data, options_auto); }
+   if(id_pland_userdate){user_data_chart.draw(user_data, options_user_total);}
 
 
 
