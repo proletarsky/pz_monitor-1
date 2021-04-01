@@ -15,6 +15,13 @@ import datetime
 
 # Create your models here.
 
+class Coordinator(models.Model):
+    name = models.CharField(max_length=50,verbose_name='Наименование')
+    mac = models.CharField(max_length=50,verbose_name='MAC координатора')
+
+    def __str__(self):
+        return self.name+' '+self.mac
+
 
 class Reason(models.Model):
     code = models.CharField(max_length=10, verbose_name='Код')

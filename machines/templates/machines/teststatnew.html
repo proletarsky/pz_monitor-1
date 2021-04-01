@@ -188,9 +188,17 @@ categoryAxis.dataFields.category = "country";
 categoryAxis.renderer.minGridDistance = 1;
 categoryAxis.fontSize = 11;
 
+var chart1_data_max_array=[];
+for(var i=0;i<chart1.data.length;i++){
+chart1_data_max_array[i] = chart1.data[i]['visits'];
+}
+var chart1datamax = chart1_data_max_array.reduce(function(max,arr){
+return Math.max(max,arr);
+},-Infinity );
+
 var valueAxis = chart1.yAxes.push(new am4charts.ValueAxis());
 valueAxis.min = 0;
-valueAxis.max = 5;
+valueAxis.max = chart1datamax+2;
 valueAxis.strictMinMax = true;
 valueAxis.renderer.minGridDistance = 30;
 // axis break
