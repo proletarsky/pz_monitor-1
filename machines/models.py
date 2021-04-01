@@ -16,11 +16,12 @@ import datetime
 # Create your models here.
 
 class Coordinator(models.Model):
-    name = models.CharField(max_length=50,verbose_name='Наименование')
-    mac = models.CharField(max_length=50,verbose_name='MAC координатора')
+    name = models.CharField(max_length=50,verbose_name='Наименование',null=True,blank=True)
+    mac = models.CharField(max_length=50,verbose_name='MAC координатора',null=True,blank=True)
+    ip = models.CharField(max_length=50,verbose_name='ip координатора',null=True,blank=True)
 
     def __str__(self):
-        return self.name+' '+self.mac
+        return self.name+' '+self.mac+' '+self.ip
 
 
 class Reason(models.Model):
@@ -274,6 +275,7 @@ class Equipment(models.Model):
     is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
     problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев',default=False,blank=True,null=True)
     dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя',blank=True,null=True)
+    coordinator = models.ForeignKey(Coordinator,verbose_name='Координатор',blank=True,null=True,on_delete=models.SET_NULL)
 
     def __str__(self):
         if self.area is None:
