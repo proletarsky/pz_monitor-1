@@ -42,6 +42,24 @@ hr{border-top:2px solid black;}
     letter-spacing: 1.1px;
     padding: 0 20px;
 }
+
+.toservice .equip-inner:before{
+    content: ' ';
+    width: 100%;
+    height: 50px;
+    background-image: url(/static/img/toservice.png);
+    position: absolute;
+    top: 50%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 11;
+    margin-top: -25px;
+}
+
 .repair_img{
   position: relative;
   display: inline-block;

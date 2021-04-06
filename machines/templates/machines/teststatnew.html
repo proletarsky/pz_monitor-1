@@ -21,8 +21,11 @@
 
 {% block content %}
 
-  
-
+<pre>
+{% for x in to_service %}
+{{ x.machines_id.id }} {{ x.count }}
+{% endfor %}
+</pre>
 
 <div id='pagecontent'>
    
@@ -77,6 +80,7 @@
 </div>
 
 
+
 <!-- Styles -->
 <style>
 #chartdiv,#chartdiv1 {
@@ -92,6 +96,25 @@
 
 <!-- Chart code -->
 <script>
+var gay_array = [];
+
+function gay_sex(x,y){
+    gay_array[x]=y;
+}
+
+{% for x in to_service %}
+gay_sex({{ x.machines_id.id }},{{ x.count }});
+{% endfor %}
+
+console.log(gay_array);
+
+function find_gay(x,y){
+ if(gay_array[x]){
+  return parseInt(y-gay_array[x]);
+ }else{
+  return y;
+ }
+}
 
 function new_line(x) {
 	return x.replace(/ /g,"\n");
@@ -163,10 +186,6 @@ series.columns.template.adapter.add("fill", function(fill, target) {
 /////////////////////
 
 
-
-
-
-
 var chart1 = am4core.create("chartdiv1", am4charts.XYChart);
 chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
 
@@ -175,7 +194,7 @@ chart1.data = [
 {% for x in sql_crush_equipment  %}
   {
     country: {% if x.machines_id %} new_line("{{ x.machines_id.id }}") {% endif %} ,
-    visits: {{ x.count }}
+    visits: find_gay({{ x.machines_id.id }},{{ x.count }} )
   },
   {% endfor %}
 

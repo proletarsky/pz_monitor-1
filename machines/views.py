@@ -982,15 +982,24 @@ def repair_statistics_diagram(request):
     if request.GET.get('bool_limit'):
         bool_limit=bool(request.GET.get('bool_limit')),
 
+    to_service = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,machines_id_id 
+                                               from machines_repair_rawdata a
+                                               join machines_equipment b on a.machines_id_id=b.id
+                                               where a.repair_job_status=2 and a.repairer_master_reason_id=18
+                                               and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s 
+                                               and a.date>=%(start_interval)s and a.date <=( date %(end_interval)s + integer '1')
+                                               group by a.machines_id_id
+                                               ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+
     sql_all_count = Repair_rawdata.objects.raw('''select 1 as id,count(a.id) as count
-    	                                          from machines_repair_rawdata a
-    	                                          join machines_equipment b on a.machines_id_id=b.id
-    	                                          where a.repair_job_status=1 and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
+                                                  from machines_repair_rawdata a
+                                                  join machines_equipment b on a.machines_id_id=b.id
+                                                  where a.repair_job_status=1  and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
                                                   and a.date <=( date %(end_interval)s + integer '1')''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})[0]
 
     sql_crush_equipment = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,machines_id_id  from machines_repair_rawdata a
                                                      join machines_equipment b on a.machines_id_id=b.id
-                                                     where a.repair_job_status=1 and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
+                                                     where a.repair_job_status=1  and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
                                                      and a.date <=( date %(end_interval)s + integer '1')
                                                      group by a.machines_id_id
                                                      ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
@@ -998,11 +1007,13 @@ def repair_statistics_diagram(request):
     sql_reason_stat = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,repairer_master_reason_id  from machines_repair_rawdata a
                                                     join machines_equipment b on a.machines_id_id=b.id
                                                     where a.repair_job_status=2 and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
-                                                     and a.date <=( date %(end_interval)s + integer '1')
+                                                    and a.date <=( date %(end_interval)s + integer '1')
+                                                    and a.repairer_master_reason_id<>18
                                                     group by a.repairer_master_reason_id''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context = {'to_service':to_service,'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/teststatnew.html',context)
 
