@@ -12,7 +12,7 @@
     {% endif %}
 	{% if request.user|has_group:'Руководитель производства' %}
         <li class="sidebar-brand">
-            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>  Личный кабинет</a>
+            <a href="http://192.168.3.14"><span class="glyphicon glyphicon-user"></span>Личный кабинет</a>
         </li>
     {% endif %}
 {% endblock sidebar %}
@@ -30,18 +30,24 @@
 	 <label class="required" for="workshop">Цех:</label>
 	 <select id="id_workshop" name="workshop">
 	 <option value="" selected="">Выбрать цех</option>
-  <option value="1">цех 1</option>   
-  <option value="7">цех 7</option>
-  <option value="8">цех 8</option>
-  <option value="9">цех 9</option>
-  <option value="14">цех 14</option>
-  <option value="26">цех 26</option>
+     {% for x in workshops %}
+     <option value="{{x.pk}}">цех {{x.pk}}</option>
+     {% endfor %}
 	 </select>
 	 </div>
-	 <div class="form-row">
+      <div class="form-row">
+     <label class="required" for="workshop">Участок:</label>
+     <select id="id_area" name="area">
+     <option value="" selected="">Выбрать участок</option>
+     {% for x in areas %}
+     <option value="{{x.pk}}">{{x}}</option>
+     {% endfor %}
+     </select>
+     </div>
+	 <!--<div class="form-row">
 	 <label class="required" for="email">Название:</label>
 	 <input type="text" id="id_model" name="model" placeholder="Название оборудования">
-	 </div>
+	 </div>-->
 	 <div class="form-row">
 	<input type="hidden" id="type_w" name="machine_or_furnace_sign" placeholder="станки или прочее" value="">
 	 <input id="sendform" type="submit" value="Найти">
@@ -62,7 +68,8 @@
         <thead style=" text-align: center">
         <tr>
             <th scope="col" style="width:5%">Цех</th>
-            <th scope="col" style="width:30%" colspan="2"><div style="text-align: center">
+            <th scope="col" style="width:10%">Участок</th>
+            <th scope="col" style="width:35%" colspan="2"><div style="text-align: center">
 		<!-- &machine_or_furnace_sign=false -->
 <select id="type_workshop" name="typefilter">
   <option value="" selected="">Всё оборудование</option>
@@ -73,13 +80,16 @@
 
 </div></th>
 {#			<th>Фото оборудования</th>#}
-            <th scope="col" style="width:65%" >Данные мониторинга</th>
+            <th scope="col" style="width:60%" >Данные мониторинга</th>
 <!--            <th scope="col" style="width:15%">Состояние</th> -->
+
+
         </tr>
         </thead>
         {% for equip in filter.qs %}
             <tr>
                 <td aria-label="Цех" ><a class="moreinfa" href="{{ appname }}/machines/?workshop={{ equip.workshop }}">{{ equip.workshop }}</a></td>
+                <td aria-label="Цех" ><a class="moreinfa" href="{{ appname }}/machines/{% if equip.area is None %}?workshop={{ equip.workshop }}">{{ equip.workshop.name }}{% else %}?area={{ equip.area }}">{{ equip.area }}{% endif %}</a></td>
                 <td aria-label="Оборудование" ><a class="moreinfa" href="{{ appname }}works/{{ equip.id }}/">{{ equip.model }} ({{ equip.code }})</a></td>
                 <td aria-label="Фото оборудования">
 		<a href="{{ appname }}works/{{ equip.id }}/">

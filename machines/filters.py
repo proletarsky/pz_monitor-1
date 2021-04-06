@@ -11,6 +11,7 @@ class EquipmentFilter(django_filters.FilterSet):
             'workshop',
             'model',
 	        'machine_or_furnace_sign',
+            'area'
             #'is_in_monitoring',
 
         ]

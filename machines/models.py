@@ -222,7 +222,7 @@ class Area(models.Model):
     green_card_id=models.CharField(max_length=70,verbose_name='ID зеленой карточки')
 
     def __str__(self):
-        return self.name+' цеха №'+str(self.workshop)
+        return self.name+' цеха №'+str(self.workshop.workshop_number)
 
 class Complex(models.Model):
     name=models.CharField(max_length=70,verbose_name='Наименование')

@@ -11,6 +11,11 @@ var exists = 0 != $('#id_workshop option[value='+parseInt(urlParams.get('worksho
 if(exists){$('#id_workshop').val(parseInt(urlParams.get('workshop')));}
 }
 
+if(urlParams.has('area')){
+var exists = 0 != $('#id_area option[value='+parseInt(urlParams.get('area'))+']').length;
+if(exists){$('#id_area').val(parseInt(urlParams.get('area')));}
+}
+
 if(urlParams.has('machine_or_furnace_sign')){
 $('#type_workshop').val( urlParams.get('machine_or_furnace_sign') );
 $('#type_w').val( urlParams.get('machine_or_furnace_sign') )

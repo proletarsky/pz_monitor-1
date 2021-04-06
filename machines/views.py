@@ -95,6 +95,8 @@ class EqipmentFilteredListView(ListView):
         context = super().get_context_data(**kwargs)
         context['filter'] = EquipmentFilter(self.request.GET, queryset=self.get_queryset().filter(is_in_monitoring=True))
         context['graph_data'] = get_ci_data_timeline()
+        context['workshops'] = Workshop.objects.all()
+        context['areas'] = Area.objects.all()
         return context
 
 
