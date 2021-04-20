@@ -988,14 +988,21 @@ def repair_statistics_diagram(request):
     avg_repair = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(return_to_work_date-repair_date),'DD:HH24:MI') as data from machines_repair_history a where %(start_interval)s<=a.return_to_work_date and %(end_interval)s >=a.repair_date''',params={'start_interval':start_interval,'end_interval':end_interval})
 
     if avg_crush[0].data:
-        avg_crush = ('ДНЕЙ: '+str(avg_crush[0].data[0:2])) if str(avg_crush[0].data[0:2])!='00' else'' + '  ЧАСОВ: '+str(avg_crush[0].data[3:5])+'  МИНУТ: '+str(avg_crush[0].data[6:8])
+        if str(avg_crush[0].data[0:2])!='00':
+            avg_crush = 'Дней: '+str(avg_crush[0].data[0:2])+ '  Часов: '+str(avg_crush[0].data[3:5])+'  Минут: '+str(avg_crush[0].data[6:8])
+        else:
+            avg_crush = 'Часов: '+str(avg_crush[0].data[3:5])+'  Минут: '+str(avg_crush[0].data[6:8])
+
+        
     else:
         avg_crush='Недостаточно данных'
 
     if avg_repair[0].data:
-        avg_repair = ('ДНЕЙ: '+str(avg_repair[0].data[0:2])) if str(avg_repair[0].data[0:2])!='00' else'' + '  ЧАСОВ: '+str(avg_repair[0].data[3:5])+'  МИНУТ:' +str(avg_repair[0].data[6:8])
-    else:
-        avg_repair = 'Недостаточно данных'
+        if str(avg_repair[0].data[0:2])!='00':
+            avg_repair = 'Дней: '+str(avg_repair[0].data[0:2])+ '  Часов: '+str(avg_repair[0].data[3:5])+'  Минут: '+str(avg_repair[0].data[6:8])
+        else:
+            avg_repair = 'Часов: '+str(avg_repair[0].data[3:5])+'  Минут: '+str(avg_repair[0].data[6:8])
+
 
 
     to_service = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,machines_id_id 
