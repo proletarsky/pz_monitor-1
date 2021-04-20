@@ -963,9 +963,10 @@ def repair_statistics_diagram(request):
 
     area_id_param = tuple(x.id for x in all_area)
     return_area = 0
-    start_interval = '2020-05-25'
     now =datetime.datetime.now().date()
-    end_interval = str(now.year)+'-'+str(now.month)+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+    end_interval = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
+    start_interval = now-datetime.timedelta(days=7)
+    start_interval = str(start_interval.year)+'-'+(str(start_interval.month) if len(str(start_interval.month))>=2 else '0'+str(start_interval.month))+'-'+(str(start_interval.day) if len(str(start_interval.day))>=2 else '0'+str(start_interval.day))
     bool_limit = (False,True)
 
     if request.GET.get('area_id_param'):
@@ -981,6 +982,21 @@ def repair_statistics_diagram(request):
         end_interval=request.GET.get('end_date')
     if request.GET.get('bool_limit'):
         bool_limit=bool(request.GET.get('bool_limit')),
+
+
+    avg_crush = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(repair_date-crush_date),'DD:HH24:MI') as data from machines_repair_history a where %(start_interval)s<=a.repair_date and %(end_interval)s >=a.crush_date''',params={'start_interval':start_interval,'end_interval':end_interval})
+    avg_repair = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(return_to_work_date-repair_date),'DD:HH24:MI') as data from machines_repair_history a where %(start_interval)s<=a.return_to_work_date and %(end_interval)s >=a.repair_date''',params={'start_interval':start_interval,'end_interval':end_interval})
+
+    if avg_crush[0].data:
+        avg_crush = ('ДНЕЙ: '+str(avg_crush[0].data[0:2])) if str(avg_crush[0].data[0:2])!='00' else'' + '  ЧАСОВ: '+str(avg_crush[0].data[3:5])+'  МИНУТ: '+str(avg_crush[0].data[6:8])
+    else:
+        avg_crush='Недостаточно данных'
+
+    if avg_repair[0].data:
+        avg_repair = ('ДНЕЙ: '+str(avg_repair[0].data[0:2])) if str(avg_repair[0].data[0:2])!='00' else'' + '  ЧАСОВ: '+str(avg_repair[0].data[3:5])+'  МИНУТ:' +str(avg_repair[0].data[6:8])
+    else:
+        avg_repair = 'Недостаточно данных'
+
 
     to_service = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,machines_id_id 
                                                from machines_repair_rawdata a
@@ -1013,7 +1029,7 @@ def repair_statistics_diagram(request):
 
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'to_service':to_service,'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context = {'to_service':to_service,'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0],'avg_crush':avg_crush,'avg_repair':avg_repair}
 
     return render(request,'machines/teststatnew.html',context)
 
