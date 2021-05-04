@@ -184,13 +184,13 @@ class EquipmentWorksDetailView(UpdateView):
 
         if self.request.POST:
             if self.object.problem_machine:
-                if self.request.POST.get('reason_id') and self.request.POST.get('trinity_id'):
-                    trinity_id = self.request.POST.get('trinity_id')
+                if self.request.POST.get('reason_id') and self.request.POST.get('hour_id'):
+                    hour_id = self.request.POST.get('hour_id')
                     reason_id = self.request.POST.get('reason_id')
                     reason = Reason.objects.get(id = reason_id)
-                    trinity = Trinity_interval.objects.get(id = trinity_id)
-                    trinity.user_reason = reason
-                    trinity.save()
+                    hour = Hour_interval.objects.get(id = hour_id)
+                    hour.user_reason = reason
+                    hour.save()
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)
         else:
             context['intervals'] = ClassifiedIntervalFormSet(queryset=interval_qs)
