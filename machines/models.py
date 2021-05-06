@@ -518,7 +518,7 @@ class ClassifiedInterval(models.Model):
         # check equipment
         #18.08.2020 Шабанов изменение филтрации поиска моделей
         if equipment is None:
-            equipment_id_list = [eq.id for eq in Equipment.objects.filter(is_in_monitoring=True,workshop__in=workshop_id).order_by('-workshop', 'id')]
+            equipment_id_list = [eq.id for eq in Equipment.objects.filter(problem_machine=False,is_in_monitoring=True,workshop__in=workshop_id).order_by('-workshop', 'id')]
         elif isinstance(equipment, list):
             equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
                                  [id for id in equipment if isinstance(id, int)])
@@ -532,7 +532,7 @@ class ClassifiedInterval(models.Model):
         total_user_stats = {}
         # cycle to get statistics
         for eid in equipment_id_list:
-            intervals = ClassifiedInterval.objects.filter(equipment__id=eid, end__gte=start_date, start__lte=end_date)
+            intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False,equipment__id=eid, end__gte=start_date, start__lte=end_date)
             # auto_reasons = intervals.values('automated_classification').distinct()
             # user_reasons = intervals.values('user_classification').distinct()
             # setup auto_stats and user_stats (fills zero)

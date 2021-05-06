@@ -189,8 +189,38 @@ class EquipmentWorksDetailView(UpdateView):
                     reason_id = self.request.POST.get('reason_id')
                     reason = Reason.objects.get(id = reason_id)
                     hour = Hour_interval.objects.get(id = hour_id)
-                    hour.user_reason = reason
-                    hour.save()
+                    end_interval = Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=True,starting__gte=hour.ending,starting__date=(hour.starting+datetime.timedelta(hours=3)).date()).order_by('id')
+                    if end_interval:
+                        end_interval = end_interval[0:1:1][0]
+
+                    else:
+                        last_object = Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=False,starting__date=(hour.starting+datetime.timedelta(hours=3)).date()).order_by('-id')[0:1:1][0]
+                        if last_object.id == hour.id:
+                            end_interval=hour
+                        else:
+                            end_interval = Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=False,starting__date=(hour.starting+datetime.timedelta(hours=3)).date(),starting__gte=hour.ending).order_by('-id')[0:1:1][0]
+
+                    start_interval = Hour_interval.objects.filter(equipment=hour.equipment,work_check=True,starting__date=(hour.starting+datetime.timedelta(hours=3)).date(),ending__lte=hour.starting).order_by('-id')
+                    if start_interval:
+                        start_interval=start_interval[0:1:1][0]
+
+                    else:
+                        fisrt_object = Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=False,starting__date=(hour.starting+datetime.timedelta(hours=3)).date()).order_by('id')[0:1:1][0]
+                        if fisrt_object.id==hour.id:
+                            start_interval=hour
+                        else:
+                            start_interval=Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=False,starting__lte=hour.starting,starting__date=(hour.starting+datetime.timedelta(hours=3)).date()).order_by('id')[0:1:1][0]
+
+                    if end_interval and start_interval:
+                        need_objects = Hour_interval.objects.filter(equipment_id=hour.equipment.id,work_check=False,id__gte=start_interval.id,id__lte=end_interval.id,user_reason__isnull=True)
+                        for x in need_objects:
+                            x.user_reason=reason
+                            x.save()
+                        hour.user_reason=reason
+                        hour.save()
+                    else:
+                        hour.user_reason = reason
+                        hour.save()
             context['intervals'] = ClassifiedIntervalFormSet(self.request.POST, queryset=interval_qs)
         else:
             context['intervals'] = ClassifiedIntervalFormSet(queryset=interval_qs)
@@ -345,8 +375,17 @@ class StatisticsView(ListView):
 
         context['machines'] = Equipment.objects.filter(is_in_monitoring=True)
         context['workshops'] = Workshop.objects.all()
+        problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True,is_in_monitoring=True)]
         if start_date is not None and start_date!='' and end_date is not None and end_date!='':
-            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id))
+            if equip_id not in problem_machines:
+                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+            else:
+                pr_m = Equipment.objects.get(id=equip_id)
+                stat_data={}
+                stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
+                stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}           
+
+            context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
         else:
@@ -355,7 +394,13 @@ class StatisticsView(ListView):
             sunday = monday + datetime.timedelta(days = 6)
             start_date = str(monday)
             end_date = str(sunday)
-            context['statistics'] = prepare_data_for_google_charts_bar(ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id))
+            if equip_id not in problem_machines:
+                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+            else:
+                stat_data={}
+                stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
+                stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1430, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}
+            context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
         return context
