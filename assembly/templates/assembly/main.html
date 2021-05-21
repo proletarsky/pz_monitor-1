@@ -1,0 +1,34 @@
+{% extends 'assembly_base.html' %}
+{% block content %}
+
+   <div class="page-header">
+        <h1 style="text-align:center;">Сборочные участки</h1>
+    </div>
+
+<div class="main-menu-wrapper">
+
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/assembly/active_tasks/"><img src="/static/img/monitor.png" alt="Мониторинг оборудования"/><span>Активные задания</span></a></div></div>
+{% if user.is_authenticated %}
+	{% for group_for in user.groups.all %}
+    		{% if group_for.id == 5 %}
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/assembly/view_reports/"><img src="/static/img/images.png" alt="Все простои"/><span>Рабочее место бригадира</span></a></div></div>
+			{% endif %}
+	{% endfor %}
+{% endif %}
+{% if user.is_authenticated %}
+	{% for group_for in user.groups.all %}
+    		{% if group_for.id == 4 %}
+<div class="main-menu-block"><div class="inner-main-menu-block"><a href="/assembly/pdo_tasks/"><img src="/static/img/working-on-office.png" alt="Все простои"/><span>Рабочее место ПДО</span></a></div></div>
+			{% endif %}
+	{% endfor %}
+{% endif %}
+
+<div class="main-menu-block" style="opacity:0.3;"><div class="inner-main-menu-block"><a href="#"><img src="/static/img/pzstatistic.png" alt="Статистика простоев"/><span>Статистика</span></a></div></div>
+
+<div class="main-menu-block" style="opacity:0.3;"><div class="inner-main-menu-block"><a href="#"><img src="/static/img/repair_history.png" alt="123"/><span>История заданий</span></a></div></div>
+
+</div>
+
+
+
+{% endblock content %}

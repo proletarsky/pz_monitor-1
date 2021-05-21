@@ -1,0 +1,71 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    {% for group_for in user.groups.all %}
+            {% if group_for.id == 4 %}
+<form class="act-form" method="GET" action=".">		
+	 <div class="form-row"><label for="id_order">Заказ на производство:</label>{{ filter.form.order }}</div>
+	 <div class="form-row"><label for="id_subdivision">Подразделение:</label>{{ filter.form.subdivision }}</div>
+	 <div class="form-row"><label for="id_status">Статус:</label>{{ filter.form.status }}</div>
+	 <!--{% csrf_token %}-->
+	 <div class="form-row">
+	 <input id="sendform" type="submit" value="Применить">
+	 </div>
+    </form>
+
+<a style="margin: 10px auto 0;
+    padding:10px;
+    border-radius: 3px;
+    display:inline-block;
+    background: #184371;
+    color: white;
+    border: 2px solid #184371;
+    cursor: pointer;
+    font-weight: 600;
+    margin:0 0 10px;" href="{% url 'pdo_create' %}">Создать новое задание</a>
+<style>td{padding: 10px 0;}.table tr:nth-child(2n){background:#FFF;}td{border:1px solid #ddd !important;}</style>
+<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+        <tr>
+            <th scope="col" style="width:20%">Обозначение</th>
+            <th scope="col" style="width:20%" colspan="1"><div style="text-align: center">Наименование работ</div></th>			            
+            <th scope="col" style="width:20%" >Заказ на производство</th>
+            <th scope="col" style="width:20%" >Срок</th>
+            <th scope="col" style="width:20%" colspan="1">Трудоёмкость</th>
+            <th scope="col" style="width:20%" colspan="1">Фактическая трудоемкость</th>
+            <th scope="col" style="width:20%" colspan="1">Подразделение</th>
+            <th scope="col" style="width:20%" colspan="1">Статус</th>
+            <th scope="col" style="width:20%" colspan="1">Разработчик</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for x in filter.qs %}		
+
+            <tr>
+                <td aria-label="Обозначение" ><a class="moreinfa" href="{% url 'pdo_update' x.pk %}" target="_blank" > {{ x.description }}</a></td>
+                <td aria-label="Наименование работ" >{{ x.name }}</td>
+                <td aria-label="Заказ на произвотство" >{{ x.order }}</td>
+                <td aria-label="Срок">{{ x.date | date:"d.m.Y"}}</td>
+                <td aria-label="Трудоёмкость">{{ x.laboriousness }}</td>
+                <td aria-label="Фактическая трудоемкость">{{ x.de_facto }}</td>
+                <td aria-label="Подразделение">{{ x.subdivision }}</td>
+                <td aria-label="Статус">
+                {% if x.status == 1 %}Создано{% endif %}
+                {% if x.status == 2 %}В работе{% endif %}
+                {% if x.status == 3 %}Закрыто{% endif %}                
+            	</td>
+                <td aria-label="Разработчик">{{ x.creator }}</td>
+            </tr>
+        {% endfor %}
+  </tbody>
+
+    </table>
+{% else %}
+<script type="text/javascript">window.location.href = '/accounts/login/'; </script>
+            {% endif %}
+    {% endfor %}
+    
+{% endif %}
+
+{% endblock content %}

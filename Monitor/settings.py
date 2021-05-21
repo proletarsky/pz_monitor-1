@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'bootstrapform',
     'googlecharts',
     'sanctuary',
+    'assembly',
     
     # 'djcelery_email',
 ]
@@ -94,7 +95,7 @@ WSGI_APPLICATION = 'Monitor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'pzmonitor',
+        'NAME': 'aa_pzmonitor',
         'USER': 'djangouser',
         'PASSWORD': 'password',
         'HOST': '127.0.0.1',
@@ -147,7 +148,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-LOGIN_REDIRECT_URL = '/machines'
+LOGIN_REDIRECT_URL = '/'
 
 # REST_FRAMEWORK
 REST_FRAMEWORK = {

@@ -26,6 +26,7 @@ urlpatterns = [
                   url(r'^machines/', include('machines.urls')),
                   url(r'^sanctuary/',include('sanctuary.urls')),
                   url(r'^admin/', admin.site.urls),
+                  url(r'^assembly/',include('assembly.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
                   url(r'^accounts/register/$', register, name='register'),
                   url(r'^accounts/edit/$', edit, name='edit'),

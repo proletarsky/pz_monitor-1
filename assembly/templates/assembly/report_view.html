@@ -1,0 +1,353 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+<style type="text/css">
+.period-block{
+	text-align:center;
+	padding-top:10px;
+}
+.inner-period-block{
+	display:table;
+	margin:0 auto;
+	padding:20px;
+}
+
+.arr_left{background-image: url(/static/img/assembly_arrow_left.png);}
+.arr_right{background-image: url(/static/img/assembly_arrow-right.png);}
+.select-period{
+    margin: 0 20px;    
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    vertical-align:top;
+}
+.top-block{
+text-align:justify;
+    display: table;
+    width: 100%;
+    padding: 15px 0;
+    margin: 10px 0;
+    margin: 10px auto;
+}
+.form-for-add,.graph{
+	display:inline-block;
+	width:50%;
+	border-bottom:none;
+	vertical-align:top;
+	text-align:center;
+}
+
+.form-for-add-line{margin:0;border-bottom:1px solid #d4d4d4;padding:5px;display:block;}
+.form-for-add-line:last-child(){border-bottom:none !important;}
+
+.form-for-add label{
+	width:90%;	
+	display:inline-block;	
+	text-align:left;
+	padding-left:20px;	
+}
+.form-for-add input,.form-for-add span{
+    width:10%;
+    display: inline-block;
+    text-align: center;
+    padding:5px;
+}
+.form-for-add input{border:1px solid #d4d4d4;border-radius:5px;}
+.inner-form-for-add{
+    display: table;
+    width: 95%;
+    border: 1px solid #d4d4d4;
+    margin: 15px auto;
+    border-radius: 5px;
+    background: #FFF;
+    }
+ .inner-form-for-add.two input[type="number"] {
+    border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 10px;
+    display: inline-block;
+}
+.block-header{
+	width:50%;
+	display:inline-block;
+	vertical-align:top;
+}
+.form-for-add-header{
+	background: #215998;
+    color: white;
+    border-radius:5px 5px 0 0;
+}
+.zadb .inner-form-for-add{text-align:left !important;min-height:165px;}
+.zadb{width:50%;display:inline-block;}
+.zadb button{
+	max-width:22%;
+    font-size: 15px;
+    padding: 15px;
+    text-align: center;
+    min-height: 67px;
+    margin:15px;
+    border:1px solid #d4d4d4;
+    border-radius:5px;
+}
+.zadb button span{
+	width:100%;
+	display:block;
+}
+.inner-form-for-add form label {
+    display: table;
+    width: 100%; 
+    padding: 15px 5px;
+    cursor: pointer;
+    height: 95px;
+}
+
+.inner-form-for-add form input[type="number"]{
+	border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    padding: 5px;
+    margin:10px;
+    display:none;
+}
+.form-block {
+    display: inline-block;
+    width: 31%;
+    vertical-align: top;
+    border: 1px solid #dadada;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    margin: 5px;
+}
+.add-zad{cursor:pointer;}
+.pbar-wrapper,.pbar{border-radius:5px;text-align:center;max-width:100%;}
+.pbar{display:inline-block;background:#00bd00;}
+.pbar-wrapper{display:table;position:relative;width:100%;background:#cacaca;margin-top:5px;line-height: 25px;}
+#send_form{text-align:center;}
+h1,h2,h3,h4,h5,h6{font-weight:normal;text-align: center;}
+.create-task-button{
+    margin: 10px auto 0;
+    padding: 5px;
+    border-radius: 3px;
+    display: table;
+    text-align: center;
+    background:green;
+    color: white;
+    border: 2px solid #184371;
+    cursor: pointer;
+    font-weight: 600;
+}
+</style>
+{% if user.is_authenticated %}
+	{% for group_for in user.groups.all %}
+    		{% if group_for.id == 5 %}
+<div class="period-block" >
+	<h1 style="margin-bottom:15px">Отчёт бригады <br> {{ object.brigade }}</h1>
+	<!-- <div class="form-for-add" ><div><b>{{ brigade }}</b><br>Всего численность {{ brigade.quantity }} человек</div></div>-->
+	<div class="inner-period-block">
+		<!-- <a class="select-period arr_left" href="#"></a> -->
+		<h3>{{ object.create | date:"d.m.Y" }}</h3>
+		<!-- <a class="select-period arr_right" href="#"></a> -->
+	</div>
+	<span>I смена</span>
+</div>
+<div class="top-block">		
+	<div class="form-for-add">
+		<h2>Выработка по заданиям</h2>
+		<div id="add-form" class="inner-form-for-add" style="min-height:320px;">
+			<div class="form-for-add-line form-for-add-header"><label>Задачи</label><span>Часы</span></div>
+			{% for x in tasks %}
+			<div class="form-for-add-line">
+				<label for="{{ x.task.id }}">{{ x.task }}</label><input id="{{ x.task.id }}" class="input_val" readonly="readonly" type="number" value="{{ x.working_out }}" name="{{ x.task.id }}" />
+			</div>
+			{% endfor %}
+		</div>
+
+	</div>
+	<div class="graph">
+		<h2>Распределение рабочего времени</h2>	
+		<div id="drawing1" class="chart-area"></div>
+	</div>
+
+	<div class="zadb ">
+	<h2>Потери</h2>	
+	<div style="left:-20px;position: relative;" class="inner-form-for-add two">
+{% if object.drawing %}
+<div class="form-block" >
+<label for="id_drawing">Отсутствие чертежей</label>
+<input type="number" readonly="readonly" id="drawing" value="{{ object.drawing }}" />
+</div>
+{% endif %}
+{% if object.deviations %}
+<div class="form-block" >
+<label for="id_deviations">Отсутствие решения по выявленным отклонениям</label>
+<input type="number" readonly="readonly" id="id_deviations" value="{{ object.deviations }}" >
+</div>
+{% endif %}
+{% if object.personal %}
+<div class="form-block" >
+<label for="id_personal">Отсутствие персонала</label>
+<input type="number" readonly="readonly" id="id_personal" value="{{ object.personal }}" >
+</div>
+{% endif %}
+{% if object.otk %}
+<div class="form-block" >
+<label for="id_otk">Отсутствие ОТК</label>
+<input type="number" readonly="readonly" id="id_otk" value="{{ object.otk }}" >
+</div>
+{% endif %}
+{% if object.vp %}
+<div class="form-block" >
+<label for="id_vp">Отсутствие ВП и/или представителя заказчика</label>
+<input type="number" readonly="readonly" id="id_vp" value="{{ object.vp }}">
+</div>
+{% endif %}
+{% if object.proektant %}
+<div class="form-block" >
+<label for="id_proektant">Отсутствие представителя проектанта</label>
+<input type="number" readonly="readonly" id="id_proektant" value="{{ object.proektant }}">
+</div>
+{% endif %}
+{% if object.ogt %}
+<div class="form-block" >
+<label for="id_ogt">Отсутствие представителя ОГТ для решения блокирующих вопросов</label>
+<input type="number" readonly="readonly" id="id_ogt" value="{{ object.ogt }}">
+</div>
+{% endif %}
+{% if object.other_order %}
+<div class="form-block" >
+<label for="id_other_order">Переход на другой заказ/другие работы</label>
+<input type="number" readonly="readonly" id="id_other_order" value="{{ object.other_order }}">
+</div>
+{% endif %}
+{% if object.ssz %}
+<div class="form-block" >
+<label for="id_ssz">Отсутствие ССЗ</label>
+<input type="number" readonly="readonly" id="id_ssz" value="{{ object.ssz }}">
+</div>
+{% endif %}
+{% if object.complect_zavod %}
+<div class="form-block" >
+<label for="id_complect_zavod">Отсутствие комплектующих по межзаводской кооперации</label>
+<input type="number" readonly="readonly" id="id_complect_zavod" value="{{ object.complect_zavod }}">
+</div>
+{% endif %}
+{% if object.complect_workshop %}
+<div class="form-block" >
+<label for="id_complect_workshop">Отсутствие комплектующих по межцеховой кооперации</label>
+<input type="number" readonly="readonly" id="id_complect_workshop" value="{{ object.complect_workshop }}">
+</div>
+{% endif %}
+{% if object.pki %}
+<div class="form-block" >
+<label for="id_pki">Отсутствие ПКИ</label>
+<input type="number" readonly="readonly" id="id_pki" value="{{ object.pki }}">
+</div>
+{% endif %}
+{% if object.materials %}
+<div class="form-block" >
+<label for="id_materials">Отсутствие расходных/вспомогательных материалов</label>
+<input type="number" readonly="readonly" id="id_materials" value="{{ object.materials }}">
+</div>
+{% endif %}
+{% if object.osn %}
+<div class="form-block" >
+<label for="id_osn">Отсутствие оснастки</label>
+<input type="number" readonly="readonly" id="id_osn" value="{{ object.osn }}">
+</div>
+{% endif %}
+{% if object.instr %}
+<div class="form-block" >
+<label for="id_instr">Отсутствие инструмента</label>
+<input type="number" readonly="readonly" id="id_instr" value="{{ object.instr }}">
+</div>
+{% endif %}
+{% if object.prisp %}
+<div class="form-block" >
+<label for="id_prisp">Отсутствие приспособлений</label>
+<input type="number" readonly="readonly" id="id_prisp" value="{{ object.prisp }}">
+</div>
+{% endif %}
+{% if object.card_valid %}
+<div class="form-block" >
+<label for="id_card_valid">Доработка по причине карт разрешений</label>
+<input type="number" readonly="readonly" id="id_card_valid" value="{{ object.card_valid }}">
+</div>
+{% endif %}
+{% if object.quality %}
+<div class="form-block" >
+<label for="id_quality">Добработка по причине исправления качества</label>
+<input type="number" readonly="readonly" id="id_quality" value="{{ object.quality }}">
+</div>
+{% endif %}
+	</div>
+	</div>
+<a class="create-task-button" href="{% url 'report_update' object.id %}">Редактировать</a><br>
+</div>
+
+
+<script type="text/javascript">
+function arraySum(array) {
+	var sum = 0;
+	for (var i = 0; i < array.length; i++){
+		console.log(i);
+		console.log(':::::::::::::::::::::::::::'+array[i][1]);
+		//if (Object.prototype.toString.call(array[i]) === '[object Number]') {
+			sum += parseInt(array[i][1]);
+		//}
+	
+	}
+	return sum
+}
+
+$( document ).ready(function() {
+
+var arr_for_send = {},arr_for_send2 = {};
+const p_array = ['drawing','deviations','personal','otk','vp','proektant','ogt','other_order','ssz','complect_zavod','complect_workshop','pki','materials','osn','instr','prisp','card_valid','quality'];
+//for(let i=0;i<p_array.length;i++){arr_for_send[p_array[i]] = 123;}
+//for(let z=1;z<5;z++){arr_for_send2[z] = 23;}
+
+var arrNumber = [], arr_sum;
+
+
+$('input[type=number]').each(function(){
+    var in_val = $(this).val();
+    if($(this).val()!=0){
+    input_label_text = 'TEST';
+    if($('label[for="'+$(this).attr('id')+'"]').length>0){
+    	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
+    }
+    arrNumber.push(new Array(input_label_text,in_val) );
+    arr_sum = arraySum(arrNumber);
+console.log(arrNumber);
+console.log(arr_sum);
+}
+});
+
+if(arrNumber.length<=0){arrNumber = [0];}
+
+//var arr_sum = arraySum(arrNumber);
+
+var chartconfig1 = {
+	type: 'RoundChart',
+	dataset:{
+	//data:[50,53,41,32,34],
+	data: arrNumber,
+	data_max:[arr_sum],
+	},
+	options:{
+	background:'red',
+	}
+};
+var graph = new ChartsCreater(chartconfig1);
+
+});
+</script>
+{% endif %}
+{% endfor %}
+{% else %}
+<script type="text/javascript">window.location.href = '/accounts/login/'; </script>
+{% endif %}
+{% endblock content %}

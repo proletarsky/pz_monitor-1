@@ -1,0 +1,181 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+<style type="text/css">
+.task-block{
+    display: inline-block;
+    width: 32%;
+    border: 2px solid black;
+    border-radius: 3px;
+    margin: 10px 0.5%;
+}
+.task-block-header{
+    border-bottom: 1px solid;
+    padding: 10px;
+    font-weight: bold;
+    background: #0038a5;
+    color: white;
+    text-align:center;
+}
+.create-task-button{
+    margin: 10px auto 0;
+    padding: 5px;
+    border-radius: 3px;
+    display: table;
+    text-align: center;
+    background: #184371;
+    color: white;
+    border: 2px solid #184371;
+    cursor: pointer;
+    font-weight: 600;
+}
+.task-block-content{
+	padding:0 10px 10px;
+	position:relative;	
+}
+.scrolling{
+	width:100%;
+	height:100px;
+	overflow:auto;
+	border:1px solid gray;
+}
+.task-progress{
+    position: absolute;
+    margin: 1px;
+    display: block;
+    height: 24px;
+    max-width: 99.54%;
+    border-radius:2.5px;
+}
+.task-proggress-bar{
+    width: 100%;
+    height: 30px;
+    position: relative;
+    border: 2px solid #292929;
+    display: inline-block;
+    max-width: 69%;
+    margin-top: 50px;
+    border-radius:3px;
+}
+.task-proggress-bar:before{
+    content: attr(data-proc);
+    position: absolute;
+    top: -65px;
+    font-weight: bold;
+    z-index: 999;
+    text-align: center;
+    width: 100%;
+    font-size: 50px;
+}
+.scrolling a {
+    display: table;
+    margin: 5px 10px;
+}
+input[name='close-task']{
+	    background: red;
+    padding: 7.5px;
+    margin: 10px auto;
+    text-align: center;
+    display: table;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.page-content-wrapper{
+	padding-top:30px;
+}
+.act-form{padding: 20px 10px 10px;}
+.task-right {
+/*
+    display: inline-block;
+    position: absolute;
+    margin-top: -5px;
+    width: 27%;
+    text-align: left;
+    right: 0;
+    */
+	display: inline-block;
+    position: relative;
+    top: -37px;
+    width: 27%;
+    text-align: left;
+    right: 0;
+    padding-left: 30px;
+}
+.task-bottom{
+    display: inline-block;
+    width: 49%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.task-bottom-header{display:block;margin-bottom:7.5px;margin-left:-20px;}
+#sendform{margin:-2.5px 0 0;}
+</style>
+<!-- <h1 style="text-align:center;padding-bottom:20px;">{{ objects.0.subdivision }}</h1> -->
+<form class="act-form" method="GET" action=".">		
+	 <div class="form-row"><label for="id_order">Заказ на производство:</label>{{ filter.form.order }}</div>
+	 <div class="form-row"><label for="id_subdivision">Подразделение:</label>{{ filter.form.subdivision }}</div>
+	 <div class="form-row"><label for="id_status">Статус:</label>
+	 <select name="status" id="id_status">
+	 <option value>-------</option>
+	 {{ filter.form.status.1 }}
+	 {{ filter.form.status.2 }}	 
+	 </select>
+	 </div>
+	 <!--{% csrf_token %}-->
+	 <div class="form-row">
+	 <input id="sendform" type="submit" value="Применить">
+	 </div>
+    </form>
+
+{% if filter.qs %}
+{% for x in filter.qs %}
+ <div class="task-block" >
+ 	<div class="task-block-header" >{{ x }}</div>
+ 	<span style="text-align: center;
+    position: relative;
+    width: 100%;
+    display: table;
+    padding: 10px 0;">Срок: {{ x.date | date:"d.m.Y" }} </span><br>
+ 	<div class="task-block-content" >
+ 	<!-- Суммарная выработка по заданию: -->
+
+ 	<div class="task-proggress-bar" data-proc="{{ x.get_de_facto }}%" ><div class="task-progress" style="width:100%;background:linear-gradient(to right,  #1dcc1d {{ x.get_de_facto }}%, white {{ x.get_remainder }}%);background:linear-gradient(90deg, rgb(0,152,0),rgb(255,255,255,{{ x.get_de_facto }}%) {{ x.get_de_facto }}% {{ x.get_de_facto }}%  );"></div></div>
+ 	 	<div class="task-right">Всего: <b>{{ x.laboriousness }}</b> ч<br><br>Факт: <b>{{ x.de_facto }}</b> ч<br></div>
+
+ 	</div>
+ 	<div class="task-block-content" >
+	
+	<div class="task-bottom">
+	<span class="task-bottom-header" >За неделю</span>
+	<b>{{ x.week_stats }}</b>
+	</div>
+
+	<div class="task-bottom">
+	<span class="task-bottom-header" >За месяц</span>
+	<b>{{ x.month_stats }}</b>
+	</div>
+
+ 	</div>
+    
+ 	<form method="GET" > 		
+ 		<input type="hidden" id="task_id" name="task_id" value="{{ x.id }}" >
+ 		{% csrf_token %}
+
+ 		{% for group_for in user.groups.all %}
+    		{% if group_for.id == 5 %}
+        		<input style="margin: -10px auto 10px;" type="submit" name="close-task" value="Закрыть" />
+    		{% endif %}
+		{% endfor %}
+	
+ 	</form>
+ </div>
+ {% endfor %}
+ {% else %}
+<h1 style="text-align:center;padding-bottom:20px;">Нет активных заданий</h1>
+ {% endif %}
+ <script type="text/javascript">window.history.pushState('', 'Title', '/assembly/active_tasks/');</script>
+{% endblock content %}

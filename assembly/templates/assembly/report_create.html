@@ -1,0 +1,486 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+
+<style type="text/css">
+.period-block{
+	text-align:center;
+	padding-top:10px;
+}
+.inner-period-block{
+	display:table;
+	margin:0 auto;
+	padding:20px;
+}
+
+.arr_left{background-image: url(/static/img/assembly_arrow_left.png);}
+.arr_right{background-image: url(/static/img/assembly_arrow-right.png);}
+.select-period{
+    margin: 0 20px;    
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    vertical-align:top;
+}
+.top-block{
+text-align:justify;
+    display: table;
+    width: 100%;
+    padding: 15px 0;
+    margin: 10px 0;
+    margin: 10px auto;
+}
+.form-for-add,.graph{
+	display:inline-block;
+	width:50%;
+	border-bottom:none;
+	vertical-align:top;
+	text-align:center;
+}
+
+.form-for-add-line{margin:0;border-bottom:1px solid #d4d4d4;padding:5px;display:block;}
+.form-for-add-line:last-child(){border-bottom:none !important;}
+
+.form-for-add label{
+	width:90%;	
+	display:inline-block;	
+	text-align:left;
+	padding-left:20px;	
+}
+.form-for-add input,.form-for-add span{
+    width:10%;
+    display: inline-block;
+    text-align: center;
+    padding:5px;
+}
+.form-for-add input{border:1px solid #d4d4d4;border-radius:5px;}
+.inner-form-for-add{
+    display: table;
+    width: 95%;
+    border: 1px solid #d4d4d4;
+    margin: 15px auto;
+    border-radius: 5px;
+    background: #FFF;
+    }
+.block-header{
+	width:50%;
+	display:inline-block;
+	vertical-align:top;
+}
+.form-for-add-header{
+	background: #215998;
+    color: white;
+    border-radius:5px 5px 0 0;
+}
+.zadb .inner-form-for-add{text-align:left !important;min-height:165px;}
+.zadb{width:50%;display:inline-block;}
+.zadb button{
+	max-width:22%;
+    font-size: 15px;
+    padding: 15px;
+    text-align: center;
+    min-height: 67px;
+    margin:15px;
+    border:1px solid #d4d4d4;
+    border-radius:5px;
+}
+.zadb button span{
+	width:100%;
+	display:block;
+}
+.inner-form-for-add form label {
+    display: table;
+    width: 100%; 
+    padding: 15px 5px;
+    cursor: pointer;
+    height: 95px;
+}
+
+.inner-form-for-add form input[type="number"]{
+	border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    padding: 5px;
+    margin:10px;
+    display:none;
+}
+.form-block {
+    display: inline-block;
+    width: 31%;
+    vertical-align: top;
+    border: 1px solid #dadada;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    margin: 5px;
+}
+.add-zad{cursor:pointer;}
+.pbar-wrapper,.pbar{border-radius:5px;text-align:center;max-width:100%;}
+.pbar{display:inline-block;background:#00bd00;}
+.pbar-wrapper{display:table;position:relative;width:100%;background:#cacaca;margin-top:5px;line-height: 25px;}
+#send_form{text-align:center;}
+h1,h2,h3,h4,h5,h6{font-weight:normal;text-align: center;}
+</style>
+{% if user.is_authenticated %}
+	{% for group_for in user.groups.all %}
+    		{% if group_for.id == 5 %}
+<div class="period-block" >
+	<h1 style="margin-bottom:15px">Отчёт бригады</h1>
+	<div class="form-for-add" ><div><b>{{ brigade }}</b><br>Всего численность {{ brigade.quantity }} человек</div></div>
+	<div class="inner-period-block">
+		<!-- <a class="select-period arr_left" href="#"></a> -->
+		<h3>{{ now }}</h3>
+		<!-- <a class="select-period arr_right" href="#"></a> -->
+	</div>
+	<span>I смена</span>
+</div>
+<div class="top-block">		
+	<div class="form-for-add">
+		<h2>Выработка по заданиям</h2>
+		<div id="add-form" class="inner-form-for-add" style="min-height:320px;">
+			<div class="form-for-add-line form-for-add-header"><label>Задачи</label><span>Часы</span></div>
+			<p style="padding:25px 0;" id="no-tasks" >Выберете задания из списка активных</p>
+		</div>
+
+	</div>
+	<div class="graph">
+		<h2>Распределение рабочего времени</h2>	
+		<div id="drawing1" class="chart-area"></div>
+	</div>
+
+
+	<div class="zadb ">
+		<h2>Активные задания подразделения</h2>	
+		<div class="inner-form-for-add">
+		{% for x in tasks %}
+			<button data-object_id='{{ x.id }}' data-name="{{ x }}" class="add-zad">{{ x }}<div class="pbar-wrapper"><span class="pbar" style="width:{{ x.get_de_facto }}%" >{{ x.get_de_facto }}%</span></div></button>
+		{% endfor %}
+	</div>
+	</div>
+	<div class="zadb ">
+	<h2>Потери</h2>	
+	<div style="left:-20px;position: relative;" class="inner-form-for-add">
+		<form id="send_form" method="post">
+		{% csrf_token %}
+    	
+
+<!-- <label for="id_foreman">Ответственный:</label> -->
+<input type="hidden" name="foreman" id="id_foreman" value="{% if user.is_authenticated %}{{ user.id }}{% else %}None{% endif %}" />
+
+
+<!-- <label for="id_subdivision">Подразделение:</label> -->
+<input type="hidden" name="subdivision" id="id_subdivision" value="{{ subdivision.id }}" />
+
+
+<!-- <label for="id_change">Смена:</label> -->
+<input type="hidden" name="change" id="id_change" value="1" />
+
+
+
+<!-- <label for="id_brigade">Бригада:</label> -->
+<input type="hidden" name="brigade" id="id_brigade" value="{{ brigade.id }}" />
+
+
+<div class="form-block" >
+<label for="id_drawing">Отсутствие чертежей</label>
+{{ form.drawing }}
+</div>
+
+
+<div class="form-block" >
+<label for="id_deviations">Отсутствие решения по выявленным отклонениям</label>
+{{ form.deviations }}
+</div>
+
+<div class="form-block" >
+<label for="id_personal">Отсутствие персонала</label>
+{{ form.personal }}
+</div>
+
+<div class="form-block" >
+<label for="id_otk">Отсутствие ОТК</label>
+{{ form.otk }}
+</div>
+
+
+<div class="form-block" >
+<label for="id_vp">Отсутствие ВП и/или представителя заказчика</label>
+{{ form.vp }}
+</div>
+
+<div class="form-block" >
+<label for="id_proektant">Отсутствие представителя проектанта</label>
+{{ form.proektant }}
+</div>
+
+
+<div class="form-block" >
+<label for="id_ogt">Отсутствие представителя ОГТ для решения блокирующих вопросов</label>
+{{ form.ogt }}
+</div>
+
+
+<div class="form-block" >
+<label for="id_other_order">Переход на другой заказ/другие работы</label>
+{{ form.other_order }}
+</div>
+
+
+<div class="form-block" >
+<label for="id_ssz">Отсутствие ССЗ</label>
+{{ form.ssz }}
+</div>
+
+<div class="form-block" >
+<label for="id_complect_zavod">Отсутствие комплектующих по межзаводской кооперации</label>
+{{ form.complect_zavod }}
+</div>
+
+<div class="form-block" >
+<label for="id_complect_workshop">Отсутствие комплектующих по межцеховой кооперации</label>
+{{ form.complect_workshop }}
+</div>
+
+<div class="form-block" >
+<label for="id_pki">Отсутствие ПКИ</label>
+{{ form.pki }}
+</div>
+
+<div class="form-block" >
+<label for="id_materials">Отсутствие расходных/вспомогательных материалов</label>
+{{ form.materials }}
+</div>
+
+<div class="form-block" >
+<label for="id_osn">Отсутствие оснастки</label>
+{{ form.osn }}
+</div>
+
+<div class="form-block" >
+<label for="id_instr">Отсутствие инструмента</label>
+{{ form.instr }}
+</div>
+
+<div class="form-block" >
+<label for="id_prisp">Отсутствие приспособлений</label>
+{{ form.prisp }}
+</div>
+
+<div class="form-block" >
+<label for="id_card_valid">Доработка по причине карт разрешений</label>
+{{ form.card_valid }}
+</div>
+
+<div class="form-block" >
+<label for="id_quality">Добработка по причине исправления качества</label>
+{{ form.quality }}
+</div>
+
+{% if user.is_authenticated %}<input style="right:15px;float:right;margin-top:15px;background: #159c15;color: white;border: 1px solid #0b7d0c;" type="submit" name="sendform" value="Сохранить отчёт" id="sendformb" />{% endif %}
+    	
+</form>
+	</div>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+var arr_for_send = {},arr_for_send2 = {};
+const p_array = ['drawing','deviations','personal','otk','vp','proektant','ogt','other_order','ssz','complect_zavod','complect_workshop','pki','materials','osn','instr','prisp','card_valid','quality'];
+//for(let i=0;i<p_array.length;i++){arr_for_send[p_array[i]] = 123;}
+//for(let z=1;z<5;z++){arr_for_send2[z] = 23;}
+console.log( arr_for_send );
+console.log( arr_for_send2 );
+
+document.getElementById('sendformb').addEventListener('click',function(e){
+e.preventDefault();
+var s_form = document.getElementById('send_form');
+$('.form-for-add-line input[type=number]').each(function(i,item){
+	//s_form.appendChild(item);
+	//console.log(item);
+	console.log(item.value);
+	arr_for_send[item.getAttribute('id')]=item.value;
+});
+
+let input1 = document.createElement('input');
+
+input1.setAttribute('type','hidden');
+input1.setAttribute('name','tasks_values');
+input1.value = JSON.stringify(arr_for_send);
+s_form.appendChild(input1);
+/*
+let input1 = document.createElement('input'),
+ input2 = document.createElement('input'),
+ s_form = document.getElementById('send_form');
+input1.setAttribute('type','hidden');
+input1.setAttribute('name','tasks_values');
+input1.value = JSON.stringify(arr_for_send);
+//input1.value = arr_for_send;
+input2.setAttribute('type','hidden');
+input2.setAttribute('name','losses_values');
+input2.value = JSON.stringify(arr_for_send2);
+//input2.value = arr_for_send2;
+*/
+//s_form.appendChild(input1);
+//s_form.appendChild(input2);
+
+
+s_form.submit();
+
+
+});
+</script>
+
+<script>
+var chartconfig = {
+	dataset:{
+	data:[ 12,20,40],
+	data_max:[{{ brigade.quantity }}],
+	},
+	options:{
+	background:'red',
+	}
+};
+
+var chartconfig1 = {
+	type: 'RoundChart',
+	dataset:{
+	//data:[50,53,41,32,34],
+	data:[0],
+	data_max:[{{ brigade.quantity }}*8],
+	},
+	options:{
+	background:'red',
+	}
+};
+
+var graph = new ChartsCreater(chartconfig1);
+
+
+$(document).on("click", ".inner-form-for-add form label", function() {   
+   $('#'+$(this).attr('for')).toggle('display');
+ });
+
+$(document).on("click", ".form-for-add-line label", function(){
+	$('button[data-object_id="'+$(this).attr("for")+'"]').show();
+	$(this).parent('.form-for-add-line').remove();
+
+	if($('#add-form input').length<=0){
+   	document.getElementById('no-tasks').style.display = 'block';
+   }else{
+   	document.getElementById('no-tasks').style.display = 'none';
+   }
+
+var arrNumber = new Array(0),
+	full = {{ brigade.quantity }}*8;
+$('input[type=number]').each(function(){
+    //arrNumber.push($(this).val());
+
+    //var in_val = ($(this).val()*100 ) / full;
+    var in_val = $(this).val();
+    if($(this).val()!=0){
+    input_label_text = 'TEST';
+    if($('label[for="'+$(this).attr('id')+'"]').length>0){
+    	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
+    }
+    arrNumber.push(new Array(input_label_text,in_val) );
+console.log(arrNumber);
+}
+if(arrNumber.length<=0){arrNumber = [0];}
+var chartconfig1 = {
+	type: 'RoundChart',
+	dataset:{
+	//data:[50,53,41,32,34],
+	data: arrNumber,
+	data_max:[{{ brigade.quantity }}*8],
+	},
+	options:{
+	background:'red',
+	}
+};
+
+var graph = new ChartsCreater(chartconfig1);
+
+	
+    //arrNumber.push('Задание 1 06590018001-01 05.20.2021');    
+    //arrNumber.push($(this).val());
+});
+
+});
+
+$(document).on("click", ".add-zad", function(){
+	let div = document.createElement('div'),
+		label = document.createElement('label'),
+		input = document.createElement('input');
+	div.setAttribute('class','form-for-add-line');
+	input.setAttribute('id',$(this).attr('data-object_id'));
+	input.setAttribute('class','input_val');
+	input.setAttribute('type','number');
+	input.setAttribute('value',0);
+	input.setAttribute('name',$(this).attr('data-object_id'));
+	label.setAttribute('for',$(this).attr('data-object_id'))
+	label.innerText =$(this).attr('data-name');
+	div.appendChild(label);
+	div.appendChild(input);
+   document.getElementById('add-form').appendChild(div);
+
+   this.style.display = 'none';
+
+if($('#add-form input').length<=0){
+   	document.getElementById('no-tasks').style.display = 'block';
+   }else{
+   	document.getElementById('no-tasks').style.display = 'none';
+   }
+
+ });
+
+
+var arr_for_graph = [];
+
+ //var input = document.body.children[0];
+window.addEventListener('input', function (e){
+var arrNumber = new Array(),
+	full = {{ brigade.quantity }}*8;
+$('input[type=number]').each(function(){
+    //arrNumber.push($(this).val());
+    console.log(full);
+    //var in_val = ($(this).val()*100 ) / full;
+    var in_val = $(this).val();
+    if($(this).val()!=0){
+    input_label_text = 'TEST';
+    if($('label[for="'+$(this).attr('id')+'"]').length>0){
+    	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
+    }
+    arrNumber.push(new Array(input_label_text,in_val) );
+if(arrNumber.length<=0){arrNumber = [0];}
+var chartconfig1 = {
+	type: 'RoundChart',
+	dataset:{
+	//data:[50,53,41,32,34],
+	data: arrNumber,
+	data_max:[{{ brigade.quantity }}*8],
+	},
+	options:{
+	background:'red',
+	}
+};
+
+var graph = new ChartsCreater(chartconfig1);
+
+	}
+    //arrNumber.push('Задание 1 06590018001-01 05.20.2021');    
+    //arrNumber.push($(this).val());
+});
+console.log(arrNumber);
+ //console.log("input event detected! coming from this element:", e.target);
+}, false);
+  
+
+</script>
+{% endif %}
+{% endfor %}
+{% else %}
+<script type="text/javascript">window.location.href = '/accounts/login/'; </script>
+{% endif %}
+{% endblock content %}

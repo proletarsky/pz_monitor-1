@@ -1,0 +1,170 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+<style type="text/css">
+.period-block{
+	text-align:center;
+	padding-top:10px;
+}
+.inner-period-block{
+	display:table;
+	margin:0 auto;
+	padding:20px;
+}
+
+.arr_left{background-image: url(/static/img/assembly_arrow_left.png);}
+.arr_right{background-image: url(/static/img/assembly_arrow-right.png);}
+.select-period{
+    margin: 0 20px;    
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    vertical-align:top;
+}
+.top-block{
+text-align:justify;
+    display: table;
+    width: 100%;
+    padding: 15px 0;
+    margin: 10px 0;
+    margin: 10px auto;
+}
+.form-for-add,.graph{
+	display:table;
+	width:50%;
+	margin:0 auto;
+	border-bottom:none;
+	vertical-align:top;
+	text-align:center;
+}
+
+.form-for-add-line{margin:0;border-bottom:1px solid #d4d4d4;padding:10px 15px;display:block;text-align:left;}
+.form-for-add-line:last-child(){border-bottom:none !important;}
+.form-for-add-line:nth-child(2n){background:#efefef;}
+
+.form-for-add label{
+	width:90%;	
+	display:inline-block;	
+	text-align:left;
+}
+.form-for-add input,.form-for-add span{
+    width:10%;
+    display: inline-block;
+    text-align: center;
+    padding:5px;
+}
+.form-for-add input{border:1px solid #d4d4d4;border-radius:5px;}
+.inner-form-for-add{
+    display: table;
+    width: 95%;
+    border: 1px solid #d4d4d4;
+    margin: 15px auto;
+    border-radius: 5px;
+    background: #FFF;
+    }
+.block-header{
+	width:50%;
+	display:inline-block;
+	vertical-align:top;
+}
+.form-for-add-header{
+	background: #215998;
+    color: white;
+    border-radius:5px 5px 0 0;
+}
+.zadb .inner-form-for-add{text-align:left !important;min-height:165px;}
+.zadb button{
+	max-width:10%;
+    font-size: 15px;
+    padding: 15px;
+    text-align: center;
+    min-height: 67px;
+    margin:15px;
+    border:1px solid #d4d4d4;
+    border-radius:5px;
+}
+.zadb button span{
+	width:100%;
+	display:block;
+}
+.inner-form-for-add form label {
+    display: table;
+    width: 100%; 
+    padding: 15px 5px;
+    cursor: pointer;
+}
+
+.inner-form-for-add form input[type="number"]{
+	border: 1px solid #d4d4d4;
+    border-radius: 5px;
+    padding: 5px;
+    margin:10px;
+    display:none;
+}
+.form-block {
+    display: inline-block;
+    width: 24%;
+    vertical-align: top;
+    border: 1px solid #dadada;
+    border-radius: 5px;
+    padding: 5px 10px;
+    text-align: center;
+    margin: 5px;
+}
+.add-zad{cursor:pointer;}
+.pbar-wrapper,.pbar{border-radius:5px;text-align:center;max-width:100%;}
+.pbar{display:inline-block;background:#00bd00;}
+.pbar-wrapper{display:table;position:relative;width:100%;background:#cacaca;margin-top:5px;line-height: 25px;}
+#send_form{text-align: justify;}
+.new_report{display:table;margin:0 auto;padding:10px 15px;color:white;background:green;border-radius:5px;}
+h1,h2,h3,h4,h5,h6{font-weight:normal;text-align: center;}
+</style>
+{% if user.is_authenticated %}
+	{% for group_for in user.groups.all %}
+    		{% if group_for.id == 5 %}
+<div class="period-block" >
+	<h1 style="margin-bottom:15px">Отчёты бригады <br> {{ object.brigade }}</h1>
+	<!-- <div class="form-for-add" ><div><b>{{ brigade }}</b><br>Всего численность {{ brigade.quantity }} человек</div></div>-->
+	<div class="inner-period-block">
+		<!-- <a class="select-period arr_left" href="#"></a> -->
+		<h3>{{ object.create | date:"d.m.Y" }}</h3>
+		<!-- <a class="select-period arr_right" href="#"></a> -->
+	</div>
+</div>
+<div class="top-block">	
+<a class="new_report" href="{% url 'report_create' %}">Создать новый отчёт</a>
+	<div class="form-for-add">		
+		<div id="add-form" class="inner-form-for-add" style="min-height:320px;">
+			<div class="form-for-add-line form-for-add-header"><label>Отчёты</label></div>
+			{% for x in reports %}
+			<div class="form-for-add-line">
+				<a href="{% url 'report_view' x.pk %}">{{ x }}</a>				
+			</div>
+			{% endfor %}
+		</div>
+
+	</div>
+
+</div>
+
+{% endif %}
+{% endfor %}
+{% else %}
+<script type="text/javascript">window.location.href = '/accounts/login/'; </script>
+{% endif %}
+{% endblock content %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+{% for x in reports %}
+{{ x }}
+{% endfor %}
+</body>
+</html>

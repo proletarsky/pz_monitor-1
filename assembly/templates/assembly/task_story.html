@@ -1,0 +1,29 @@
+{% extends 'assembly_base.html' %}
+
+{% block content %}
+<style>td{padding: 10px 0;}</style>
+<table class="table text-left" width="100%">
+        <thead style=" text-align: center">
+        <tr>
+            <th scope="col" style="width:20%">Задание</th>
+            <th scope="col" style="width:20%" colspan="1"><div style="text-align: center">Создание</div></th>			            
+            <th scope="col" style="width:20%" >Начало работ</th>
+            <th scope="col" style="width:20%" >Закрытие</th>
+        </tr>
+        </thead>
+        <tbody>
+      {% for x in Storys %}	
+
+            <tr>
+                <td aria-label="Обозначение" ><a class="moreinfa" href="#"> {{  x.task  }}</a></td>
+                <td aria-label="Наименование работ" >{{x.create_date }}</td>
+                <td aria-label="Заказ на произвотство" >{{ x.on_work }}</td>
+                <td aria-label="Срок">{{ x.closed  }}</td>
+            </tr>
+        {% endfor %}
+  </tbody>
+
+    </table>
+
+
+{% endblock content %}
