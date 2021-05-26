@@ -377,13 +377,23 @@ class StatisticsView(ListView):
         context['workshops'] = Workshop.objects.all()
         problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True,is_in_monitoring=True)]
         if start_date is not None and start_date!='' and end_date is not None and end_date!='':
-            if equip_id not in problem_machines:
-                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+
+            if equip_id is not None:
+                if equip_id not in problem_machines:
+                    stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+                else:
+                    pr_m = Equipment.objects.get(id=equip_id)
+                    stat_data={}
+                    stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
+                    stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}   
+
             else:
-                pr_m = Equipment.objects.get(id=equip_id)
-                stat_data={}
-                stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
-                stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}           
+                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+                pr_machs  = Equipment.objects.filter(problem_machine=True,workshop_id__in=workshop_id)
+                for x in pr_machs:
+                    stat_data[str(x)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}} 
+
+
 
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
@@ -394,15 +404,24 @@ class StatisticsView(ListView):
             sunday = monday + datetime.timedelta(days = 6)
             start_date = str(monday)
             end_date = str(sunday)
-            if equip_id not in problem_machines:
-                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+            if equip_id is not None:
+                if equip_id not in problem_machines:
+                    stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+                else:
+                    pr_m = Equipment.objects.get(id=equip_id)
+                    stat_data={}
+                    stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
+                    stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}   
+
             else:
-                stat_data={}
-                stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
-                stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1430, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}
+                stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
+                pr_machs  = Equipment.objects.filter(problem_machine=True,workshop_id__in=workshop_id)
+                for x in pr_machs:
+                    stat_data[str(x)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}} 
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
+        #print(context['statistics'])
         return context
 
 
