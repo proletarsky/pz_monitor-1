@@ -379,7 +379,9 @@ CreatePieChart(x){
 	circle1.setAttributeNS(null, 'cx', '50%' );
 	circle1.setAttributeNS(null, 'cy', '50%' );
 	circle1.setAttributeNS(null,'stroke', 'rgb('+rgb1+', '+rgb2+', '+rgb3+')' );
-	circle1.setAttributeNS(null, 'stroke-dasharray', z +' 100');
+	var new_z=z;
+	if(z==50){new_z=100;}
+	circle1.setAttributeNS(null, 'stroke-dasharray', new_z +' 100');
 	if(i1!=0){
 	var y = Math.ceil(arr1[i1-1][1]);
 	y = Math.ceil((100*y)/arraysum);
@@ -484,7 +486,9 @@ CreateRoundChart(){
 	circle1.setAttributeNS(null, 'cx', '50%' );
 	circle1.setAttributeNS(null, 'cy', '50%' );
 	circle1.setAttributeNS(null,'stroke', rgb[i1]);
-	circle1.setAttributeNS(null, 'stroke-dasharray', z +' 100');
+	var new_z=z;
+	if(z==50){new_z=100;}
+	circle1.setAttributeNS(null, 'stroke-dasharray', new_z +' 100');
 	if(i1!=0){
 	var y = arr1[i1-1][1];
 	y = ((100*y)/datamax);

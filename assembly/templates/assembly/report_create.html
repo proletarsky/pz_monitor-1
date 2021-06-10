@@ -102,8 +102,9 @@ text-align:justify;
 	border: 1px solid #d4d4d4;
     border-radius: 5px;
     padding: 5px;
-    margin:10px;
+    margin:10px 0;
     display:none;
+    max-width:100%;
 }
 .form-block {
     display: inline-block;
@@ -297,6 +298,10 @@ document.getElementById('sendformb').addEventListener('click',function(e){
 e.preventDefault();
 var s_form = document.getElementById('send_form');
 $('.form-for-add-line input[type=number]').each(function(i,item){
+	var i_n_value = $(this).val();
+        $(this).val('');
+        $(this).val(parseInt(i_n_value));
+        if(i_n_value<0 || i_n_value =='' ){$(this).val(parseInt(0));}
 	//s_form.appendChild(item);
 	//console.log(item);
 	console.log(item.value);
@@ -375,12 +380,17 @@ $(document).on("click", ".form-for-add-line label", function(){
 var arrNumber = new Array(0),
 	full = {{ brigade.quantity }}*8;
 $('input[type=number]').each(function(){
+
+	var i_n_value = $(this).val();
+        $(this).val('');
+        $(this).val(parseInt(i_n_value));
+        if(i_n_value<0 || i_n_value =='' ){$(this).val(parseInt(0));}
     //arrNumber.push($(this).val());
 
     //var in_val = ($(this).val()*100 ) / full;
     var in_val = $(this).val();
     if($(this).val()!=0){
-    input_label_text = 'TEST';
+    input_label_text = 'TEST666';
     if($('label[for="'+$(this).attr('id')+'"]').length>0){
     	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
     }
@@ -443,12 +453,16 @@ window.addEventListener('input', function (e){
 var arrNumber = new Array(),
 	full = {{ brigade.quantity }}*8;
 $('input[type=number]').each(function(){
+	var i_n_value = $(this).val();
+        $(this).val('');
+        $(this).val(parseInt(i_n_value));
+        if(i_n_value<0 || i_n_value =='' ){$(this).val(parseInt(0));}
     //arrNumber.push($(this).val());
     console.log(full);
     //var in_val = ($(this).val()*100 ) / full;
     var in_val = $(this).val();
     if($(this).val()!=0){
-    input_label_text = 'TEST';
+    input_label_text = 'TEST777';
     if($('label[for="'+$(this).attr('id')+'"]').length>0){
     	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
     }

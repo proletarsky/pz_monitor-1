@@ -67,8 +67,9 @@ text-align:justify;
     border: 1px solid #d4d4d4;
     border-radius: 5px;
     padding: 5px;
-    margin: 10px;
+    margin: 10px 0;
     display: inline-block;
+    max-width:100%;
 }
 .block-header{
 	width:50%;
@@ -108,8 +109,9 @@ text-align:justify;
 	border: 1px solid #d4d4d4;
     border-radius: 5px;
     padding: 5px;
-    margin:10px;
+    margin:10px 0;
     display:none;
+    max-width:100%;
 }
 .form-block {
     display: inline-block;
@@ -173,11 +175,11 @@ h1,h2,h3,h4,h5,h6{font-weight:normal;text-align: center;}
 
 	<div class="zadb ">
 	<h2>Потери</h2>	
-	<div style="left:-20px;position: relative;" class="inner-form-for-add two">
+	<div style="left:0px;position: relative;" class="inner-form-for-add two">
 {% if object.drawing %}
 <div class="form-block" >
 <label for="id_drawing">Отсутствие чертежей</label>
-<input type="number" readonly="readonly" id="drawing" value="{{ object.drawing }}" />
+<input type="number" readonly="readonly" id="id_drawing" value="{{ object.drawing }}" />
 </div>
 {% endif %}
 {% if object.deviations %}
@@ -299,7 +301,12 @@ function arraySum(array) {
 		//}
 	
 	}
-	return sum
+
+	if ( ( {{ object.brigade.quantity }}*8 ) < sum ){
+		return sum;
+	}else{
+		return ( {{ object.brigade.quantity }}*8 );
+	}
 }
 
 $( document ).ready(function() {
@@ -315,7 +322,7 @@ var arrNumber = [], arr_sum;
 $('input[type=number]').each(function(){
     var in_val = $(this).val();
     if($(this).val()!=0){
-    input_label_text = 'TEST';
+    input_label_text = 'TEST1';
     if($('label[for="'+$(this).attr('id')+'"]').length>0){
     	input_label_text = $('label[for="'+$(this).attr('id')+'"]').text();
     }

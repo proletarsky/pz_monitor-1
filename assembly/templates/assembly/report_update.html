@@ -101,8 +101,9 @@ text-align:justify;
 	border: 1px solid #d4d4d4;
     border-radius: 5px;
     padding: 5px;
-    margin:10px;
+    margin:10px 0;
     display:none;
+    max-width:100%;
 }
 .form-block {
     display: inline-block;
@@ -375,7 +376,13 @@ function arraySum(array) {
 		//}
 	
 	}
-	return sum
+
+	if ( ( {{ brigade.quantity }}*8 ) < sum ){
+		return sum;
+	}else{
+		return ( {{ brigade.quantity }}*8 );
+	}
+
 }
 
 $( document ).ready(function() {
@@ -503,9 +510,17 @@ var arr_for_graph = [];
 
  //var input = document.body.children[0];
 window.addEventListener('input', function (e){
+
+
 var arrNumber = new Array(),
 	full = {{ brigade.quantity }}*8;
 $('input[type=number]').each(function(){
+
+var i_n_value = $(this).val();
+        $(this).val('');
+        $(this).val(parseInt(i_n_value));
+        if(i_n_value<0 || i_n_value =='' ){$(this).val(parseInt(0));}
+	
     //arrNumber.push($(this).val());
     console.log(full);
     //var in_val = ($(this).val()*100 ) / full;
