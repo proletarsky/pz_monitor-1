@@ -12,6 +12,8 @@ from django.db.models.signals import post_save
 from django.conf import settings
 from django.core.exceptions import ValidationError
 import datetime
+import pytz
+from collections import Counter
 
 # Create your models here.
 
@@ -231,6 +233,7 @@ class Complex(models.Model):
     def __str__(self):
         return self.name
 
+
 class Equipment(models.Model):
     
     TIMETABLE_CHOICES = (
@@ -282,6 +285,45 @@ class Equipment(models.Model):
             return '{0} - {1}, цех {2}'.format(self.code, self.model,self.workshop)
         else:
             return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
+
+
+    def problem_statistics(self,start,end):
+
+        if not  self.problem_machine:
+            return None
+
+        else:
+            ending_ = datetime.datetime(year=int(end[0:4:1]),month=int(end[5:7:1]),day=int(end[8:10:1]),hour=0,minute=0,tzinfo=pytz.UTC)
+            starting_ = datetime.datetime(year=int(start[0:4:1]),month=int(start[5:7:1]),day=int(start[8:10:1]),hour=0,minute=0,tzinfo=pytz.UTC)
+            if start==end:
+                ending_ = starting_+datetime.timedelta(days=1)
+            result = {}
+            hour_intervals = Hour_interval.objects.filter(equipment_id=self.id,ending__gte=starting_,starting__lte=ending_).order_by('id')
+            total_work = 0
+            total_loss = 0
+            user_reason = []
+            for x in hour_intervals:
+                if x.work_check:
+                    total_work+=1
+                else:
+                    total_loss+=1
+                    user_reason.append(x.user_reason)
+            counter = dict(Counter(user_reason))
+            user_stats = {}
+            for x in counter:
+                if x:
+                    user_stats[str(x)]=counter[x]
+                else:
+                    user_stats['Не указано']=counter[x]
+            result['auto_stats']={'000 - Оборудование работает': total_work, '001 - Простой': total_loss}
+            result['user_stats'] = user_stats
+            return (result)
+
+            
+
+
+        
+
 
 class Minute_interval(models.Model):
     starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)

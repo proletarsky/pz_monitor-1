@@ -377,6 +377,7 @@ class StatisticsView(ListView):
         context['workshops'] = Workshop.objects.all()
         problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True,is_in_monitoring=True)]
         if start_date is not None and start_date!='' and end_date is not None and end_date!='':
+    
 
             if equip_id is not None:
                 if equip_id not in problem_machines:
@@ -385,13 +386,13 @@ class StatisticsView(ListView):
                     pr_m = Equipment.objects.get(id=equip_id)
                     stat_data={}
                     stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
-                    stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}   
+                    stat_data[str(pr_m)]=pr_m.problem_statistics(start_date,end_date)   
 
             else:
                 stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
                 pr_machs  = Equipment.objects.filter(problem_machine=True,workshop_id__in=workshop_id)
                 for x in pr_machs:
-                    stat_data[str(x)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}} 
+                    stat_data[str(x)]=x.problem_statistics(start_date,end_date) 
 
 
 
@@ -404,6 +405,7 @@ class StatisticsView(ListView):
             sunday = monday + datetime.timedelta(days = 6)
             start_date = str(monday)
             end_date = str(sunday)
+        
             if equip_id is not None:
                 if equip_id not in problem_machines:
                     stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
@@ -411,40 +413,19 @@ class StatisticsView(ListView):
                     pr_m = Equipment.objects.get(id=equip_id)
                     stat_data={}
                     stat_data['total']={'user_stats': {'Не указано': 140}, 'auto_stats': {'001 - Простой': 140, '000 - Оборудование работает': 9940}}
-                    stat_data[str(pr_m)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}}   
+                    stat_data[str(pr_m)]=pr_m.problem_statistics(start_date,end_date)    
 
             else:
                 stat_data = ClassifiedInterval.get_statistics(start_date, end_date,workshop_id=workshop_id,equipment=equip_id)
                 pr_machs  = Equipment.objects.filter(problem_machine=True,workshop_id__in=workshop_id)
                 for x in pr_machs:
-                    stat_data[str(x)]={'user_stats': {'319 - Установка, выверка, снятие детали': 1443, '215 - Отдых и естественные надобности': 5690, 'Не указано': 1500}, 'auto_stats': {'000 - Оборудование работает': 7000, '001 - Простой': 3000}} 
+                    stat_data[str(x)]=x.problem_statistics(start_date,end_date) 
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code']+' - '+col['description'], 'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description','code', 'color')]
-        #print(context['statistics'])
         return context
 
 
-
-#def repair_equipment(request,workshop_numb,area_numb):
-	#equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb)
-    #lenght=12
-    #len(equipments)
-    #del_result=(lenght//10)+1
-    #if (del_result > 1 and lenght%10>6) or lenght==26:
-    #    del_result+=1
-	#if request.method == "POST":
-		#form = Repairform(request.POST)
-		#if form.is_valid():
-			#Repair_rawdata=form.save()
-			#return redirect('post_new', workshop_numb=workshop_numb,area_numb=area_numb)
-    #form = Repairform(request.POST)
-    #Repair_rawdata=form.save()
-	#else:
-		#form = Repairform()
-    #form = Repairform()
-	#return render(request,'machines/test.html',{'equipments':equipments,'form':form})
-    #,'lenght':lenght,'del_result':del_result
 
 def html_special_chars(text):
     if(text):
