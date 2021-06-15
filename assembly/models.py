@@ -44,7 +44,7 @@ class Order(models.Model):
 class Task(models.Model):
 
 	STATUSES = ((1,'Создано'),(2,'В работе'),(3,'Закрыто'))
-	name = models.CharField(max_length=150,verbose_name='Наименование работ')
+	name = models.CharField(max_length=150,verbose_name='Наименование работ',null=True,blank=True)
 	description = models.CharField(max_length=150,verbose_name='Обозначение')
 	order = models.ForeignKey(Order,verbose_name='Заказ на производство',on_delete=models.SET_NULL,null=True)
 	date = models.DateField(verbose_name='Срок')
@@ -156,7 +156,7 @@ class Report(models.Model):
 		#return reverse('subdivision_tasks',args=[self.task.subdivision.id])
 
 	def __str__(self):
-		string = 'Отчет бригады '+str(self.subdivision)+' '+'за '+self.create.strftime('%d-%m-%Y')
+		string = 'Отчет '+str(self.brigade)+' '+'за '+self.create.strftime('%d-%m-%Y')
 		return string
 
 
