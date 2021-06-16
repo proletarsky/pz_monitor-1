@@ -433,7 +433,7 @@ def html_special_chars(text):
     
 
 def repair_equipment(request,workshop_numb,area_numb):
-    equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('id')
+    equipments = Equipment.objects.filter(is_in_repair=True,workshop__workshop_number=workshop_numb,area__area_number=area_numb).order_by('-machine_or_furnace_sign','id')
     reasons_and_comments = {}
     work_or_not={}
     for x in equipments:
