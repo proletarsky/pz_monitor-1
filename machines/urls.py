@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 from machines import views
 from rest_framework import routers
-from .views import RawDataViewSet, EquipmentWorksDetailView, repair_equipment, all_complexes,complex_equipments,work_statistics,repair_view_data,repair_statistics,main_repairer,repair_statistics_diagram,repair_history
+from .views import main,RawDataViewSet, EquipmentWorksDetailView, repair_equipment, all_complexes,complex_equipments,work_statistics,repair_view_data,repair_statistics,main_repairer,repair_statistics_diagram,repair_history
 
 router = routers.DefaultRouter()
 router.register(r'^api/rawdata', RawDataViewSet, basename='RawData')
@@ -28,5 +28,6 @@ urlpatterns = [
                   #url(r'^ajax_stats/$', views.ajax_stats, name='ajax_stats'),
             path('repair_history/',repair_history,name='repair_history'),
             path('work_statistics/',work_statistics,name = 'work_statistics'),
+            path('main/',main,name='main'),
                   
               ] + router.urls

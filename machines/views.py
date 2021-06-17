@@ -34,6 +34,12 @@ from .de_facto_time_interval import get_de_facto_time,chill_days
 from django.db.models.functions import Coalesce
 
 
+
+def main(request):
+    return render(request,'machines/main.html')
+
+
+
 @permission_classes([permissions.AllowAny])
 class RawDataUploadView(APIView):
     parser_classes = (CoordinatorDataParser,)
