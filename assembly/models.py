@@ -53,7 +53,7 @@ class Task(models.Model):
 	subdivision = models.ForeignKey(Subdivision,verbose_name='Подразделение',on_delete=models.SET_NULL,null=True)
 	status = models.IntegerField(verbose_name='Статус',choices=STATUSES,default=1)
 	creator = models.ForeignKey(User,verbose_name='Разработчик',on_delete=models.SET_NULL,null=True)
-	create = models.DateTimeField(verbose_name='Дата создания',auto_now_add=True,null=True,blank=True)
+	creating = models.DateTimeField(verbose_name='Дата создания',auto_now_add=True,null=True,blank=True)
 
 	def __str__(self):
 		check = {1:'Создано',2:'В работе',3:'Закрыто'}
@@ -76,7 +76,7 @@ class Task(models.Model):
 	def week_stats(self):
 		end = datetime.datetime.now().date()
 		start = end - datetime.timedelta(days=7)
-		reports = Task_Report.objects.filter(task_id=self.id,report__create__gte=start)
+		reports = Task_Report.objects.filter(task_id=self.id,report__creating__gte=start)
 		if reports:
 			sum_working_out = sum([x.working_out for x in reports])
 			week_stats = (sum_working_out*100)/self.laboriousness
@@ -88,7 +88,7 @@ class Task(models.Model):
 	def month_stats(self):
 		end = datetime.datetime.now().date()
 		start = end - datetime.timedelta(days=30)
-		reports = Task_Report.objects.filter(task_id=self.id,report__create__gte=start)
+		reports = Task_Report.objects.filter(task_id=self.id,report__creating__gte=start)
 		if reports:
 			sum_working_out = sum([x.working_out for x in reports])
 			month_stats = (sum_working_out*100)/self.laboriousness
@@ -125,7 +125,7 @@ class Task_History(models.Model):
 class Report(models.Model):
 	task = models.ManyToManyField(Task,verbose_name='Задание',through='Task_Report',null=True,blank=True)
 	foreman = models.ForeignKey(User,verbose_name='Бригадир',on_delete=models.SET_NULL,null=True,blank=True)
-	create = models.DateTimeField(verbose_name='Дата создания',auto_now_add=True,null=True,blank=True)
+	creating = models.DateTimeField(verbose_name='Дата создания',auto_now_add=True,null=True,blank=True)
 	subdivision = models.ForeignKey(Subdivision,verbose_name='Подразделение',on_delete=models.SET_NULL,null=True,blank=True)
 	change = models.IntegerField(verbose_name='Смена',null=True,blank=True)
 	brigade = models.ForeignKey(Brigade,verbose_name = 'Бригада',on_delete=models.SET_NULL,null=True,blank=True)
@@ -156,7 +156,7 @@ class Report(models.Model):
 		#return reverse('subdivision_tasks',args=[self.task.subdivision.id])
 
 	def __str__(self):
-		string = 'Отчет '+str(self.brigade)+' '+'за '+self.create.strftime('%d-%m-%Y')
+		string = 'Отчет '+str(self.brigade)+' '+'за '+self.creating.strftime('%d-%m-%Y')
 		return string
 
 

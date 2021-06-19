@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+</head>
+<body>
+ {% for x in working_out %}<br>
+ {{ x.0 }} {{ x.1 }} {{ x.2 }}
+ {% endfor %}<br>
+
+
+ {% for x in losses %}
+ {{ x.personal }}<br>
+ {{ x.change }}
+ {% endfor %}
+</body>
+</html>
