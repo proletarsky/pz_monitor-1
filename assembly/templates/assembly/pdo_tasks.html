@@ -2,8 +2,7 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    {% for group_for in user.groups.all %}
-            {% if group_for.id == 4 %}
+            {% if check %}
 <form class="act-form" method="GET" action=".">		
 	 <div class="form-row"><label for="id_order">Заказ на производство:</label>{{ filter.form.order }}</div>
 	 <div class="form-row"><label for="id_subdivision">Подразделение:</label>{{ filter.form.subdivision }}</div>
@@ -61,11 +60,11 @@
   </tbody>
 
     </table>
+  
 {% else %}
-<script type="text/javascript">window.location.href = '/accounts/login/'; </script>
+<script type="text/javascript">
+//window.location.href = '/accounts/login/'; </script>
             {% endif %}
-    {% endfor %}
-    
 {% endif %}
 
 {% endblock content %}

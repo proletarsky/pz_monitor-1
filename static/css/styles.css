@@ -59,12 +59,14 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 .left_button{
 background: red;
 border-radius:5px 0 0 5px;
+margin: 0 0 0 -20px;
 }
 .right_button{    
     background: green;
     margin-left: -25px;
     border-radius:0 5px 5px 0;
     color:white;
+    margin: 0 0 0 -3px;
 }
 .hidden-button .left_button,.hidden-button .right_button{display:none;}
 .form-block .left_button,.form-block .right_button{line-height: 28px !important;}

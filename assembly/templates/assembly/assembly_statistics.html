@@ -1,18 +1,447 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<title></title>
-</head>
-<body>
- {% for x in working_out %}<br>
- {{ x.0 }} {{ x.1 }} {{ x.2 }}
- {% endfor %}<br>
+{% extends 'assembly_base.html' %}
 
+{% block content %}
+<script type="text/javascript">
+$(document).ready(function () {
+	$('#id_start_date').val(($('.act-form').data('start')));
+	$('#id_end_date').val(($('.act-form').data('end')));
+var urlParams = new URLSearchParams(window.location.search);
+if(urlParams.toString()==''){
+set_period('прошлая неделя');
+//$("#id_periods_selector").val('прошлая неделя');
+//urlParams.append('periods_selector', 'прошлая+неделя');
+//urlParams.append('start_date', $('#id_start_date').val());
+//urlParams.append('end_date', $('#id_end_date').val());
+//location.hash = urlParams.toString();
+}
+
+
+$("#id_empty_only").on('change', function() {
+  if ($(this).is(':checked')) {
+    $(this).attr('value', 'True');
+  } else {
+    $(this).attr('value', 'False');
+  }
+  
+  //$('#checkbox-value').text($('#checkbox1').val());
+});
+
+    $('#id_start_date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd"
+    });
+
+    $('#id_end_date').datepicker({
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd"
+    });
+
+    // $('#id_periods_selector').val('прошлая декада');
+    // set_period('прошлая декада');
+
+    $("#id_periods_selector").change(function (e) {
+        console.log('select changed!');
+        var cur_val = $(this).val();
+        console.log($(this).val());
+        set_period(cur_val);
+   });
+
+    $('#show-hide-plant').click(function (e) {
+        e.preventDefault();
+        $('.toggled-pane-total').toggle('slow');
+        var txt = $('#show-hide-plant').text();
+        if (txt === 'Показать')
+            txt = 'Скрыть';
+        else
+            txt = 'Показать';
+        // console.log(txt);
+        $('#show-hide-plant').text(txt);
+    });
+
+
+    //$(ids).click(function (e) {
+$('.show-hide-button').click(function (e) {
+        e.preventDefault();
+        var elementID = $(this).attr('id');
+        var id = elementID.split('-').pop();
+        var classID = `.toggled-pane-${id}`;
+        // console.log(`elID = ${elementID}`);
+        $(classID).toggle('slow');
+        var txt = $(`#${elementID}`).text();
+        if (txt === 'Показать')
+            txt = 'Скрыть';
+        else
+            txt = 'Показать';
+        $(`#${elementID}`).text(txt);
+    })
+});
+
+function formatDate(date) {
+    var month = (date.getMonth() + 1).toString().padStart(2, '0');
+    var day = date.getDate().toString().padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function set_period(period) {
+        switch (period) {
+           case 'прошлая неделя':
+               var date = new Date();
+               var dayOfWeek = date.getDay();
+               var endPeriod = new Date(date.getFullYear(), date.getMonth(), date.getDate() - dayOfWeek + 1);
+               var startPeriod = new Date(date.getFullYear(), date.getMonth(), date.getDate() - dayOfWeek - 6);
+               $('#id_start_date').val(formatDate(startPeriod));
+               $('#id_end_date').val(formatDate(endPeriod));
+               $('#id_start_date').attr('readonly', true);
+               $('#id_end_date').attr('readonly', true);
+               break;
+           case 'прошлая декада':
+               var date = new Date();
+               var extra = date.getDate() % 10;
+               var endPeriod = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1 - extra);
+               var startPeriod = new Date(date.getFullYear(), date.getMonth(), date.getDate() - 9 - extra);
+               $('#id_start_date').val(formatDate(startPeriod));
+               $('#id_end_date').val(formatDate(endPeriod));
+               $('#id_start_date').attr('readonly', true);
+               $('#id_end_date').attr('readonly', true);
+               break;
+           case 'прошлый месяц':
+               var date = new Date();
+               var endPeriod = new Date(date.getFullYear(), date.getMonth(), 1);
+               var startPeriod = new Date(date.getFullYear(), date.getMonth()-1, 1);
+               $('#id_start_date').val(formatDate(startPeriod));
+               $('#id_end_date').val(formatDate(endPeriod));
+               $('#id_start_date').attr('readonly', true);
+               $('#id_end_date').attr('readonly', true);
+               break;
+           case 'текущий месяц':
+               var date = new Date();
+               var endPeriod = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+               var startPeriod = new Date(date.getFullYear(), date.getMonth(), 1);
+               $('#id_start_date').val(formatDate(startPeriod));
+               $('#id_end_date').val(formatDate(endPeriod));
+               $('#id_start_date').attr('readonly', true);
+               $('#id_end_date').attr('readonly', true);
+               break;
+           default:
+               $('#id_start_date').attr('readonly', false);
+               $('#id_end_date').attr('readonly', false);
+               break;
+       }
+}
+
+</script>
+<style type="text/css">
+	.act-form .ui-datepicker-trigger {
+    height: 37px;
+    top: 14px;
+    margin-top:5px;
+}
+.act-form{
+	text-align: left;
+    margin-top: 50px;
+}
+h3{padding:10px 0;}
+</style>
+<form class="act-form" method="GET" data-start="{{start}}" data-end="{{end}}" >		
+ 	 <div style="position:relative;top:-3px;" class="form-row">
+ 	 	<select name="subdivision_id">
+ 	 		<option value="">Выбрать подразделение</option>
+ 	 		{% for x in subdivisions %}
+ 	 		<option {% if x.id == subdivision %} selected="" {% endif %} value="{{ x.id }}">{{ x }}</option>
+ 	 		{% endfor %}
+ 	 	</select>
+ 	 </div>
+
+	 <div class="form-row">{{ filter.form.start_date }}</div>
+	 <div class="form-row">{{ filter.form.end_date }}</div>
+	 <!--{% csrf_token %}-->
+	 <div class="form-row">
+	 <input id="sendform" type="submit" value="Применить">
+	 </div>
+    </form>
+<h3 style="text-align:center;">График динамики эффективности работы сборочных участков</h3>
+  <div style="height:350px;margin:0 auto;" id="chartdiv"></div>
+  <h3 style="text-align:center;">Диаграмма динамики потерь на сборочных участках</h3>
+  <div style="height:350px;margin:0 auto;" id="chartContainer"></div>
+<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+<script type="text/javascript">
+function new_line(x) {
+	return x.replace(/ /g,"\n");
+};
+
+am4core.ready(function(){
+
+
+
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+// Create chart instance
+var chart1 = am4core.create("chartdiv", am4charts.XYChart);
+
+// Add data
+chart1.data = [{% for x in working_out %}
+  {
+    'date': new_line("{{ x.0 }}"),
+    'value': parseInt({{ x.1 }}),
+    'value1': parseInt({{ x.2 }})
+  },
+  {% endfor %} 
+
+  ];
+
+// Set input format for the dates
+chart1.dateFormatter.inputDateFormat = "yyyy-MM-dd";
+
+// Create axes
+var dateAxis = chart1.xAxes.push(new am4charts.DateAxis());
+var valueAxis = chart1.yAxes.push(new am4charts.ValueAxis());
+
+// Create series
+var series = chart1.series.push(new am4charts.LineSeries());
+series.dataFields.valueY = "value";
+series.dataFields.dateX = "date";
+series.tooltipText = "{value} {value1}%"
+series.strokeWidth = 2;
+series.minBulletDistance = 15;
+
+// Drop-shaped tooltips
+series.tooltip.background.cornerRadius = 20;
+series.tooltip.background.strokeOpacity = 0;
+series.tooltip.pointerOrientation = "vertical";
+series.tooltip.label.minWidth = 40;
+series.tooltip.label.minHeight = 40;
+series.tooltip.label.textAlign = "middle";
+series.tooltip.label.textValign = "middle";
+
+// Make bullets grow on hover
+var bullet = series.bullets.push(new am4charts.CircleBullet());
+bullet.circle.strokeWidth = 2;
+bullet.circle.radius = 4;
+bullet.circle.fill = am4core.color("#fff");
+
+var bullethover = bullet.states.create("hover");
+bullethover.properties.scale = 1.3;
+
+// Make a panning cursor
+chart1.cursor = new am4charts.XYCursor();
+chart1.cursor.behavior = "panXY";
+chart1.cursor.xAxis = dateAxis;
+chart1.cursor.snapToSeries = series;
+
+// Create vertical scrollbar and place it before the value axis
+//chart1.scrollbarY = new am4core.Scrollbar();
+//chart1.scrollbarY.parent = chart1.leftAxesContainer;
+//chart1.scrollbarY.toBack();
+
+// Create a horizontal scrollbar with previe and place it underneath the date axis
+//chart1.scrollbarX = new am4charts.XYChartScrollbar();
+//chart1.scrollbarX.series.push(series);
+//chart1.scrollbarX.parent = chart1.bottomAxesContainer;
+
+dateAxis.start = 0.79;
+//dateAxis.keepSelection = true;
+
+
+//////
+
+
+// Themes begin
+am4core.useTheme(am4themes_animated);
+// Themes end
+
+var chart = am4core.create("chartContainer", am4charts.XYChart);
+chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+chart.data = [
 
  {% for x in losses %}
- {{ x.personal }}<br>
- {{ x.change }}
- {% endfor %}
-</body>
-</html>
+ 
+  	{% if x.drawing  %}
+  {
+    country: new_line('Отсутствие чертежей'),
+    visits: parseInt({{ x.drawing }} )
+  },
+    {% endif %}
+  
+
+  {% if x.deviations  %}
+  {
+    country: new_line('Отсутствие решения по выявленным отклонениям'),
+    visits: parseInt({{ x.deviations }})
+  },
+    {% endif %}
+
+  {% if x.personal  %}
+  {
+    country: new_line('Отсутствие персонала'),
+    visits: parseInt({{ x.personal }})
+  },
+    {% endif %}
+
+     {% if x.otk  %}
+  {
+    country: new_line('Отсутствие ОТК'),
+    visits: parseInt({{ x.otk }})
+  },
+    {% endif %}
+
+      {% if x.vp  %}
+  {
+    country: new_line('Отсутствие ВП и/или представителя заказчика'),
+    visits: parseInt({{ x.vp }})
+  },
+    {% endif %}
+
+      {% if x.proektant  %}
+  {
+    country: new_line('Отсутствие представителя проектанта'),
+    visits: parseInt({{ x.proektant }})
+  },
+    {% endif %}
+
+      {% if x.ogt  %}
+  {
+    country: new_line('Отсутствие представителя ОГТ для решения блокирующих вопросов'),
+    visits: parseInt({{ x.ogt }})
+  },
+    {% endif %}
+
+      {% if x.other_order  %}
+  {
+    country: new_line('Переход на другой заказ/другие работы'),
+    visits: parseInt({{ x.other_order }})
+  },
+    {% endif %}
+
+      {% if x.ssz  %}
+  {
+    country: new_line('Отсутствие ССЗ'),
+    visits: parseInt({{ x.ssz }})
+  },
+    {% endif %}
+
+      {% if x.complect_zavod  %}
+  {
+    country: new_line('Отсутствие комплектующих по межзаводской кооперации'),
+    visits: parseInt({{ x.complect_zavod }})
+  },
+    {% endif %}
+
+      {% if x.complect_workshop  %}
+  {
+    country: new_line('Отсутствие комплектующих по межцеховой кооперации'),
+    visits: parseInt({{ x.complect_workshop }})
+  },
+    {% endif %}
+
+      {% if x.pki  %}
+  {
+    country: new_line('Отсутствие ПКИ'),
+    visits: parseInt({{ x.pki }})
+  },
+    {% endif %}
+
+      {% if x.materials  %}
+  {
+    country: new_line('Отсутствие расходных/вспомогательных материалов'),
+    visits: parseInt({{ x.materials }})
+  },
+    {% endif %}
+
+      {% if x.osn  %}
+  {
+    country: new_line('Отсутствие оснастки'),
+    visits: parseInt({{ x.osn }})
+  },
+    {% endif %}
+
+      {% if x.instr  %}
+  {
+    country: new_line('Отсутствие инструмента'),
+    visits: parseInt({{ x.instr }})
+  },
+    {% endif %}
+
+      {% if x.prisp  %}
+  {
+    country: new_line('Отсутствие приспособлений'),
+    visits: parseInt({{ x.prisp }})
+  },
+    {% endif %}
+
+      {% if x.card_valid  %}
+  {
+    country: new_line('Доработка по причине карт разрешений'),
+    visits: parseInt({{ x.card_valid }})
+  },
+    {% endif %}
+
+      {% if x.quality  %}
+  {
+    country: new_line('Добработка по причине исправления качества'),
+    visits: parseInt({{ x.quality }})
+  },
+    {% endif %}
+
+
+      {% if x.nothing  %}
+  {
+    country: new_line('Не указано'),
+    visits: parseInt({{ x.nothing }})
+  },
+    {% endif %}
+
+
+  {% endfor %}
+
+];
+
+
+var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+categoryAxis.renderer.grid.template.location = 0;
+categoryAxis.dataFields.category = "country";
+categoryAxis.renderer.minGridDistance = 40;
+categoryAxis.fontSize = 11;
+
+var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+valueAxis.min = 0;
+valueAxis.max = 100; //MAXXXXXXXXXXXXXXXXXXXXXXXx
+valueAxis.strictMinMax = true;
+valueAxis.renderer.minGridDistance = 10;
+// axis break
+var axisBreak = valueAxis.axisBreaks.create();
+axisBreak.startValue = 2100;
+axisBreak.endValue = 22900;
+//axisBreak.breakSize = 0.005;
+
+// fixed axis break
+var d = (axisBreak.endValue - axisBreak.startValue) / (valueAxis.max - valueAxis.min);
+axisBreak.breakSize = 0.05 * (1 - d) / d; // 0.05 means that the break will take 5% of the total value axis height
+
+// make break expand on hover
+var hoverState = axisBreak.states.create("hover");
+hoverState.properties.breakSize = 1;
+hoverState.properties.opacity = 0.1;
+hoverState.transitionDuration = 1500;
+
+axisBreak.defaultState.transitionDuration = 1000;
+
+var series = chart.series.push(new am4charts.ColumnSeries());
+series.dataFields.categoryX = "country";
+series.dataFields.valueY = "visits";
+series.columns.template.tooltipText = "{valueY.value}";
+series.columns.template.tooltipY = 0;
+series.columns.template.strokeOpacity = 0;
+
+series.columns.template.adapter.add("fill", function(fill, target) {
+  return chart.colors.getIndex(target.dataItem.index);
+});
+});
+</script>
+
+{% endblock content %}

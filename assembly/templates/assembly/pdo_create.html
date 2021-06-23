@@ -2,8 +2,7 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    {% for group_for in user.groups.all %}
-            {% if group_for.id == 4 %}
+            {% if check %}
 <h1 style="text-align:center; margin-bottom:15px;">Создание нового задания</h1>
 <form method="post" action="." class="act-form act-form-fixed">
 
@@ -37,7 +36,5 @@
 {% else %}
 <script type="text/javascript">window.location.href = '/accounts/login/'; </script>
 			{% endif %}
-
-	{% endfor %}
 {% endif %}
 {% endblock content %}

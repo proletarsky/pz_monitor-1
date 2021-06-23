@@ -2,8 +2,7 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    {% for group_for in user.groups.all %}
-            {% if group_for.id == 4 %}
+            {% if check %}
 <form method="post"  class="act-form act-form-fixed">
 
 {% csrf_token %}
@@ -36,6 +35,5 @@
 {% else %}
 <script type="text/javascript">window.location.href = '/accounts/login/'; </script>
             {% endif %}
-    {% endfor %}
 {% endif %}
 {% endblock content %}

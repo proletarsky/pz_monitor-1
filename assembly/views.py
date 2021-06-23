@@ -24,6 +24,9 @@ class View_pdo_tasks(ListView):
 	def get_context_data(self,**kwargs):
 		context = super().get_context_data(**kwargs)
 		context['filter'] = TaskFilter(self.request.GET,queryset=self.get_queryset())
+		context['check']=0
+		if self.request.user.id and self.request.user.groups.filter(id=4):
+			context['check']=1
 		return context
 
 
@@ -35,6 +38,14 @@ class Create_task(CreateView):
 	template_name='assembly/pdo_create.html'
 	fields = ['description','name','order','date','laboriousness','subdivision','creator']
 
+	def get_context_data(self,**kwargs):
+		context = super().get_context_data(**kwargs)
+		context['check']=0
+		if self.request.user.id and self.request.user.groups.filter(id=4):
+			context['check']=1
+		return context
+
+
 
 
 
@@ -44,6 +55,13 @@ class Update_task(UpdateView):
 	template_name = 'assembly/pdo_update.html'
 	fields = ['description','name','order','date','laboriousness','subdivision']
 
+
+	def get_context_data(self,**kwargs):
+		context = super().get_context_data(**kwargs)
+		context['check']=0
+		if self.request.user.id and self.request.user.groups.filter(id=4):
+			context['check']=1
+		return context
 
 
 
@@ -111,7 +129,8 @@ class Create_report(CreateView):
 	'instr',
 	'prisp', 
 	'card_valid',
-	'quality'
+	'quality',
+	'nothing'
 	)
 
 	def form_valid(self, form):
@@ -154,7 +173,7 @@ class View_reports(ListView):
 			foreman_id = self.request.user.id
 			brigade = Brigade.objects.get(foreman=foreman_id)
 			subdivision = Subdivision.objects.get(id=brigade.subdivision.id)
-			reports = Report.objects.filter(subdivision=subdivision).order_by('-id')
+			reports = Report.objects.filter(subdivision=subdivision).order_by('-creating')
 		queryset = reports
 		return queryset
 
@@ -195,7 +214,8 @@ class Update_report(UpdateView):
 	'instr',
 	'prisp', 
 	'card_valid',
-	'quality'
+	'quality',
+	'nothing'
 		)
 
 	def form_valid(self, form):
@@ -239,19 +259,22 @@ class Update_report(UpdateView):
 def assembly_statistics(request):
 	end = datetime.datetime.now().date()
 	start = end-datetime.timedelta(days=7)
+
 	subdivisions = Subdivision.objects.all()
 	subdivision_id = tuple(x.id for x in  subdivisions)
+	return_subdivision = 0
 	all_works_time = sum([x.quantity*8 for x in Brigade.objects.all()])
 
 	if request.GET.get('subdivision_id'):
 		subdivision_id = int(request.GET.get('subdivision_id')),
+		return_subdivision = subdivision_id[0]
 		all_works_time = sum([x.quantity*8 for x in Brigade.objects.filter(subdivision_id=subdivision_id)])
 
-	if request.GET.get('start'):
-		start_get = request.GET.get('start')
+	if request.GET.get('start_date'):
+		start_get = request.GET.get('start_date')
 		start = datetime.date(year=int(start_get[0:4:1]),month=int(start_get[5:7:1]),day=int(start_get[8:10:1]))
-	if request.GET.get('end'):
-		end_get = request.GET.get('start')
+	if request.GET.get('end_date'):
+		end_get = request.GET.get('end_date')
 		end = datetime.date(year=int(end_get[0:4:1]),month=int(end_get[5:7:1]),day=int(end_get[8:10:1]))
 
 	delta_days = (end-start).days
@@ -277,6 +300,20 @@ def assembly_statistics(request):
 
 	end = end.strftime('%Y-%m-%d')
 	start = start.strftime('%Y-%m-%d')
+
+
+
+	# work = Task_Report.objects.raw('''select 1 as id,
+	# 									coalesce(sum(b.working_out),0) as work
+	# 									from assembly_report a
+	# 									join assembly_task_report b on a.id=b.report_id
+	# 									where a.subdivision_id  in %(subdivision_id)s
+	# 									and date(creating) >= %(start)s
+	# 									and date(creating)<=%(end)s''', params = {'subdivision_id':subdivision_id,'start':start,'end':end})
+
+	# context['work'] = work[0]
+	# context['all_works_time'] = all_works_time
+
 	losses_query = Task_Report.objects.raw('''
 			select 1 as id,
 		coalesce(sum(change),0) as change,
@@ -297,14 +334,20 @@ def assembly_statistics(request):
 		coalesce(sum(instr),0) as instr,
 		coalesce(sum(prisp),0) as prisp,
 		coalesce(sum(card_valid),0) as card_valid,
-		coalesce(sum(quality),0) as quality
+		coalesce(sum(quality),0) as quality,
+		coalesce(sum(nothing),0) as nothing
 	from assembly_report a
 	where subdivision_id in %(subdivision_id)s
 	and date(creating) >= %(start)s
 	and date(creating)<=%(end)s''', params = {'subdivision_id':subdivision_id,'start':start,'end':end})
 
 	context['losses'] = losses_query
-
+	filter = calendar_repair(0,queryset=Report.objects.all())
+	context['filter'] = filter
+	context['subdivisions'] = Subdivision.objects.all()
+	context['start'] = start
+	context['end'] = end
+	context['subdivision'] = return_subdivision
 	return render(request,'assembly/assembly_statistics.html',context)
 
 

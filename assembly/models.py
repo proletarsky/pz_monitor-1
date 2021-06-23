@@ -149,6 +149,7 @@ class Report(models.Model):
 	prisp = models.FloatField(verbose_name='Отсутствие приспособлений',null=True,blank=True)
 	card_valid = models.FloatField(verbose_name='Доработка по причине карт разрешений',null=True,blank=True)
 	quality = models.FloatField(verbose_name='Добработка по причине исправления качества',null=True,blank=True)
+	nothing = models.FloatField(verbose_name='Не указано',null=True,blank=True,default=0)
 	#-------------------
 
 	def get_absolute_url(self):

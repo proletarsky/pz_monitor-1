@@ -40,20 +40,22 @@ text-align:justify;
 	text-align:center;
 }
 
-.form-for-add-line{margin:0;border-bottom:1px solid #d4d4d4;padding:5px;display:block;}
+.form-for-add-line{margin:0;border-bottom:1px solid #d4d4d4;padding:5px;display:block;padding-right:30px;}
 .form-for-add-line:last-child(){border-bottom:none !important;}
 
 .form-for-add label{
-	width:90%;	
+	max-width:90%;	
 	display:inline-block;	
 	text-align:left;
-	padding-left:20px;	
+	padding-left:5px;	
+	width:100%;
 }
 .form-for-add input,.form-for-add span{
     width:10%;
     display: inline-block;
     text-align: center;
     padding:5px;
+    vertical-align:top;
 }
 .form-for-add input{border:1px solid #d4d4d4;border-radius:5px;}
 .inner-form-for-add{
@@ -85,6 +87,7 @@ text-align:justify;
     margin:15px;
     border:1px solid #d4d4d4;
     border-radius:5px;
+    word-break:break-all;
 }
 .zadb button span{
 	width:100%;
@@ -104,7 +107,7 @@ text-align:justify;
     padding: 5px;
     margin:10px 0;
     display:none;
-    max-width:100%;
+        max-width: 80%;
     text-align:center;
     margin-top: 0;
 }
@@ -168,6 +171,7 @@ h1,h2,h3,h4,h5,h6{font-weight:normal;text-align: center;}
 		{% csrf_token %}
     	
 
+<input type="hidden" name="nothing" id="id_nothing" value="0"/>
 <!-- <label for="id_foreman">Ответственный:</label> -->
 <input type="hidden" name="foreman" id="id_foreman" value="{% if user.is_authenticated %}{{ user.id }}{% else %}None{% endif %}" />
 
@@ -298,12 +302,14 @@ console.log( arr_for_send2 );
 
 document.getElementById('sendformb').addEventListener('click',function(e){
 e.preventDefault();
-var s_form = document.getElementById('send_form');
+var s_form = document.getElementById('send_form'),
+	inputs_val_sum =0;
 $('.form-for-add-line input[type=number]').each(function(i,item){
 	var i_n_value = $(this).val();
         $(this).val('');
         $(this).val(parseInt(i_n_value));
         if(i_n_value<0 || i_n_value =='' ){$(this).val(parseInt(0));}
+        inputs_val_sum = inputs_val_sum+parseInt($(this).val());
 	//s_form.appendChild(item);
 	//console.log(item);
 	console.log(item.value);
@@ -331,7 +337,7 @@ input2.value = JSON.stringify(arr_for_send2);
 */
 //s_form.appendChild(input1);
 //s_form.appendChild(input2);
-
+document.getElementById('id_nothing').value = ({{ brigade.quantity }}*8)-inputs_val_sum;
 
 s_form.submit();
 
