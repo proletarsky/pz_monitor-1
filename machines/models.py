@@ -222,6 +222,7 @@ class Area(models.Model):
     area_number=models.IntegerField(verbose_name='Номер участка',null=True,blank=True)
     mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
     green_card_id=models.CharField(max_length=70,verbose_name='ID зеленой карточки')
+    add_green_card_id = models.CharField(max_length=70,verbose_name='ID дополнительной зеленой карточки',blank=True,null=True)
 
     def __str__(self):
         return self.name+' цеха №'+str(self.workshop.workshop_number)
