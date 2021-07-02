@@ -1157,6 +1157,41 @@ def main_repairer(request):
     context={'a':123}
     return render(request,'machines/main_repairer.html',context)
 
+
+
+def oee(request):
+    need_objects = Equipment.objects.filter(id__in=[4,5])
+    ferrarri_details,ferrarri_brak = 166,7
+    okuma_details,okuma_brak = 159,6
+
+    ferrarri_time  = int(ClassifiedInterval.objects.raw("""select 1 as id, EXTRACT(epoch FROM sum("end"-"start")/3600) as time from machines_classifiedinterval
+            where equipment_id = 4 and automated_classification_id = 1
+            and "start" <='2021-07-01' and "end" >='2021-06-01'""")[0].time)
+
+    okuma_time  = int(ClassifiedInterval.objects.raw("""select 1 as id, EXTRACT(epoch FROM sum("end"-"start")/3600) as time from machines_classifiedinterval
+            where equipment_id = 5 and automated_classification_id = 1
+            and "start" <='2021-07-01' and "end" >='2021-06-01'""")[0].time)
+
+    ferrari_A = ferrarri_time/720
+
+    ferrari_P = ferrarri_details/(2.5*ferrarri_time)
+
+    ferrari_Q = (ferrarri_details-ferrarri_brak)/ferrarri_details
+
+    ferrari_OEE = ferrari_A*ferrari_P*ferrari_Q*100
+
+
+    okuma_A = okuma_time/720
+
+    okuma_P = okuma_details/(2.5*okuma_time)
+
+    okuma_Q = (okuma_details-okuma_brak)/okuma_details
+
+    okuma_OEE = okuma_A*okuma_P*okuma_Q*100
+
+
+    return render(request,'machines/oee.html',{'ferrari_A':ferrari_A*100,'ferrari_P':ferrari_P*100,'ferrari_Q':ferrari_Q*100,'ferrari_OEE':ferrari_OEE,'okuma_A':okuma_A*100,'okuma_P':okuma_P*100,'okuma_Q':okuma_Q*100,'okuma_OEE':okuma_OEE})
+
     
 
 #ajax for test Prigoda 4.09.20

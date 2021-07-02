@@ -9,6 +9,7 @@
     border-radius: 3px;
     margin: 10px 0.5%;
 }
+.redtext{color:red !important;}
 .task-block-header{
     border-bottom: 1px solid;
     padding: 10px;
@@ -144,7 +145,7 @@ input[name='close-task']{
  	<div class="task-block-content" >
  	<!-- Суммарная выработка по заданию: -->
 
- 	<div class="task-proggress-bar" data-proc="{{ x.get_de_facto }}%" ><div class="task-progress" style="width:100%;background:linear-gradient(to right,  #1dcc1d {{ x.get_de_facto }}%, white {{ x.get_remainder }}%);background:linear-gradient(90deg, rgb(0,152,0),rgb(255,255,255,{{ x.get_de_facto }}%) {{ x.get_de_facto }}% {{ x.get_de_facto }}%  );"></div></div>
+ 	<div class="task-proggress-bar {% if x.get_de_facto > 100 %} redtext {% endif %}" data-proc="{{ x.get_de_facto }}%" ><div class="task-progress" style="width:100%;background:linear-gradient(to right,  #1dcc1d {{ x.get_de_facto }}%, white {{ x.get_remainder }}%);background:linear-gradient(90deg, rgb(0,152,0),rgb(255,255,255,{{ x.get_de_facto }}%) {{ x.get_de_facto }}% {{ x.get_de_facto }}%  );"></div></div>
  	 	<div class="task-right">Всего: <b>{{ x.laboriousness }}</b> ч<br><br>Факт: <b>{{ x.de_facto }}</b> ч<br></div>
 
  	</div>
