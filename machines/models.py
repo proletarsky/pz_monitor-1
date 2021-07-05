@@ -4,7 +4,7 @@ from machines.time_helpers import CurrentDayType, get_duration_minutes
 
 from django.db import models
 from django.db.models import Count, Max
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.utils import timezone, dateparse
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -17,10 +17,21 @@ from collections import Counter
 
 # Create your models here.
 
+
+
+class Company(models.Model):
+    name  = models.CharField(max_length=100,verbose_name='Наименование предприятия')
+    group = models.ForeignKey(Group,verbose_name='Группа пользователей',on_delete=models.SET_NULL,null=True,blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Coordinator(models.Model):
     name = models.CharField(max_length=50,verbose_name='Наименование',null=True,blank=True)
     mac = models.CharField(max_length=50,verbose_name='MAC координатора',null=True,blank=True)
     ip = models.CharField(max_length=50,verbose_name='ip координатора',null=True,blank=True)
+    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
 
     def __str__(self):
         return self.name+' '+self.mac+' '+self.ip
@@ -211,6 +222,7 @@ class Workshop(models.Model):
     workshop_number = models.IntegerField(verbose_name='Номер цеха',primary_key=True)
     name = models.CharField(max_length=50, verbose_name='Наименование')
     foreman = models.CharField(max_length=50,verbose_name='Начальник цеха',null=True,blank=True)
+    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
 
     def __str__(self):
         return str(self.workshop_number)
@@ -223,6 +235,7 @@ class Area(models.Model):
     mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
     green_card_id=models.CharField(max_length=70,verbose_name='ID зеленой карточки')
     add_green_card_id = models.CharField(max_length=70,verbose_name='ID дополнительной зеленой карточки',blank=True,null=True)
+    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
 
     def __str__(self):
         return self.name+' цеха №'+str(self.workshop.workshop_number)
@@ -280,6 +293,7 @@ class Equipment(models.Model):
     problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев',default=False,blank=True,null=True)
     dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя',blank=True,null=True)
     coordinator = models.ForeignKey(Coordinator,verbose_name='Координатор',blank=True,null=True,on_delete=models.SET_NULL)
+    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
 
     def __str__(self):
         if self.area is None:
