@@ -33,6 +33,19 @@
 
 <div class="form-wrapper" style="padding-top: 10px; padding-bottom:30px">
      <form class="form-inline text-left act-form" method="get" style="display:table;width:100%;" data-start="{{start_interval}}" data-end="{{end_interval}}" data-area_id="{{area_id_param}}" data-bool="{{bool_limit}}" >
+
+
+<div class="form-row">
+     <label class="required" for="workshop_id_param">Цех:</label>
+<select name="workshop_id_param" id="workshop_id_param" data-selected_id="{{workshop_id_param}}"  data-workshop_id_param="{{workshop_id_param}}" >
+    <option selected="selected" value="0" >Все Цеха</option>
+{% for y in all_workshops %}                                    
+                    <option value="{{ y.pk }}">{{ y }}</option>
+                {% endfor %}
+</select>
+</div>
+
+
      <div class="form-row">
      <label class="required" for="workshop">Участок:</label>
 <select name="area_id_param" id="area_id_param" data-selected_id="{{area_id_param}}"  data-area_id_param="{{area_id_param}}" >
@@ -161,7 +174,8 @@ Date.time = function() { return Date.now().getUnixTime(); }
     var area = $('#area_id_param');
     area.val( $(area).data('area_id_param') );
      
-    
+    var warea = $('#workshop_id_param');
+    warea.val( $(warea).data('workshop_id_param') );
 
        $( ".gra" ).each(function( index ){
 

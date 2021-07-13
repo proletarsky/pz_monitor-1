@@ -59,10 +59,21 @@
 <div class="page-header"></div>
 <div class="form-wrapper">
 <div class="page-header">
-<form class="act-form" method="GET" action=".">	
+<form class="act-form" method="GET" action=".">
+
+     <div class="form-row">
+     <label class="required" for="workshop_id_param">Цех:</label>
+     <select id="workshop_id" name="workshop_id_param" data-selected_id="{{ return_workshop }}">
+        <option value=""  >Выбрать Цех</option>
+     {% for x in all_workshops  %}      
+      <option {% if return_workshop == x.pk %} selected="selected" {% endif %}  value="{{x.pk}}">{{x}}</option> 
+    {% endfor %}
+    </select>
+     </div> 
+
 	 <div class="form-row">
 	 <label class="required" for="workshop">Участок:</label>
-     <select id="id_workshop" data-selected_id="{{ area_url_info.id }}">
+     <select id="id_workshop" name="area_url_info" data-selected_id="{{ area_url_info.id }}">
         <option value="" selected >Все участки</option>
      {% for x in all_area  %}      
       <option {% if area_url_info.id == x.id %} selected="selected" {% endif %}  value="{{x.id}}">{{x}}</option> 
@@ -78,19 +89,20 @@
 </div>
 
 <script type="text/javascript">
+    /*
 	$(document).on('click','#sendform',function(e){
 		e.preventDefault();
 		var id_workshop = $('#id_workshop').val();
+        var workshop_id = $('#workshop_id').val();
 		//if(id_workshop!=0){
             if(id_workshop!=''){
-			window.location = "/machines/repair_view_data/?area_url_info="+id_workshop;
+			window.location = "/machines/repair_view_data/?area_url_info="+id_workshop+'&?workshop_id="'+workshop_id;
         }else{
             window.location = "/machines/repair_view_data/";
         }
-		//}else{alert('Vibirite uchastok');}
-		
+		//}else{alert('Vibirite uchastok');}	
 	});
-
+*/
 </script>
 
     <div class="page-header">

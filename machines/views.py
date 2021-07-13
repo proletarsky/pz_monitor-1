@@ -541,16 +541,24 @@ def complex_equipments(request,complex_id):
 def repair_view_data(request):
     all_area = Area.objects.all()
     area_id = [ x.id for x in all_area]
+    all_workshops = Workshop.objects.all()
+    workshop_id = [x.pk for x in all_workshops]
+    return_workshop=0
     area_url_info = ''
     if request.GET.get('area_url_info'):
         area_id=request.GET.get('area_url_info')
         area_url_info = Area.objects.get(id=area_id)
-    need_id=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,repair_job_status=1)
+
+    if request.GET.get('workshop_id_param'):
+        workshop_id = request.GET.get('workshop_id_param')
+        return_workshop = Workshop.objects.get(pk=workshop_id).pk
+
+    need_id=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,workshop__pk__in=workshop_id,repair_job_status=1)
     crush_equipments=[]
     for x in need_id:
         a=Repair_rawdata.objects.filter(repair_job_status=1,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
         crush_equipments.extend(a)
-    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,repair_job_status=2)
+    need_id_rep=Equipment.objects.filter(is_in_repair=True,area__id__in=area_id,workshop__pk__in=workshop_id,repair_job_status=2)
     repair_equipments=[]
     for x in need_id_rep:
         a=Repair_rawdata.objects.filter(repair_job_status=2,machines_id_id=x.id).order_by('machines_id_id','-date').distinct('machines_id_id')[0:1:1]
@@ -586,14 +594,17 @@ def repair_view_data(request):
                 return redirect('repair_view_data')
     else:
         form = Repairform()  
-    context={'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'form':form,'all_area':all_area,'area_url_info':area_url_info}
+    context={'all_workshops':all_workshops,'return_workshop':return_workshop,'crush_equipments':crush_equipments,'repair_equipments':repair_equipments,'form':form,'all_area':all_area,'area_url_info':area_url_info}
     return render(request,'machines/repair_view_data.html',context)
 
 
 def repair_statistics(request):
     all_area = Area.objects.all()
+    all_workshops = Workshop.objects.all()
 
     area_id_param = tuple(x.id for x in all_area)
+    workshop_id_param = tuple(x.pk for x in all_workshops )
+    return_workshop = 0
     return_area = 0
     start_interval = '2020-11-01'
     now =datetime.datetime.now().date()
@@ -607,6 +618,14 @@ def repair_statistics(request):
         else:    
             area_id_param = request.GET.get('area_id_param'),
             return_area = area_id_param[0]
+    if request.GET.get('workshop_id_param'):
+        if request.GET.get('workshop_id_param')=='0':
+            workshop_id_param = tuple(x.pk for x in all_workshops)
+            return_workshop=0
+        else:
+            workshop_id_param = request.GET.get('workshop_id_param'),
+            return_workshop=workshop_id_param[0]
+
     if request.GET.get('start_date'):
         start_interval=request.GET.get('start_date')
         if start_interval < '2020-11-01': start_interval='2020-11-01'
@@ -884,14 +903,15 @@ def repair_statistics(request):
                                                     extract (epoch from(coalesce(sum(case when a.repair_job_status=2 then de_facto end),'0:00:00'))) as ep_repair
                                                     from machines_repair_statistics a
                                                     join machines_equipment b on a.equipment_id=b.id
-                                                    where b.area_id in %(area_id_param)s 
+                                                    where b.area_id in %(area_id_param)s
+                                                    and b.workshop_id in %(workshop_id_param)s 
                                                     and b.is_limit in %(bool_limit)s
                                                     and (%(start_interval)s<=coalesce(a.end_date,current_timestamp) and %(end_interval)s>=a.start_date)
                                                     group by equipment_id 
-                                                     ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+                                                     ''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())#queryset=ClassifiedInterval.objects.all())
-    context={'sql_query':sql_query,'all_area':all_area,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
+    context={'sql_query':sql_query,'all_workshops':all_workshops,'workshop_id_param':return_workshop,'all_area':all_area,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0]}
 
     return render(request,'machines/repair_statistics.html',context)
 
@@ -1014,6 +1034,9 @@ def repair_statistics_diagram(request):
 
     area_id_param = tuple(x.id for x in all_area)
     return_area = 0
+    all_workshops = Workshop.objects.all()
+    workshop_id_param = tuple(x.pk for x in all_workshops )
+    return_workshop = 0
     now =datetime.datetime.now().date()
     end_interval = str(now.year)+'-'+(str(now.month) if len(str(now.month))>=2 else '0'+str(now.month))+'-'+(str(now.day) if len(str(now.day))>=2 else '0'+str(now.day))
     start_interval = now-datetime.timedelta(days=7)
@@ -1027,6 +1050,15 @@ def repair_statistics_diagram(request):
         else:    
             area_id_param = request.GET.get('area_id_param'),
             return_area = area_id_param[0]
+
+    if request.GET.get('workshop_id_param'):
+        if request.GET.get('workshop_id_param')=='0':
+            workshop_id_param = tuple(x.pk for x in all_workshops)
+            return_workshop = 0
+        else:
+            workshop_id_param = request.GET.get('workshop_id_param'),
+            return_workshop = workshop_id_param[0]
+
     if request.GET.get('start_date'):
         start_interval=request.GET.get('start_date')
     if request.GET.get('end_date'):
@@ -1035,8 +1067,14 @@ def repair_statistics_diagram(request):
         bool_limit=bool(request.GET.get('bool_limit')),
 
 
-    avg_crush = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(repair_date-crush_date),'DD:HH24:MI') as data from machines_repair_history a where %(start_interval)s<=a.repair_date and %(end_interval)s >=a.crush_date''',params={'start_interval':start_interval,'end_interval':end_interval})
-    avg_repair = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(return_to_work_date-repair_date),'DD:HH24:MI') as data from machines_repair_history a where %(start_interval)s<=a.return_to_work_date and %(end_interval)s >=a.repair_date''',params={'start_interval':start_interval,'end_interval':end_interval})
+    avg_crush = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(repair_date-crush_date),'DD:HH24:MI') as data from machines_repair_history a 
+                                              join machines_equipment b on a.equipment_id=b.id
+                                              where %(start_interval)s<=a.repair_date and %(end_interval)s >=a.crush_date and b.workshop_id in %(workshop_id_param)s and b.area_id in %(area_id_param)s''',
+                                              params={'start_interval':start_interval,'end_interval':end_interval,'workshop_id_param':workshop_id_param,'area_id_param':area_id_param})
+    avg_repair = Repair_history.objects.raw('''select 1 as id,TO_CHAR(avg(return_to_work_date-repair_date),'DD:HH24:MI') as data from machines_repair_history a 
+                                                join machines_equipment b on a.equipment_id=b.id
+                                                where %(start_interval)s<=a.return_to_work_date and %(end_interval)s >=a.repair_date and b.workshop_id in %(workshop_id_param)s and b.area_id in %(area_id_param)s'''
+                                                ,params={'start_interval':start_interval,'end_interval':end_interval,'workshop_id_param':workshop_id_param,'area_id_param':area_id_param})
 
     if avg_crush[0].data:
         if str(avg_crush[0].data[0:2])!='00':
@@ -1053,6 +1091,8 @@ def repair_statistics_diagram(request):
             avg_repair = 'Дней: '+str(avg_repair[0].data[0:2])+ '  Часов: '+str(avg_repair[0].data[3:5])+'  Минут: '+str(avg_repair[0].data[6:8])
         else:
             avg_repair = 'Часов: '+str(avg_repair[0].data[3:5])+'  Минут: '+str(avg_repair[0].data[6:8])
+    else:
+        avg_repair = 'Недостаточно данных'
 
 
 
@@ -1061,33 +1101,44 @@ def repair_statistics_diagram(request):
                                                join machines_equipment b on a.machines_id_id=b.id
                                                where a.repair_job_status=2 and a.repairer_master_reason_id=18
                                                and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s 
+                                               and b.workshop_id in %(workshop_id_param)s
                                                and a.date>=%(start_interval)s and a.date <=( date %(end_interval)s + integer '1')
                                                group by a.machines_id_id
-                                               ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+                                               ''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
 
     sql_all_count = Repair_rawdata.objects.raw('''select 1 as id,count(a.id) as count
                                                   from machines_repair_rawdata a
                                                   join machines_equipment b on a.machines_id_id=b.id
-                                                  where a.repair_job_status=1  and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
-                                                  and a.date <=( date %(end_interval)s + integer '1')''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})[0]
+                                                  where a.repair_job_status=1  and  b.area_id in %(area_id_param)s and b.workshop_id in %(workshop_id_param)s and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
+                                                  and a.date <=( date %(end_interval)s + integer '1')''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})[0]
 
     sql_crush_equipment = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,machines_id_id  from machines_repair_rawdata a
                                                      join machines_equipment b on a.machines_id_id=b.id
-                                                     where a.repair_job_status=1  and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
-                                                     and a.date <=( date %(end_interval)s + integer '1')
+                                                     where a.repair_job_status=1  and  b.area_id in %(area_id_param)s and b.workshop_id in %(workshop_id_param)s and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
+                                                     and a.date <=( date %(end_interval)s + integer '1') 
                                                      group by a.machines_id_id
-                                                     ''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+                                                     ''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
 
     sql_reason_stat = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,repairer_master_reason_id  from machines_repair_rawdata a
                                                     join machines_equipment b on a.machines_id_id=b.id
-                                                    where a.repair_job_status=2 and  b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
+                                                    where a.repair_job_status=2 and  b.area_id in %(area_id_param)s and b.workshop_id in %(workshop_id_param)s and b.is_limit in %(bool_limit)s and a.date>=%(start_interval)s 
                                                     and a.date <=( date %(end_interval)s + integer '1')
                                                     and a.repairer_master_reason_id<>18
-                                                    group by a.repairer_master_reason_id''',params = {'area_id_param':area_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+                                                    group by a.repairer_master_reason_id''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
+
+    sql_max_count = Repair_rawdata.objects.raw('''select 1 as id,count(*) as count,repair_reason_id as id_id from machines_repair_rawdata a
+                                                    join machines_equipment b on a.machines_id_id=b.id
+                                                    where a.repair_job_status = 1
+                                                    and b.area_id in %(area_id_param)s  and b.is_limit in %(bool_limit)s 
+                                                    and b.workshop_id in %(workshop_id_param)s 
+                                                    and a.date>=%(start_interval)s and a.date <=( date %(end_interval)s + integer '1')
+                                                    and a.repair_reason_id is not null
+                                                    group by repair_reason_id
+                                                    order by count(*) desc limit 1''',params = {'area_id_param':area_id_param,'workshop_id_param':workshop_id_param,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit})
 
     
     filter = calendar_repair(0,queryset=Equipment.objects.all())
-    context = {'to_service':to_service,'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0],'avg_crush':avg_crush,'avg_repair':avg_repair}
+    context = {'sql_max_count':sql_max_count,'to_service':to_service,'all_workshops':all_workshops,'workshop_id_param':return_workshop,'all_area':all_area,'sql_all_count':sql_all_count,'sql_crush_equipment':sql_crush_equipment,'sql_reason_stat':sql_reason_stat,'filter':filter,'area_id_param':return_area,'start_interval':start_interval,'end_interval':end_interval,'bool_limit':bool_limit[0],'avg_crush':avg_crush,'avg_repair':avg_repair}
 
     return render(request,'machines/teststatnew.html',context)
 
