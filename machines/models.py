@@ -290,10 +290,12 @@ class Equipment(models.Model):
     red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
     in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
     is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
+    is_cnc = models.BooleanField(verbose_name='Является станком ЧПУ', default=False)
     problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев',default=False,blank=True,null=True)
     dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя',blank=True,null=True)
     coordinator = models.ForeignKey(Coordinator,verbose_name='Координатор',blank=True,null=True,on_delete=models.SET_NULL)
     company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
+
 
     def __str__(self):
         if self.area is None:
