@@ -8,7 +8,7 @@ from django.contrib import admin
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Equipment._meta.fields]
     list_filter = ['workshop']
-    search_fields = ['workshop', 'code', 'model']
+    search_fields = ['id', 'workshop__workshop_number', 'code', 'model']
 
     class Meta:
         model = Equipment
