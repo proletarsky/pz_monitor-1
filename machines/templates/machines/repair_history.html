@@ -85,7 +85,7 @@
             <div class="checkbox">
                 
                     <label>
-                        <input type="checkbox" name="bool_limit" id="id_empty_only" value="True"> <span>ЛИМИТИРУЮЩЕЕ</span>
+                        <input type="checkbox" name="bool_limit" id="id_empty_only" value={% if bool_limit == False %}False{% endif %}> <span>ЛИМИТИРУЮЩЕЕ</span>
                     </label>
                 
                 
@@ -190,6 +190,33 @@
         {% endfor %}
 
     </table>
+
+<div class="pages">
+    <ul class="pagination pagination-lg">
+       {% if current_page == 1 %}
+           <li class="disabled"><a href="#">«</a></li>
+       {% else %}
+           <li><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page=1">«</a></li>
+       {% endif %}
+       {% for i in paginator %}
+           {% if current_page == i %}
+                <li class="active page-item"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
+            {% else %}
+                {% if i == paginator.ELLIPSIS %}
+                    <li class="page-item"><span class="page-link">{{ paginator.ELLIPSIS }}</span></li>
+                {% else %}
+                    <li class="page-item"><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if current_page == paginator.num_pages %}
+            <li class="disabled"><a href="#">»</a></li>
+        {% else %}
+            <li><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ paginator.num_pages }}">»</a></li>
+        {% endif %}
+    </ul>
+</div>
+
     <script type="text/javascript">
 
 

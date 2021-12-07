@@ -12,7 +12,9 @@ hr{border-top:2px solid black;}
   width: 13.27%; 
   height: 11.9%; 
   margin: 0.5% 0.5%; 
-} 
+}
+
+.
 .red{color:red !important;}
 .infobox{
   background: #000000d4;
@@ -905,6 +907,7 @@ text-align:left;
   table thead {
     display: none;
   }
+
 .ui-datepicker-calendar thead{
 display: table-header-group !important;
 }

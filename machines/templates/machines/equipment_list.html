@@ -51,17 +51,16 @@
 	 <div class="form-row">
 	<input type="hidden" id="type_w" name="machine_or_furnace_sign" placeholder="станки или прочее" value="">
 	 <input id="sendform" type="submit" value="Найти">
+
 	 </div>
+
+    {% if gap_instruments %}
+    <div class="form-row">
+        <a href="http://192.168.5.184/0toolscontrol/" class="btn btn-primary" style="display: block; color: white; padding: 8px 8px 7px 8px; top: 0">Контроль инструмента</a>
+    </div>
+    {% endif %}
 	</form>
   </div>
-<!--
-    <form class="form-inline text-left" method="get">
-        <div class="form-group mb-2 text-left" style="padding-bottom: 30px">
-            {{ filter.form | bootstrap_inline }}
-            <button class="btn btn-primary" type="submit">Применить</button>
-        </div>
-    </form>
--->
 
 <div id='pagecontent'>
     <table class="table text-left" width="100%">
