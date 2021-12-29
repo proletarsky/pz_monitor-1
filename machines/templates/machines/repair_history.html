@@ -196,7 +196,7 @@
        {% if current_page == 1 %}
            <li class="disabled"><a href="#">«</a></li>
        {% else %}
-           <li><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page=1">«</a></li>
+           <li><a href="/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page=1">«</a></li>
        {% endif %}
        {% for i in paginator %}
            {% if current_page == i %}
@@ -205,14 +205,14 @@
                 {% if i == paginator.ELLIPSIS %}
                     <li class="page-item"><span class="page-link">{{ paginator.ELLIPSIS }}</span></li>
                 {% else %}
-                    <li class="page-item"><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ i }}">{{ i }}</a></li>
+                    <li class="page-item"><a href="/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ i }}">{{ i }}</a></li>
                 {% endif %}
             {% endif %}
         {% endfor %}
         {% if current_page == paginator.num_pages %}
             <li class="disabled"><a href="#">»</a></li>
         {% else %}
-            <li><a href="http://127.0.0.1:8000/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ paginator.num_pages }}">»</a></li>
+            <li><a href="/machines/repair_history/?area_id_param={{ area_id_param }}&repairer_id_param={{ repairer_id_param }}&start_date={{ start_interval }}&end_date={{ end_interval }}&bool_limit={{ bool_limit }}&page={{ paginator.num_pages }}">»</a></li>
         {% endif %}
     </ul>
 </div>
