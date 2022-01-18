@@ -22,6 +22,7 @@ sort_order = {
 def prepare_data_for_google_charts_bar(data):
     charts_data = {}
     charts_data['details'] = {}
+
     for key in data.keys():
         chart = data[key]['auto_stats']
         chart2 = data[key]['user_stats']
@@ -32,8 +33,14 @@ def prepare_data_for_google_charts_bar(data):
         for k in sorted(chart.keys()):
             legend += [k]
             graph_data += [chart[k]]
+
+        res = sum(chart2.values())
         for k in chart2.keys():
-            user_data += [[k, chart2[k]]]
+            try:
+                user_data += [[str(round(chart2[k]/res*100, 1)) + "%" + " " + k, chart2[k]]]
+            except Exception as e:
+                user_data += [[str(round(chart2[k]/1, 1)) + "%" + " " + k, chart2[k]]]
+                print(e)
         legend += [{'role': 'annotation'}]
         graph_data += ['']
         if key == 'total':

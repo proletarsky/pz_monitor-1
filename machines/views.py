@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import io
+
 from django.forms import fields
 from django.forms.models import inlineformset_factory
 from django.db.models import Q
@@ -35,6 +38,7 @@ from .de_facto_time_interval import get_de_facto_time, chill_days
 from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 from .utils.ellipsis_paginator import EllipsisPaginator
+
 # import logging
 #
 # logger = logging.getLogger(__name__)
@@ -111,7 +115,7 @@ class EqipmentFilteredListView(ListView):
         context['areas'] = Area.objects.all()
 
         if "area" in self.request.GET and self.request.GET['area'] == "9":
-            if self.request.GET['workshop'] == "" or self.request.GET['workshop'] == "26":
+            if "workshop" not in self.request.GET or self.request.GET['workshop'] == "" or self.request.GET['workshop'] == "26":
                 context['gap_instruments'] = True
             else:
                 context['gap_instruments'] = False
@@ -421,10 +425,14 @@ class StatisticsView(ListView):
         context['return_workshop'] = return_workshop
         filter = StatisticsFilter(self.request.GET, queryset=ClassifiedInterval.objects.all())
         context['filter'] = filter
-        start_date = self.request.GET.get('start_date');
-        end_date = self.request.GET.get('end_date');
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
 
-        context['machines'] = Equipment.objects.filter(is_in_monitoring=True)
+        # if end_date == '':
+        #     end_date = start_date
+        #     print(end_date)
+
+        context['machines'] = Equipment.objects.filter(is_in_monitoring=True).order_by("code")
         context['workshops'] = Workshop.objects.all()
         problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True, is_in_monitoring=True)]
         if start_date is not None and start_date != '' and end_date is not None and end_date != '':
@@ -475,6 +483,7 @@ class StatisticsView(ListView):
                 pr_machs = Equipment.objects.filter(problem_machine=True, workshop_id__in=workshop_id)
                 for x in pr_machs:
                     stat_data[str(x)] = x.problem_statistics(start_date, end_date)
+            # print(stat_data)
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code'] + ' - ' + col['description'],
                                   'color': col['color'] if col['color'] else '#ff0000'}
@@ -1475,3 +1484,65 @@ def ajax_stats(request):
     else:
         message = "no"
     return HttpResponse(message)
+
+
+# Generate Excel report
+# def get_report_data():
+#     # Simulate a more complex table read.
+#     return [[1, 2, 3],
+#             [4, 5, 6],
+#             [7, 8, 9]]
+
+
+# class GenerateExcelReport(View):
+#
+#     def get(self, request):
+#
+#         # Create an in-memory output file for the new workbook.
+#         output = io.BytesIO()
+#
+#         # Even though the final file will be in memory the module uses temp
+#         # files during assembly for efficiency. To avoid this on servers that
+#         # don't allow temp files, for example the Google APP Engine, set the
+#         # 'in_memory' Workbook() constructor option as shown in the docs.
+#         workbook = xlsxwriter.Workbook(output)
+#         worksheet = workbook.add_worksheet()
+#
+#         bold = workbook.add_format({'bold': True})
+#
+#         worksheet.write('A1', 'ЦЕХ', bold)
+#         worksheet.write('B1', 'Оборудование', bold)
+#         worksheet.write('C1', 'ПН - 20.12.2021', bold)
+#         worksheet.write('D1', 'ВТ - 21.12.2021', bold)
+#         worksheet.write('E1', 'СР - 22.12.2021', bold)
+#         worksheet.write('F1', 'ЧТ - 23.12.2021', bold)
+#         worksheet.write('G1', 'ПТ - 24.12.2021', bold)
+#         worksheet.write('H1', 'СБ - 25.12.2022', bold)
+#         worksheet.write('I1', 'ВС - 26.12.2023', bold)
+#         worksheet.write('J1', 'За неделю', bold)
+#         worksheet.write('K1', 'Причины простоя / Комментарии', bold)
+#
+#         # Get some data to write to the spreadsheet.
+#         data = get_report_data()
+#
+#         # Write some test data.
+#
+#         # for row_num, columns in enumerate(data):
+#         #     for col_num, cell_data in enumerate(columns):
+#         #         worksheet.write(row_num, col_num, cell_data)
+#
+#         # Close the workbook before sending the data.
+#         workbook.close()
+#
+#         # Rewind the buffer.
+#         output.seek(0)
+#
+#         # Set up the Http response.
+#         filename = 'django_simple.xlsx'
+#         response = HttpResponse(
+#             output,
+#             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+#         )
+#         response['Content-Disposition'] = 'attachment; filename=%s' % filename
+#
+#         return response
