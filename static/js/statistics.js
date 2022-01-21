@@ -152,8 +152,6 @@ function drawChart() {
     var auto_data = google.visualization.arrayToDataTable(graphicsData.total.auto_data);
     var user_data = google.visualization.arrayToDataTable(graphicsData.total.user_data);
     var data_keys = Object.keys(graphicsData.details);
-    // console.log(user_data)
-
 
 
     var eq_auto_data = [];
@@ -161,27 +159,26 @@ function drawChart() {
     for (var i = 1; i <= data_keys.length; i++){
         var eq_auto = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].auto_data);
         var eq_user = google.visualization.arrayToDataTable(graphicsData.details[data_keys[i-1]].user_data);
-        // console.log(eq_user)
         eq_auto_data.push(eq_auto);
         eq_user_data.push(eq_user);
     }
-
 
     var options_auto = {
         width: '100%',
         height: '100%',
         legend: {position: 'top', maxLines: 3},
         chartArea: { width: '80%', height:'80%'},        
-        bar: { groupWidth: '30%' },        
-        //colors: ['red','yellow'],
-// explorer: {actions: ['dragToZoom', 'rightClickToReset'],         axis: 'horizontal',             keepInBounds: true,             maxZoom: 20},
+        bar: { groupWidth: '30%' },
         isStacked: 'percent'
     };
-    var list_color_total=[]
 
+    var list_color_total=[]
     var new_total_array_data=[]
+
     graphicsData.valueOf().total.user_data.forEach(x=>new_total_array_data.push(x[0]))
+
     var new_total_array_data_filter_ON=[]
+
     new_total_array_data_filter_ON=new_total_array_data.filter(x=>x!='user_reason')
 
     var color_reason_list=[]
@@ -190,10 +187,7 @@ function drawChart() {
     //Функция для определения цвета по наименованию причины простоя
     function color_def(raw_searched_color) {
         var searched_color = raw_searched_color.split('%')
-        console.log(searched_color)
-        console.log(searched_color[1].slice(1))
         var ind=color_reason_list.indexOf(searched_color[1].slice(1))
-        console.log(ind)
         if(ind==-1){
             return "#C0C0C0"
         }
@@ -204,16 +198,17 @@ function drawChart() {
 
     new_total_array_data_filter_ON.forEach(x=>list_color_total.push(color_def(x)))
 
+
     var options_user_total = {
         width: '100%',
         height: '100%',
         pieHole: 0.4,
         colors:list_color_total,
         chartArea: {
-            left: 0,
-            right: '5%',
-            top: '10%',
-            bottom: '10%'
+            left: '1%',
+            right: '1%',
+            top: '5%',
+            bottom: '5%'
         }
     };
 
@@ -226,6 +221,7 @@ if(id_plant){
     var user_data_chart = new google.visualization.PieChart(document.getElementById("id-plant-userdata"));
   }
    if(id_plant){  auto_data_chart.draw(auto_data, options_auto); }
+
    if(id_pland_userdate){user_data_chart.draw(user_data, options_user_total);}
 
 
@@ -253,8 +249,6 @@ if(id_plant){
                bottom: '10%'
            },
         };
-
-        eq_user_data[i-1].sort([{column: 1}])
 
         auto_chart.draw(eq_auto_data[i-1], options_auto);
         user_chart.draw(eq_user_data[i-1], options_user_example);
