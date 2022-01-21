@@ -16,85 +16,86 @@
 
 {% block content %}
     <div class="page-header">
-        <h1>Статистика работы</h1>
-<!--
-<input type="date" id="start" name="trip-start"
-       value="2018-07-22"
-       min="2018-01-01" max="2018-12-31">
--->
+        <h1>Статистика простоев</h1>
     </div>
     <div style="padding-top: 10px; padding-bottom:30px">
         <form class="form-inline text-left" method="get" style="display:table;width:100%;">
             <ul class=" navbar-nav navbar-left" style="width: 100%;">
                 <li>{{ filter.form | bootstrap_inline }}
-   <div class="form-group">
-     <select id="id_workshop" class="form-control" name="workshop_id" data-selected_id="{{ return_workshop }}">
-        <option value=""  >Все цеха</option>
-     {% for x in workshops  %}      
-      <option {% if return_workshop == x.workshop_number  %} selected="selected" {% endif %}  value="{{ x.workshop_number }}">{{x}}</option> 
-
-    {% endfor %}
-    </select>
-</div>
-     <div class="form-group">  
-     <select id="machines" class="form-control" name="equip_id" data-selected_id="{{ return_machines }}">
-        <option value=""  >Все оборудование</option>
-     {% for x in machines  %}      
-      <option {% if return_machine == x.id  %} selected="selected" {% endif %} value="{{ x.id }}">{{x}}</option> 
-    {% endfor %}
-    </select>
-</div>
-     </li> 
-                <li><button class="btn btn-primary" type="submit">Применить</button></li>
+                    <div class="form-group">
+                        <select id="id_workshop" class="form-control" name="workshop_id"
+                                data-selected_id="{{ return_workshop }}">
+                            <option value="">Все цеха</option>
+                            {% for x in workshops %}
+                                <option {% if return_workshop == x.workshop_number %} selected="selected" {% endif %}
+                                                                                      value="{{ x.workshop_number }}">{{ x }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select id="machines" class="form-control" name="equip_id"
+                                data-selected_id="{{ return_machines }}">
+                            <option value="">Все оборудование</option>
+                            {% for x in machines %}
+                                <option {% if return_machine == x.id %} selected="selected" {% endif %}
+                                                                        value="{{ x.id }}">{{ x }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </li>
+                <li>
+                    <button class="btn btn-primary" type="submit">Применить</button>
+                </li>
             </ul>
         </form>
     </div>
     {% if statistics %}
-        
-        {% if not  return_machine  %}
-        <hr class="hr-primary" />
-        <div class="panel col-lg-12">
-            
-            <ul class=" navbar-nav navbar-left">
-                <li><b>Все предприятие</b></li>
-            </ul>
-            
-            <ul class=" navbar-right">
-                <li><a id="show-hide-plant" href="#">Скрыть</a></li>
-            </ul>
-        </div>
+        {% if not  return_machine %}
+            <hr class="hr-primary"/>
+            <div class="panel col-lg-12">
+                <ul class=" navbar-nav navbar-left">
+                    <li><b>Все предприятие</b></li>
+                </ul>
+                <ul class=" navbar-right">
+                    <li><a id="show-hide-plant" href="#">Скрыть</a></li>
+                </ul>
+            </div>
 
-        <div class="col-lg-12 toggled-pane toggled-pane-total">
-            <table style="width: 100%; height: 100%">
-                <tr>
-                    <td>
-                        <p><b>Общая статистика работы</b></p>
-                        <div id="id-plant"></div>
-                    </td>
-                    <td>
-                        <p><b>Общая статистика причин простоев</b></p>
-                        <div id="id-plant-userdata"></div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <div class="col-lg-12 toggled-pane toggled-pane-total">
+                <table style="width: 100%; height: 100%">
+                    <tr>
+                        <td>
+                            <p><b>Общая статистика работы</b></p>
+                            <div id="id-plant"></div>
+                        </td>
+                        <td>
+                            <p><b>Общая статистика причин простоев</b></p>
+                            <div id="id-plant-userdata"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         {% endif %}
         {% for equip in statistics.details.keys %}
             {% if equip != 'total' %}
                 <div class="col-lg-12">
-                <hr class="hr-primary" /></div>
+                    <hr class="hr-primary"/>
+                </div>
                 <div class="panel col-lg-12">
                     <ul class=" navbar-nav navbar-left show-hide-{{ forloop.counter }}">
                         <li><b>{{ equip }}</b></li>
                     </ul>
                     <ul class=" navbar-right">
-                        <li><a class="show-hide-button" id="show-hide-{{forloop.counter}}" href="#">Скрыть</a></li>
+                        <li><a class="show-hide-button" id="show-hide-{{ forloop.counter }}" href="#">Скрыть</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-12 toggled-pane toggled-pane-{{ forloop.counter }}">
                     <table style="width: 100%; height: 100%">
                         <tr>
-                            <td>
+                            <td style="width: 3%; border-right: 1px solid #ccc;">
+                               <h4>{{ forloop.counter }}</h4>
+                            </td>
+                            <td style="padding-left: 1%">
                                 <p><b>Cтатистика работы {{ equip }}</b></p>
                                 <div id="id-work-{{ forloop.counter }}"></div>
                             </td>
@@ -109,31 +110,20 @@
         {% endfor %}
 
         <script type="text/javascript">
-            //console.log({{ context }});
-            graphicsData={{ statistics|safe }}            
-            colorsJSON={{ colors|safe }}
-
-// TYT KOPAT' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  $.each(graphicsData.details,function(index,value){  
-  //console.log('Индекс: ' + index + '; Значение: ' + value);
-  //console.log(value.auto_data);
-  //console.log(value.auto_data[0].length);
-  //console.log(value.auto_data[0]);
-  if(value.auto_data[0].length<4){
-    console.log(value.auto_data[0][1]);
-    //value.auto_data[0].splice(1, 0, '000 - Оборудование работает1');
-    if( Number(value.auto_data[0][1].replace(/\D+/g,""))=='001' ){
-    value.auto_data[0].splice(1, 0, '000 - Оборудование работает');
-    value.auto_data[1].splice(1, 0, 0);
-}else{
-    //value.auto_data[0].splice(1, 0, '001 - Простой');
-}
-    
-  }
-});
-
+            graphicsData = {{ statistics|safe }}
+                colorsJSON = {{ colors|safe }}
+                $.each(graphicsData.details, function (index, value) {
+                    console.log(value)
+                    if (value.auto_data[0].length < 4) {
+                        console.log(value.auto_data[0][1]);
+                        if (Number(value.auto_data[0][1].replace(/\D+/g, "")) == '001') {
+                            value.auto_data[0].splice(1, 0, '000 - Оборудование работает');
+                            value.auto_data[1].splice(1, 0, 0);
+                        } else {
+                            //value.auto_data[0].splice(1, 0, '001 - Простой');
+                        }
+                    }
+                });
         </script>
     {% endif %}
-{#    </div>#}
-
 {% endblock %}

@@ -179,7 +179,7 @@ chart.data = [
 
 {% for x,y in graphics_data.items %}
   {
-    country: new_line("{{ y.starting }}")  ,
+    country: new_line("{{ y.starting }}") + "\n" + {{ y.percent|floatformat }} + "%",
     visits: parseInt({{ y.percent }})
   },
   {% endfor %}
