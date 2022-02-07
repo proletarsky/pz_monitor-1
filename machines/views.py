@@ -1632,6 +1632,6 @@ def stats_report(request):
         'total_period_percent': total_period_percent
     }
 
-    context['previous_week_data'] = get_previous_week_report()
+    context['previous_week_data'] = get_previous_week_report(start_date, end_date)
 
     return render(request, 'machines/stats_report.html', context)

@@ -4,12 +4,12 @@ from machines.models import Equipment, Workshop, ClassifiedInterval
 from django.utils import dateparse
 
 # Get data for the past week
-def get_previous_week_report():
-    today = datetime.datetime.now()
-    start_delta = datetime.timedelta(days=datetime.datetime.today().weekday(), weeks=1)
+def get_previous_week_report(start_date, end_date):
+    # today = datetime.datetime.now()
+    # start_delta = datetime.timedelta(days=datetime.datetime.today().weekday(), weeks=1)
 
-    start_date = (today - start_delta).strftime("%Y-%m-%d")
-    end_date = (today - start_delta + datetime.timedelta(days=6)).strftime("%Y-%m-%d")
+    # start_date = (today - start_delta).strftime("%Y-%m-%d")
+    # end_date = (today - start_delta + datetime.timedelta(days=6)).strftime("%Y-%m-%d")
 
     workshop_id = [x.workshop_number for x in Workshop.objects.all()]
 
