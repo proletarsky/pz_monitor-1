@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load bootstrap %}
+{% load bootstrap3 %}
+{% load static %}
+
+{% block sidebar %}
+    {% if user.is_superuser %}
+        <li class="sidebar-brand">
+            <a href="/admin/"><span class="glyphicon glyphicon-cog"></span> Панель управления</a>
+        </li>
+    {% endif %}
+{% endblock sidebar %}
+
+{% block content %}
+    <div class="report__title"><h2>Отчет о работе обурудования c {{ date.start_date|date:"d.m.Y" }} по
+        {{ date.end_date|date:"d.m.Y" }} </h2></div>
+
+    <div class="report-choice">
+        <form class="form-inline text-left" method="get" style="display:table;width:100%;">
+            <ul class=" navbar-nav navbar-left" style="width: 100%;">
+                <li>{{ filter.form | bootstrap_inline }}
+                    <div class="form-group">
+                        <select id="id_workshop" class="form-control" name="workshop_id"
+                                data-selected_id="{{ return_workshop }}">
+                            <option value="">Все цеха</option>
+                            {% for x in workshops %}
+                                <option {% if return_workshop == x.workshop_number %} selected="selected" {% endif %}
+                                                                                      value="{{ x.workshop_number }}">{{ x }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </li>
+                <li>
+                    <button class="btn btn-primary" type="submit">Применить</button>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <div class="print-report">
+        <a class="print-report__link" href="javascript:(print());">
+            <img class="print-report__img" src="{% static 'img/print_icon.png' %}" alt="Печать">
+        </a>
+        <div class="print-report__label">Печать</div>
+    </div>
+
+    <div class="report__table-overflow">
+        <table class="report__table">
+            <thead>
+            <tr class="report__table-header">
+                <th class="report__table-cell report__table-header-cell">ЦЕХ</th>
+                <th class="report__table-cell report__table-header-cell">Оборудование</th>
+                {% for days_title in day_list %}
+                    <th class="report__table-cell report__table-header-cell report__table-header-days">{{ days_title }}</th>
+                {% endfor %}
+                <th class="report__table-cell report__table-header-cell" colspan=3>За период</th>
+                <th class="report__table-cell report__table-header-cell">Причины простоя</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for machines in statistics.day_stats %}
+                <tr class="report__table-row">
+                    <td class="report__table-cell report__table-body-cell report__table-body-cell-info report__workshop">
+                        <b>{{ machines.workshop_id }} цех</b></td>
+                    <td class="report__table-cell report__table-body-cell report__table-body-cell-info">
+                        <b>{{ machines.model }}</b> ({{ machines.code }})
+                    </td>
+                    {% for item in machines.days_percent %}
+                        {% if item != 'нет данных' %}
+                            <td class="report__table-cell report__table-body-cell report__table-header-cell-common">{{ item|floatformat }}%</td>
+                        {% else %}
+                            <td class="report__table-cell report__table-body-cell report__table-header-cell-common">нет
+                                данных
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                    <td class="report__table-cell report__table-body-cell report__table-body-cell-info">{{ machines.total_percent }}%</td>
+                    <td class="report__table-cell report__table-body-cell report__table-week-reason">
+                        {% for reason, value in machines.user_stats %}
+                            {% if not forloop.last %}
+                                <span class="report__table-total-reason">{{ value|floatformat }}% - {{ reason|slice:"6:"|lower }},</span>
+                            {% else %}
+                                <span class="report__table-total-reason">{{ value|floatformat }}% -
+                                    {{ reason|slice:"6:"|lower }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="report__table-cell report__table-body-cell report__table-body-cell-info report__workshop">
+                        {% if  total_workshop_percent|length == 1 %}
+                            {% for workshop, total_workshop_percent in total_workshop_percent.items %}
+                                {{ total_workshop_percent }}%
+                            {% endfor %}
+                        {% else %}
+                            {% for workshop, total_workshop_percent in total_workshop_percent.items %}
+                                {% if workshop == machines.workshop_id %}
+                                    {{ total_workshop_percent }}%
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="report__table-cell report__table-body-cell report__table-week-reason report__table-total-reason-list report__workshop">
+                        {% if  statistics.total_workshop_user_data|length == 1 %}
+                            {% for workshop, value_list in statistics.total_workshop_user_data.items %}
+                                {% for item in value_list %}
+                                    <span class="report__table-total-reason">  {{ item.0|slice:"6:" }} - {{ item.1 }}% </span>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            {% for workshop, value_list in statistics.total_workshop_user_data.items %}
+                                {% if workshop == machines.workshop_id %}
+                                    {% for item in value_list %}
+                                        <span class="report__table-total-reason">  {{ item.0|slice:"6:" }} - {{ item.1 }}% </span>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            <tr class="report__table-footer">
+                <td class="report__table-cell report__table-footer-cell"><b>Итого (ср.знач.)</b></td>
+                <td class="report__table-cell report__table-footer-cell"></td>
+                {% for item in period_percents.days_total_percent %}
+                    <td class="report__table-cell report__table-footer-cell">
+                        <b>{{ item }}%</b>
+                    </td>
+                {% endfor %}
+                <td class="report__table-cell report__table-footer-total" colspan="3">
+                    <b>{{ period_percents.total_period_percent }}%</b>
+                </td>
+                <td class="report__table-cell">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="report__additional">
+        <div class="report__additional-title">
+            <h3>Не указанные причины простоя за прошедшую неделю</h3>
+        </div>
+        <table class="report__additional-table">
+            <thead>
+            <tr class="report__table-header">
+                <th class="report__table-cell report__table-header-cell">Не указаны причины:</th>
+                <th class="report__table-cell report__table-header-cell">
+                    {{ previous_week_data.previous_week_start_date|date:"d.m" }}-{{ previous_week_data.previous_week_end_date|date:"d.m" }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for value in previous_week_data.workshop_sort_joined_report %}
+                <tr class="report__table-footer">
+                    <td class="report__table-cell">
+                        <b>{{ value.workshop_id }} цех</b>
+                    </td>
+                    <td class="report__table-cell report__table-cell-no-reason">
+                        {% if value.workshop_user_stats == 0 %}
+                            <b>-</b>
+                        {% else %}
+                            {{ value.workshop_user_stats|floatformat }}%
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript" src="{% static 'js/report.js' %}"></script>
+
+
+{% endblock content %}

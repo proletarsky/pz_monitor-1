@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import io
+from statistics import mean
 
 from django.forms import fields
 from django.forms.models import inlineformset_factory
@@ -24,20 +25,20 @@ from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .parsers import CoordinatorDataParser
-from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter, calendar_repair
-from django.utils import timezone
+from .filters import EquipmentFilter, ClassifiedIntervalFilter, StatisticsFilter, calendar_repair, ReportFilter
+from django.utils import timezone, dateparse
 import re, datetime
 from .helpers import prepare_data_for_google_charts_bar, get_ci_data_timeline
 from qsstats import QuerySetStats
 from django.db.models import Avg
 from .forms import UserRegistrationForm, Repairform
 from django.shortcuts import redirect
-# FOR JSON RESPONSE!!!
 from django.http import JsonResponse
 from .de_facto_time_interval import get_de_facto_time, chill_days
-from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 from .utils.ellipsis_paginator import EllipsisPaginator
+from .utils.stats_report import get_previous_week_report
+
 
 # import logging
 #
@@ -115,7 +116,8 @@ class EqipmentFilteredListView(ListView):
         context['areas'] = Area.objects.all()
 
         if "area" in self.request.GET and self.request.GET['area'] == "9":
-            if "workshop" not in self.request.GET or self.request.GET['workshop'] == "" or self.request.GET['workshop'] == "26":
+            if "workshop" not in self.request.GET or self.request.GET['workshop'] == "" or self.request.GET[
+                'workshop'] == "26":
                 context['gap_instruments'] = True
             else:
                 context['gap_instruments'] = False
@@ -484,10 +486,12 @@ class StatisticsView(ListView):
                 for x in pr_machs:
                     stat_data[str(x)] = x.problem_statistics(start_date, end_date)
             # print(stat_data)
+            print(stat_data)
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code'] + ' - ' + col['description'],
                                   'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description', 'code', 'color')]
+        # print(context['statistics'])
         return context
 
 
@@ -1417,6 +1421,7 @@ def repair_history(request):
                                                                                        'start_interval': start_interval,
                                                                                        'end_interval': end_interval,
                                                                                        'bool_limit': bool_limit,
+                                                                                       'bool_limit': bool_limit,
                                                                                        'repairer_id_param': repairer_id_param,
                                                                                        'equipment_id_param': equipment_id_param}))
 
@@ -1477,72 +1482,156 @@ def oee(request):
                    'okuma_Q': okuma_Q * 100, 'okuma_OEE': okuma_OEE})
 
 
-# ajax for test Prigoda 4.09.20
-def ajax_stats(request):
-    if request.is_ajax():
-        message = "123"
+def stats_report(request):
+    context = {}
+
+    today = datetime.datetime.now()
+    start_delta = datetime.timedelta(days=datetime.datetime.today().weekday(), weeks=1)
+
+    if request.GET.get('start_date') and request.GET.get('end_date'):
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
     else:
-        message = "no"
-    return HttpResponse(message)
+        start_date = (today - start_delta).strftime("%Y-%m-%d")
+        end_date = (today - start_delta + datetime.timedelta(days=6)).strftime("%Y-%m-%d")
 
+    return_workshop = 0
+    workshop_id = [x.workshop_number for x in Workshop.objects.all()]
 
-# Generate Excel report
-# def get_report_data():
-#     # Simulate a more complex table read.
-#     return [[1, 2, 3],
-#             [4, 5, 6],
-#             [7, 8, 9]]
+    if request.GET.get('workshop_id'):
+        workshop_id = request.GET.get('workshop_id'),
+        return_workshop = int(workshop_id[0])
 
+    context['return_workshop'] = return_workshop
 
-# class GenerateExcelReport(View):
-#
-#     def get(self, request):
-#
-#         # Create an in-memory output file for the new workbook.
-#         output = io.BytesIO()
-#
-#         # Even though the final file will be in memory the module uses temp
-#         # files during assembly for efficiency. To avoid this on servers that
-#         # don't allow temp files, for example the Google APP Engine, set the
-#         # 'in_memory' Workbook() constructor option as shown in the docs.
-#         workbook = xlsxwriter.Workbook(output)
-#         worksheet = workbook.add_worksheet()
-#
-#         bold = workbook.add_format({'bold': True})
-#
-#         worksheet.write('A1', 'ЦЕХ', bold)
-#         worksheet.write('B1', 'Оборудование', bold)
-#         worksheet.write('C1', 'ПН - 20.12.2021', bold)
-#         worksheet.write('D1', 'ВТ - 21.12.2021', bold)
-#         worksheet.write('E1', 'СР - 22.12.2021', bold)
-#         worksheet.write('F1', 'ЧТ - 23.12.2021', bold)
-#         worksheet.write('G1', 'ПТ - 24.12.2021', bold)
-#         worksheet.write('H1', 'СБ - 25.12.2022', bold)
-#         worksheet.write('I1', 'ВС - 26.12.2023', bold)
-#         worksheet.write('J1', 'За неделю', bold)
-#         worksheet.write('K1', 'Причины простоя / Комментарии', bold)
-#
-#         # Get some data to write to the spreadsheet.
-#         data = get_report_data()
-#
-#         # Write some test data.
-#
-#         # for row_num, columns in enumerate(data):
-#         #     for col_num, cell_data in enumerate(columns):
-#         #         worksheet.write(row_num, col_num, cell_data)
-#
-#         # Close the workbook before sending the data.
-#         workbook.close()
-#
-#         # Rewind the buffer.
-#         output.seek(0)
-#
-#         # Set up the Http response.
-#         filename = 'django_simple.xlsx'
-#         response = HttpResponse(
-#             output,
-#             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-#         )
-#         response['Content-Disposition'] = 'attachment; filename=%s' % filename
-#
-#         return response
+    context['filter'] = ReportFilter(request.GET, queryset=ClassifiedInterval.objects.all())
+
+    context['date'] = {
+        'start_date': dateparse.parse_date(start_date),
+        'end_date': dateparse.parse_date(end_date)
+    }
+
+    # Days range for table
+    day_range = []
+    delta = dateparse.parse_date(end_date) - dateparse.parse_date(start_date)
+    for i in range(delta.days + 1):
+        day_range.append((dateparse.parse_date(start_date) + datetime.timedelta(days=i)).strftime("%A - %d.%m.%Y"))
+    context['day_list'] = day_range
+
+    context['workshops'] = Workshop.objects.all()
+
+    # Get data from old and new statistics
+    stat_data = {}
+    problem_stat_data = {}
+
+    problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True, is_in_monitoring=True,
+                                                               workshop_id__in=workshop_id)]
+
+    if start_date is not None and start_date != '' and end_date is not None and end_date != '':
+        stat_data = ClassifiedInterval.get_report_data(start_date, end_date, workshop_id=workshop_id)
+
+        problem_stat_data = Equipment.report_problem_statistics(start_date, end_date, workshop_id=workshop_id,
+                                                                equipment=problem_machines)
+
+    joined_report = stat_data['day_stats'] + problem_stat_data['day_stats']
+
+    # Delete test machines
+    for i in range(len(joined_report)):
+        if joined_report[i]['code'] == "TEST":
+            del joined_report[i]
+            break
+
+    total_keys_list = {**problem_stat_data['total_workshop_user_data'], **stat_data['total_workshop_user_data']}
+
+    model_sort_joined_report = sorted(joined_report, key=lambda k: (k['model'], k['code']))
+
+    dict_to_sorting = {
+        7: 1,
+        8: 2,
+        26: 3,
+        14: 4,
+        9: 5,
+        20: 6,
+        1: 7
+    }
+
+    workshop_sort_joined_report = sorted(model_sort_joined_report, key=lambda k: dict_to_sorting[k['workshop_id']])
+
+    # Merge identical reason
+    if stat_data and problem_stat_data:
+        for key, value in total_keys_list.items():
+            t_dict = {}
+
+            if key in stat_data['total_workshop_user_data'] and key in problem_stat_data[
+                'total_workshop_user_data'] and bool(problem_stat_data['total_workshop_user_data'][key]) and bool(
+                    stat_data['total_workshop_user_data'][key]):
+                total_keys_list[key] = [value, problem_stat_data['total_workshop_user_data'][key]]
+                for item in total_keys_list[key]:
+                    for item_key, item_value in item.items():
+                        if item_key in t_dict:
+                            t_dict[item_key] += item_value
+                        else:
+                            t_dict[item_key] = item_value
+                    total_keys_list[key] = t_dict
+            else:
+                total_keys_list[key] = value
+
+    total_user_stats = {}
+
+    # Calculation percent for reasons
+    for workshop, reason in total_keys_list.items():
+        workshop_user_stats = {}
+        user_stats_value = [sum(reason.values())]
+        for k, v in reason.items():
+            if v == 0:
+                continue
+            else:
+                workshop_user_stats[k] = round(v / max(user_stats_value) * 100, 1)
+        total_user_stats[workshop] = sorted(workshop_user_stats.items(), key=lambda x: x[1], reverse=True)
+
+    context['statistics'] = {
+        'day_stats': workshop_sort_joined_report,
+        'total_workshop_user_data': total_user_stats
+    }
+
+    # Total workshop percent
+    total_workshop_percent_dict = {}
+
+    for workshop in workshop_id:
+        total_workshop_percent = 0
+        total_workshop_count = 0
+        for item in workshop_sort_joined_report:
+            if int(item['workshop_id']) == int(workshop):
+                total_workshop_percent += item['total_percent']
+                total_workshop_count += 1
+        if total_workshop_percent == 0:
+            total_workshop_percent_dict[workshop] = 0
+        else:
+            total_workshop_percent_dict[workshop] = round(total_workshop_percent / total_workshop_count, 1)
+
+    context['total_workshop_percent'] = total_workshop_percent_dict
+
+    # Total period percents
+    days_total_percent = []
+    item_period_percent = []
+    total_period_percent = ''
+    if workshop_sort_joined_report:
+        for day_count, i in enumerate(range(delta.days + 1)):
+            day_total_percent = []
+            for value in workshop_sort_joined_report:
+                day_total_percent.append(value["days_percent"][day_count])
+            days_total_percent.append(round(mean(day_total_percent), 1))
+        for item in workshop_sort_joined_report:
+            item_period_percent.append(item["total_percent"])
+        total_period_percent = round(mean(item_period_percent), 1)
+    else:
+        days_total_percent = [0, 0]
+
+    context['period_percents'] = {
+        'days_total_percent': days_total_percent,
+        'total_period_percent': total_period_percent
+    }
+
+    context['previous_week_data'] = get_previous_week_report()
+
+    return render(request, 'machines/stats_report.html', context)

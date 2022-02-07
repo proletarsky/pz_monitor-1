@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from statistics import mean
+
 from machines.time_helpers import CurrentDayType, get_duration_minutes
 
 from django.db import models
 from django.db.models import Count, Max
-from django.contrib.auth.models import User,Group
+from django.contrib.auth.models import User, Group
 from django.utils import timezone, dateparse
 from django.contrib.auth.models import User
 from django.dispatch import receiver
@@ -15,26 +18,27 @@ import datetime
 import pytz
 from collections import Counter
 
+
 # Create your models here.
 
 
-
 class Company(models.Model):
-    name  = models.CharField(max_length=100,verbose_name='Наименование предприятия')
-    group = models.ForeignKey(Group,verbose_name='Группа пользователей',on_delete=models.SET_NULL,null=True,blank=True)
+    name = models.CharField(max_length=100, verbose_name='Наименование предприятия')
+    group = models.ForeignKey(Group, verbose_name='Группа пользователей', on_delete=models.SET_NULL, null=True,
+                              blank=True)
 
     def __str__(self):
         return self.name
 
 
 class Coordinator(models.Model):
-    name = models.CharField(max_length=50,verbose_name='Наименование',null=True,blank=True)
-    mac = models.CharField(max_length=50,verbose_name='MAC координатора',null=True,blank=True)
-    ip = models.CharField(max_length=50,verbose_name='ip координатора',null=True,blank=True)
-    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
+    name = models.CharField(max_length=50, verbose_name='Наименование', null=True, blank=True)
+    mac = models.CharField(max_length=50, verbose_name='MAC координатора', null=True, blank=True)
+    ip = models.CharField(max_length=50, verbose_name='ip координатора', null=True, blank=True)
+    company = models.ForeignKey(Company, verbose_name='Предприятие', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.name+' '+self.mac+' '+self.ip
+        return self.name + ' ' + self.mac + ' ' + self.ip
 
 
 class Reason(models.Model):
@@ -160,7 +164,7 @@ class Timetable(models.Model):
         short_day_of_week = [d[0] for d in TimetableDetail.DAYS_OF_WEEK]
         if todayType == 1:
             return []
-        elif todayType == 0 or todayType == 2:    # common working day or eve holiday
+        elif todayType == 0 or todayType == 2:  # common working day or eve holiday
             # to find suitable timetable detail
             todayWorkDay = timezone.localtime()
             weekDay = todayWorkDay.weekday() if CurrentDayType.get_working_day(todayWorkDay) == todayWorkDay.day \
@@ -184,27 +188,27 @@ class Timetable(models.Model):
             else:
                 sub_hour = 1 if todayType == 2 else 0
                 if foundTD.lunch_start1 is None:
-                    time_intervals = [(foundTD.start_time1, datetime.time(foundTD.end_time1.hour-sub_hour,
+                    time_intervals = [(foundTD.start_time1, datetime.time(foundTD.end_time1.hour - sub_hour,
                                                                           foundTD.end_time1.minute, 0))]
                 else:
                     time_intervals = [(foundTD.start_time1, foundTD.lunch_start1),
-                                      (foundTD.lunch_end1, datetime.time(foundTD.end_time1.hour-sub_hour,
+                                      (foundTD.lunch_end1, datetime.time(foundTD.end_time1.hour - sub_hour,
                                                                          foundTD.end_time1.minute, 0))]
                 if foundTD.start_time2:
                     if foundTD.lunch_start2 is None:
-                        time_intervals += [(foundTD.start_time2, datetime.time(foundTD.end_time2.hour-sub_hour,
+                        time_intervals += [(foundTD.start_time2, datetime.time(foundTD.end_time2.hour - sub_hour,
                                                                                foundTD.end_time2.minute, 0))]
                     else:
                         time_intervals += [(foundTD.start_time2, foundTD.lunch_start2),
-                                           (foundTD.lunch_end2, datetime.time(foundTD.end_time2.hour-sub_hour,
+                                           (foundTD.lunch_end2, datetime.time(foundTD.end_time2.hour - sub_hour,
                                                                               foundTD.end_time2.minute, 0))]
                 if foundTD.start_time3:
                     if foundTD.lunch_start3 is None:
-                        time_intervals += [(foundTD.start_time3, datetime.time(foundTD.end_time3.hour-sub_hour,
+                        time_intervals += [(foundTD.start_time3, datetime.time(foundTD.end_time3.hour - sub_hour,
                                                                                foundTD.end_time3.minute, 0))]
                     else:
                         time_intervals += [(foundTD.start_time3, foundTD.lunch_start3),
-                                           (foundTD.lunch_end3, datetime.time(foundTD.end_time3.hour-sub_hour,
+                                           (foundTD.lunch_end3, datetime.time(foundTD.end_time3.hour - sub_hour,
                                                                               foundTD.end_time3.minute, 0))]
             return time_intervals
         else:
@@ -213,43 +217,45 @@ class Timetable(models.Model):
 
 class TimetableContent(models.Model):
     timetable = models.ForeignKey(Timetable, related_name='timetable', verbose_name='Расписание',
-                                     on_delete=models.DO_NOTHING)
-    details = models.ForeignKey(TimetableDetail, related_name='detail', verbose_name='Детали', on_delete=models.DO_NOTHING)
+                                  on_delete=models.DO_NOTHING)
+    details = models.ForeignKey(TimetableDetail, related_name='detail', verbose_name='Детали',
+                                on_delete=models.DO_NOTHING)
 
 
-#12.08.2020 Шабанов добавление новых моделей
+# 12.08.2020 Шабанов добавление новых моделей
 class Workshop(models.Model):
-    workshop_number = models.IntegerField(verbose_name='Номер цеха',primary_key=True)
+    workshop_number = models.IntegerField(verbose_name='Номер цеха', primary_key=True)
     name = models.CharField(max_length=50, verbose_name='Наименование')
-    foreman = models.CharField(max_length=50,verbose_name='Начальник цеха',null=True,blank=True)
-    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
+    foreman = models.CharField(max_length=50, verbose_name='Начальник цеха', null=True, blank=True)
+    company = models.ForeignKey(Company, verbose_name='Предприятие', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return str(self.workshop_number)
 
 
 class Area(models.Model):
-    workshop=models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.SET_NULL,null=True,blank=True)
-    name=models.CharField(max_length=50,verbose_name='Наименование')
-    area_number=models.IntegerField(verbose_name='Номер участка',null=True,blank=True)
-    mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
-    green_card_id=models.CharField(max_length=70,verbose_name='ID зеленой карточки')
-    add_green_card_id = models.CharField(max_length=70,verbose_name='ID дополнительной зеленой карточки',blank=True,null=True)
-    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
+    workshop = models.ForeignKey(Workshop, verbose_name='Цех', on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=50, verbose_name='Наименование')
+    area_number = models.IntegerField(verbose_name='Номер участка', null=True, blank=True)
+    mac_scan = models.CharField(max_length=70, verbose_name='MAC считывателя участка', blank=True, null=True)
+    green_card_id = models.CharField(max_length=70, verbose_name='ID зеленой карточки')
+    add_green_card_id = models.CharField(max_length=70, verbose_name='ID дополнительной зеленой карточки', blank=True,
+                                         null=True)
+    company = models.ForeignKey(Company, verbose_name='Предприятие', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return self.name+' цеха №'+str(self.workshop.workshop_number)
+        return self.name + ' цеха №' + str(self.workshop.workshop_number)
+
 
 class Complex(models.Model):
-    name=models.CharField(max_length=70,verbose_name='Наименование')
-    descr=models.TextField(verbose_name='Описание')
+    name = models.CharField(max_length=70, verbose_name='Наименование')
+    descr = models.TextField(verbose_name='Описание')
 
     def __str__(self):
         return self.name
 
 
 class Equipment(models.Model):
-    
     TIMETABLE_CHOICES = (
         ('8/5', '8 часов с выходными'),
         ('24/7', 'круглосуточно без выходных'),
@@ -258,19 +264,19 @@ class Equipment(models.Model):
                               for m in RawData.objects.all().distinct('mac_address')]
     AVAILABLE_CHANNELS = lambda: [(m.channel, m.channel)
                                   for m in RawData.objects.filter(date__gte=timezone.localdate()).distinct('channel')]
-    #Шабанов изменение структуры модели - поле "Цех" больше не является строкой, здесь теперь хранятся ссылки на объекты типа цех из таблицы Workshop
-    workshop = models.ForeignKey(Workshop,verbose_name='Цех',on_delete=models.PROTECT,blank=True,null=True)
-    #workshop=models.IntegerField(verbose_name='Цех')
-    area = models.ForeignKey(Area,verbose_name='Участок',on_delete=models.PROTECT,null=True,blank=True)
+    # Шабанов изменение структуры модели - поле "Цех" больше не является строкой, здесь теперь хранятся ссылки на объекты типа цех из таблицы Workshop
+    workshop = models.ForeignKey(Workshop, verbose_name='Цех', on_delete=models.PROTECT, blank=True, null=True)
+    # workshop=models.IntegerField(verbose_name='Цех')
+    area = models.ForeignKey(Area, verbose_name='Участок', on_delete=models.PROTECT, null=True, blank=True)
     code = models.CharField(max_length=10, verbose_name='Инвентарный номер')
     model = models.CharField(max_length=20, verbose_name='Модель')
-    image=models.ImageField(blank=True, upload_to='machines', verbose_name='Фото оборудования')
+    image = models.ImageField(blank=True, upload_to='machines', verbose_name='Фото оборудования')
     description = models.TextField(max_length=1000, verbose_name='Описание', null=True, blank=True)
     timetable = models.CharField(max_length=30, verbose_name='Расписание', choices=TIMETABLE_CHOICES)
     master = models.ForeignKey(Participant, on_delete=models.PROTECT)
     machine_or_furnace_sign = models.BooleanField(verbose_name='Оборудование является станком', default=True)
     xbee_mac = models.CharField(max_length=25, verbose_name='MAC модема',
-                                #choices=AVAILABLE_MACS(), -- замена выпадающего списка на текстовое поле
+                                # choices=AVAILABLE_MACS(), -- замена выпадающего списка на текстовое поле
                                 null=True, blank=True)
     main_channel = models.CharField(max_length=5, verbose_name='Канал', choices=AVAILABLE_CHANNELS(),
                                     null=True, blank=True)
@@ -282,159 +288,295 @@ class Equipment(models.Model):
     is_in_monitoring = models.BooleanField(verbose_name='В системе мониторинга', default=False)
     is_in_repair = models.BooleanField(verbose_name='В системе учета ремонтных работ', default=False)
     JOB_STATUSES = (
-        (0,'В рабочем состоянии'),
-        (1,'Сломан, необходим ремонт'),
-        (2,'В ремонте'),
+        (0, 'В рабочем состоянии'),
+        (1, 'Сломан, необходим ремонт'),
+        (2, 'В ремонте'),
     )
-    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=2)
-    red_card_id = models.CharField(max_length=70,verbose_name='ID красной карточки',default=1000000000)
-    in_complex=models.ForeignKey(Complex,verbose_name='Входит в комплекс',on_delete=models.DO_NOTHING,null=True,blank=True)
-    is_limit=models.BooleanField(verbose_name='Является лимитированным оборудованием',default=False,blank=True,null=True)
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES, null=False,
+                                            default=2)
+    red_card_id = models.CharField(max_length=70, verbose_name='ID красной карточки', default=1000000000)
+    in_complex = models.ForeignKey(Complex, verbose_name='Входит в комплекс', on_delete=models.DO_NOTHING, null=True,
+                                   blank=True)
+    is_limit = models.BooleanField(verbose_name='Является лимитированным оборудованием', default=False, blank=True,
+                                   null=True)
     is_cnc = models.BooleanField(verbose_name='Является станком ЧПУ', default=False)
-    problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев',default=False,blank=True,null=True)
-    dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя',blank=True,null=True)
-    coordinator = models.ForeignKey(Coordinator,verbose_name='Координатор',blank=True,null=True,on_delete=models.SET_NULL)
-    company = models.ForeignKey(Company,verbose_name='Предприятие',on_delete=models.SET_NULL,null=True,blank=True)
-
+    problem_machine = models.BooleanField(verbose_name='Новый алгоритм измерения простоев', default=False, blank=True,
+                                          null=True)
+    dimension_delta = models.FloatField(verbose_name='Дельта для измерения простоя', blank=True, null=True)
+    coordinator = models.ForeignKey(Coordinator, verbose_name='Координатор', blank=True, null=True,
+                                    on_delete=models.SET_NULL)
+    company = models.ForeignKey(Company, verbose_name='Предприятие', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         if self.area is None:
-            return '{0} - {1}, цех {2}'.format(self.code, self.model,self.workshop)
+            return '{0} - {1}, цех {2}'.format(self.code, self.model, self.workshop)
         else:
-            return '{0} - {1}, {2}'.format(self.code, self.model,self.area)
+            return '{0} - {1}, {2}'.format(self.code, self.model, self.area)
 
+    def problem_statistics(self, start, end):
 
-    def problem_statistics(self,start,end):
-
-        if not  self.problem_machine:
+        if not self.problem_machine:
             return None
 
         else:
-            ending_ = datetime.datetime(year=int(end[0:4:1]),month=int(end[5:7:1]),day=int(end[8:10:1]),hour=0,minute=0,tzinfo=pytz.UTC)
-            starting_ = datetime.datetime(year=int(start[0:4:1]),month=int(start[5:7:1]),day=int(start[8:10:1]),hour=0,minute=0,tzinfo=pytz.UTC)
-            if start==end:
-                ending_ = starting_+datetime.timedelta(days=1)
+            ending_ = datetime.datetime(year=int(end[0:4:1]), month=int(end[5:7:1]), day=int(end[8:10:1]), hour=0,
+                                        minute=0, tzinfo=pytz.UTC)
+            starting_ = datetime.datetime(year=int(start[0:4:1]), month=int(start[5:7:1]), day=int(start[8:10:1]),
+                                          hour=0, minute=0, tzinfo=pytz.UTC)
+            if start == end:
+                ending_ = starting_ + datetime.timedelta(days=1)
             result = {}
-            hour_intervals = Hour_interval.objects.filter(equipment_id=self.id,ending__gte=starting_,starting__lte=ending_).order_by('id')
+            hour_intervals = Hour_interval.objects.filter(equipment_id=self.id, ending__gte=starting_,
+                                                          starting__lte=ending_).order_by('id')
             total_work = 0
             total_loss = 0
             user_reason = []
             for x in hour_intervals:
                 if x.work_check:
-                    total_work+=1
+                    total_work += 1
                 else:
-                    total_loss+=1
+                    total_loss += 1
                     user_reason.append(x.user_reason)
             counter = dict(Counter(user_reason))
             user_stats = {}
             for x in counter:
                 if x:
-                    user_stats[str(x)]=counter[x]
+                    user_stats[str(x)] = counter[x]
                 else:
-                    user_stats['Не указано']=counter[x]
-            result['auto_stats']={'000 - Оборудование работает': total_work, '001 - Простой': total_loss}
+                    user_stats['Не указано'] = counter[x]
+            result['auto_stats'] = {'000 - Оборудование работает': total_work, '001 - Простой': total_loss}
             result['user_stats'] = user_stats
             return (result)
 
-            
 
+    @staticmethod
+    def report_problem_statistics(start, end, workshop_id, equipment):
+        statistics = {}
 
-        
+        ending = datetime.datetime(year=int(end[0:4:1]), month=int(end[5:7:1]), day=int(end[8:10:1]), hour=0,
+                                    minute=0, tzinfo=pytz.UTC)
+        starting = datetime.datetime(year=int(start[0:4:1]), month=int(start[5:7:1]), day=int(start[8:10:1]),
+                                      hour=0, minute=0, tzinfo=pytz.UTC)
+        if start == end:
+            ending = starting + datetime.timedelta(days=1)
+
+        days_stats = []
+        delta = ending - starting
+
+        for eid in equipment:
+            intervals_data = []
+            hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
+                                                          starting__lte=ending).order_by('id')
+
+            user_reason = []
+            for x in hour_intervals:
+                if x.work_check:
+                    continue
+                else:
+                    user_reason.append(x.user_reason)
+            counter = dict(Counter(user_reason))
+            user_stats = {}
+            for x in counter:
+                if x:
+                    user_stats[str(x)] = counter[x]
+                else:
+                    user_stats['000 - Не указано'] = counter[x]
+
+            user_stats_value = [sum(user_stats.values())]
+            for k, v in user_stats.items():
+                if v == 0:
+                    continue
+                else:
+                    user_stats[k] = round(v / max(user_stats_value) * 100, 1)
+
+            for day_count, i in enumerate(range(delta.days + 1)):
+                hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting + datetime.timedelta(days=i),
+                                                              starting__lte=starting + datetime.timedelta(days=i + 1)).order_by('id')
+                total_work = 0
+                total_loss = 0
+                for x in hour_intervals:
+                    if x.work_check:
+                        total_work += 1
+                    else:
+                        total_loss += 1
+                if total_work != 0 and total_loss != 0:
+                    intervals_data.append(round(100 - total_loss / (total_work + total_loss) * 100, 1))
+                elif total_work == 0:
+                    intervals_data.append(0)
+                elif total_loss == 0:
+                    intervals_data.append(100)
+
+            sort_user_stats = sorted(user_stats.items(), key=lambda x: x[1], reverse=True)
+
+            days_stats.append({
+                'workshop_id': Equipment.objects.filter(id=eid).values_list('workshop_id', flat=True).first(),
+                'code': Equipment.objects.filter(id=eid).values_list('code', flat=True).first(),
+                'model': Equipment.objects.filter(id=eid).values_list('model', flat=True).first(),
+                'days_percent': intervals_data,
+                'total_percent': round(mean(intervals_data), 1),
+                'user_stats': sort_user_stats
+            })
+
+        total_workshop_percent_dict = {}
+
+        total_workshop_user_data = {}
+
+        for workshop in workshop_id:
+            total_workshop_percent = 0
+            total_workshop_count = 0
+            # Total percent for period
+            for item in days_stats:
+                if item['workshop_id'] == workshop:
+                    total_workshop_percent += item['total_percent']
+                    total_workshop_count += 1
+            if total_workshop_percent == 0:
+                total_workshop_percent_dict[workshop] = 0
+            else:
+                total_workshop_percent_dict[workshop] = round(total_workshop_percent / total_workshop_count, 1)
+            total_user_stats = {}
+            if Equipment.objects.filter(workshop_id=workshop, problem_machine=True, is_in_monitoring=True):
+                for eid in equipment:
+                    hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
+                                                                  starting__lte=ending).order_by('id')
+
+                    user_reason = []
+                    for x in hour_intervals:
+                        if x.work_check:
+                            continue
+                        else:
+                            user_reason.append(x.user_reason)
+                    counter = dict(Counter(user_reason))
+
+                    for x in counter:
+                        if x:
+                            total_user_stats[str(x)] = counter[x]
+                        else:
+                            total_user_stats['000 - Не указано'] = counter[x]
+
+            total_workshop_user_data[workshop] = total_user_stats
+
+        statistics['day_stats'] = days_stats
+        statistics['total_workshop_user_data'] = total_workshop_user_data
+        return statistics
 
 
 class Minute_interval(models.Model):
-    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
-    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
-    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
-    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
-    hour = models.ForeignKey('Hour_interval',verbose_name = 'Промежуток входит в часовой интервал',null=True,blank=True,on_delete=models.CASCADE)
+    starting = models.DateTimeField(verbose_name='Начало промежутка', blank=True, null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка', blank=True, null=True)
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE, null=True,
+                                  blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?', null=True, blank=True)
+    hour = models.ForeignKey('Hour_interval', verbose_name='Промежуток входит в часовой интервал', null=True,
+                             blank=True, on_delete=models.CASCADE)
+
 
 class Hour_interval(models.Model):
-    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
-    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
-    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
-    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
-    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,blank=True, limit_choices_to={'is_operator': True})
-    trinity = models.ForeignKey('Trinity_interval',verbose_name = 'Промежуток входит в 3-часовой интервал',null=True,blank=True,on_delete=models.CASCADE)
+    starting = models.DateTimeField(verbose_name='Начало промежутка', blank=True, null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка', blank=True, null=True)
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE, null=True,
+                                  blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?', null=True, blank=True)
+    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,
+                                    blank=True, limit_choices_to={'is_operator': True})
+    trinity = models.ForeignKey('Trinity_interval', verbose_name='Промежуток входит в 3-часовой интервал', null=True,
+                                blank=True, on_delete=models.CASCADE)
+
 
 class Trinity_interval(models.Model):
-    starting = models.DateTimeField(verbose_name='Начало промежутка',blank=True,null=True)
-    ending = models.DateTimeField(verbose_name='Конец промежутка',blank=True,null=True)
-    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE,null=True,blank=True)
-    work_check = models.BooleanField(verbose_name='Оборудование работает?',null=True,blank=True)
-    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,blank=True, limit_choices_to={'is_operator': True})
+    starting = models.DateTimeField(verbose_name='Начало промежутка', blank=True, null=True)
+    ending = models.DateTimeField(verbose_name='Конец промежутка', blank=True, null=True)
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE, null=True,
+                                  blank=True)
+    work_check = models.BooleanField(verbose_name='Оборудование работает?', null=True, blank=True)
+    user_reason = models.ForeignKey(Reason, verbose_name='Причина оператора', on_delete=models.SET_NULL, null=True,
+                                    blank=True, limit_choices_to={'is_operator': True})
 
 
 class Repairer_master_reason(models.Model):
-    name = models.CharField(max_length=100,verbose_name='Наименование')
+    name = models.CharField(max_length=100, verbose_name='Наименование')
     description = models.TextField(verbose_name='Описание')
+
     def __str__(self):
         return self.name
 
+
 class Repair_reason(models.Model):
-    name = models.CharField(max_length=100,verbose_name='Наименование')
+    name = models.CharField(max_length=100, verbose_name='Наименование')
     description = models.TextField(verbose_name='Описание')
+
     def __str__(self):
         return self.name
 
 
 class Repair_rawdata(models.Model):
-    date = models.DateTimeField(auto_now_add=True,verbose_name='Дата/Время')
-    machines_id = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE, blank=True,null=True)
-    card_id = models.CharField(max_length=70,verbose_name='ID карточки',blank=True,null=True)
+    date = models.DateTimeField(auto_now_add=True, verbose_name='Дата/Время')
+    machines_id = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE, blank=True,
+                                    null=True)
+    card_id = models.CharField(max_length=70, verbose_name='ID карточки', blank=True, null=True)
     JOB_STATUSES = (
-        (0,'В рабочем состоянии'),
-        (1,'Сломан, необходим ремонт'),
-        (2,'В ремонте'),
+        (0, 'В рабочем состоянии'),
+        (1, 'Сломан, необходим ремонт'),
+        (2, 'В ремонте'),
     )
-    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES,null=False,default=0)
-    repairer_id = models.ForeignKey('Repairer',verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
-    repairer_master_reason = models.ForeignKey('Repairer_master_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
-    repair_reason = models.ForeignKey('Repair_reason',verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
-    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True,default=None)
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES, null=False,
+                                            default=0)
+    repairer_id = models.ForeignKey('Repairer', verbose_name='Ремонтник', null=True, blank=True,
+                                    on_delete=models.SET_NULL)
+    repairer_master_reason = models.ForeignKey('Repairer_master_reason', verbose_name='Причина поломки', null=True,
+                                               blank=True, on_delete=models.SET_NULL, default=None)
+    repair_reason = models.ForeignKey('Repair_reason', verbose_name='Причина поломки', null=True, blank=True,
+                                      on_delete=models.SET_NULL, default=None)
+    repair_comment = models.TextField(verbose_name='Комментарий', blank=True, null=True, default=None)
 
     def __str__(self):
-        return '{0}, {1}, {2}'.format(self.machines_id,self.date,self.card_id)
+        return '{0}, {1}, {2}'.format(self.machines_id, self.date, self.card_id)
 
 
 class Data_from_scan(models.Model):
-    date = models.DateTimeField(auto_now=True,verbose_name='Дата/Время')
-    mac_scan = models.CharField(max_length=70,verbose_name='MAC считывателя участка',blank=True,null=True)
-    card_id = models.CharField(max_length=70,verbose_name='ID карточки')
+    date = models.DateTimeField(auto_now=True, verbose_name='Дата/Время')
+    mac_scan = models.CharField(max_length=70, verbose_name='MAC считывателя участка', blank=True, null=True)
+    card_id = models.CharField(max_length=70, verbose_name='ID карточки')
 
     def __str__(self):
         return '{0}, {1}'.format(self.date, self.card_id)
 
+
 class Repairer(models.Model):
-    FIO = models.CharField(max_length=150,verbose_name='ФИО')
-    card_id=models.CharField(max_length=70,verbose_name='ID карточки')
+    FIO = models.CharField(max_length=150, verbose_name='ФИО')
+    card_id = models.CharField(max_length=70, verbose_name='ID карточки')
 
     def __str__(self):
         return '{0}'.format(self.FIO)
 
+
 class Repair_statistics(models.Model):
     JOB_STATUSES = (
-        (0,'В рабочем состоянии'),
-        (1,'Сломан, необходим ремонт'),
-        (2,'В ремонте'),)
-    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE)
-    start_date = models.DateField(verbose_name='Дата начала периода',blank=True,null=True)
-    end_date = models.DateField(verbose_name='Дата конца периода',blank=True,null=True)
-    start_time = models.TimeField(verbose_name='Время начала периода',blank=True,null=True)
-    end_time = models.TimeField(verbose_name='Время конца периода',blank=True,null=True)
-    de_facto = models.DurationField(verbose_name='Время работы с учетом расписания',blank=True,null=True)
-    repair_job_status = models.IntegerField(verbose_name='Статус оборудования',choices=JOB_STATUSES,null=True,blank=True)
+        (0, 'В рабочем состоянии'),
+        (1, 'Сломан, необходим ремонт'),
+        (2, 'В ремонте'),)
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE)
+    start_date = models.DateField(verbose_name='Дата начала периода', blank=True, null=True)
+    end_date = models.DateField(verbose_name='Дата конца периода', blank=True, null=True)
+    start_time = models.TimeField(verbose_name='Время начала периода', blank=True, null=True)
+    end_time = models.TimeField(verbose_name='Время конца периода', blank=True, null=True)
+    de_facto = models.DurationField(verbose_name='Время работы с учетом расписания', blank=True, null=True)
+    repair_job_status = models.IntegerField(verbose_name='Статус оборудования', choices=JOB_STATUSES, null=True,
+                                            blank=True)
 
 
 class Repair_history(models.Model):
-    equipment = models.ForeignKey(Equipment,verbose_name='Оборудование',on_delete=models.CASCADE)
-    crush_date = models.DateTimeField(verbose_name='Дата и время поломки',blank=True,null=True,auto_now_add=True)
-    repair_date = models.DateTimeField(verbose_name='Дата и время взятия в ремонт',blank=True,null=True,auto_now_add=True)
-    return_to_work_date=models.DateTimeField(verbose_name='Дата и время возврата к работе',null=True,blank=True,auto_now_add=True)
-    first_reason = models.ForeignKey(Repair_reason,verbose_name='Первичная причина',null=True,blank=True,on_delete=models.SET_NULL,default=None)
-    master_reason = models.ForeignKey(Repairer_master_reason,verbose_name='Причина поломки',null=True,blank=True,on_delete=models.SET_NULL,default=None)
-    repair_comment = models.TextField(verbose_name='Комментарий',blank=True,null=True,default=None)
-    repairer = models.ForeignKey(Repairer,verbose_name='Ремонтник', null=True,blank=True,on_delete=models.SET_NULL)
+    equipment = models.ForeignKey(Equipment, verbose_name='Оборудование', on_delete=models.CASCADE)
+    crush_date = models.DateTimeField(verbose_name='Дата и время поломки', blank=True, null=True, auto_now_add=True)
+    repair_date = models.DateTimeField(verbose_name='Дата и время взятия в ремонт', blank=True, null=True,
+                                       auto_now_add=True)
+    return_to_work_date = models.DateTimeField(verbose_name='Дата и время возврата к работе', null=True, blank=True,
+                                               auto_now_add=True)
+    first_reason = models.ForeignKey(Repair_reason, verbose_name='Первичная причина', null=True, blank=True,
+                                     on_delete=models.SET_NULL, default=None)
+    master_reason = models.ForeignKey(Repairer_master_reason, verbose_name='Причина поломки', null=True, blank=True,
+                                      on_delete=models.SET_NULL, default=None)
+    repair_comment = models.TextField(verbose_name='Комментарий', blank=True, null=True, default=None)
+    repairer = models.ForeignKey(Repairer, verbose_name='Ремонтник', null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class ClassifiedInterval(models.Model):
@@ -478,7 +620,7 @@ class ClassifiedInterval(models.Model):
 
     @staticmethod
     def add_interval(equipment: Equipment, start: timezone.datetime, end: timezone.datetime, classification: Reason,
-                     is_zero = False):
+                     is_zero=False):
         """
         This function build chain of intervals to remove gaps between those and avoid overlappings
         result is adding or correction intervals in ClassifiedIntervals.objects
@@ -553,7 +695,7 @@ class ClassifiedInterval(models.Model):
                                           end__in=qs.values('end')).update(automated_classification=sys_stop_reason)
 
     @staticmethod
-    def get_statistics(start, end,workshop_id, by_workshop=False, equipment=None):
+    def get_statistics(start, end, workshop_id, by_workshop=False, equipment=None):
         '''
         calculates statistics for period
         :param start: start of period (string YYYY-mm-dd)
@@ -569,15 +711,17 @@ class ClassifiedInterval(models.Model):
         if start_date is None:
             raise ValueError('Value {0} as start date is invalid, it should be YYYY-MM-DD formatted'.format(start))
         end_date = dateparse.parse_date(end)
-        end_date = timezone.make_aware(datetime.datetime.combine(end_date, datetime.datetime.min.time()))\
+        end_date = timezone.make_aware(datetime.datetime.combine(end_date, datetime.datetime.min.time())) \
             if isinstance(end_date, datetime.date) else None
         if end_date is None:
             raise ValueError('Value {0} as end date is invalid, it should be YYYY-MM-DD formatted'.format(end))
 
         # check equipment
-        #18.08.2020 Шабанов изменение филтрации поиска моделей
+        # 18.08.2020 Шабанов изменение филтрации поиска моделей
         if equipment is None:
-            equipment_id_list = [eq.id for eq in Equipment.objects.filter(problem_machine=False,is_in_monitoring=True,workshop__in=workshop_id).order_by('-workshop', 'id')]
+            equipment_id_list = [eq.id for eq in Equipment.objects.filter(problem_machine=False, is_in_monitoring=True,
+                                                                          workshop__in=workshop_id).order_by(
+                '-workshop', 'id')]
         elif isinstance(equipment, list):
             equipment_id_list = ([eq.id for eq in equipment if isinstance(eq, Equipment)] +
                                  [id for id in equipment if isinstance(id, int)])
@@ -591,7 +735,8 @@ class ClassifiedInterval(models.Model):
         total_user_stats = {}
         # cycle to get statistics
         for eid in equipment_id_list:
-            intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False,equipment__id=eid, end__gte=start_date, start__lte=end_date)
+            intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
+                                                          end__gte=start_date, start__lte=end_date)
             # auto_reasons = intervals.values('automated_classification').distinct()
             # user_reasons = intervals.values('user_classification').distinct()
             # setup auto_stats and user_stats (fills zero)
@@ -607,18 +752,156 @@ class ClassifiedInterval(models.Model):
                 user_cl = str(ci.user_classification) if ci.user_classification else 'Не указано'
                 auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
                 user_stats[user_cl] = user_stats.get(user_cl, 0) + \
-                    (int_dur_min if not ci.automated_classification.is_working else 0)
+                                      (int_dur_min if not ci.automated_classification.is_working else 0)
 
                 # update total statistics
                 total_auto_stats[auto_cl] = total_auto_stats.get(auto_cl, 0) + int_dur_min
                 total_user_stats[user_cl] = total_user_stats.get(user_cl, 0) + \
-                    (int_dur_min if not ci.automated_classification.is_working else 0)
+                                            (int_dur_min if not ci.automated_classification.is_working else 0)
 
             statistics[str(Equipment.objects.filter(id=eid).first())] = {'auto_stats': auto_stats,
                                                                          'user_stats': user_stats}
         # end of cycle
-        statistics['total'] = {'auto_stats' : total_auto_stats, 'user_stats': total_user_stats}
+        statistics['total'] = {'auto_stats': total_auto_stats, 'user_stats': total_user_stats}
         return statistics
+
+    @staticmethod
+    def get_report_data(start, end, workshop_id):
+        '''
+        calculates report
+        :param start: start of period (string YYYY-mm-dd)
+        :param end: end of period (string YYYY-mm-dd)
+        :param by_workshop: if make grouping by workshop (Boolean)
+        :return: dict of report
+        '''
+        equipment_id_list = [eq.id for eq in Equipment.objects.filter(problem_machine=False, is_in_monitoring=True,
+                                                                      workshop__in=workshop_id).order_by(
+            '-workshop', 'id')]
+        statistics = {}
+        if not equipment_id_list:
+            statistics['day_stats'] = []
+            statistics['total_workshop_user_data'] = {}
+            return statistics
+        else:
+            # Check dates
+            start_date = dateparse.parse_date(start);
+            start_date = timezone.make_aware(datetime.datetime.combine(start_date, datetime.datetime.min.time())) \
+                if isinstance(start_date, datetime.date) else None
+            if start_date is None:
+                raise ValueError('Value {0} as start date is invalid, it should be YYYY-MM-DD formatted'.format(start))
+            end_date = dateparse.parse_date(end)
+            end_date = timezone.make_aware(datetime.datetime.combine(end_date, datetime.datetime.min.time())) \
+                if isinstance(end_date, datetime.date) else None
+            if end_date is None:
+                raise ValueError('Value {0} as end date is invalid, it should be YYYY-MM-DD formatted'.format(end))
+
+            # Cycle to get statistics
+            delta = end_date - start_date
+            days_stats = []
+
+            for eid in equipment_id_list:
+                percent_stats = []
+
+                intervals_data = []
+
+                user_stats_intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False,
+                                                                         equipment__id=eid,
+                                                                         end__gte=start_date, start__lte=end_date + datetime.timedelta(days=1) )
+                user_stats = {}
+
+                for ci in user_stats_intervals:
+                    start_i = max(ci.start, start_date)
+                    end_i = min(ci.end, end_date + datetime.timedelta(days=1))
+                    int_dur_min = int((end_i - start_i).total_seconds() // 60)
+                    user_cl = str(ci.user_classification) if ci.user_classification else '000 - Не указано'
+
+                    user_stats[user_cl] = user_stats.get(user_cl, 0) + \
+                                                        (int_dur_min if not ci.automated_classification.is_working else 0)
+
+                user_stats_value = [sum(user_stats.values())]
+
+                #  Calculation percent for reasons
+                for k, v in user_stats.items():
+                    if v == 0:
+                        continue
+                    else:
+                        user_stats[k] = round(v / max(user_stats_value) * 100, 1)
+
+                for day_count, i in enumerate(range(delta.days + 1)):
+                    auto_stats = {}
+
+                    intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
+                                                                  end__gte=start_date + datetime.timedelta(days=i),
+                                                                  start__lte=start_date + datetime.timedelta(days=i + 1))
+                    for c, ci in enumerate(intervals):
+                        start_i = max(ci.start, start_date + datetime.timedelta(days=i))
+                        end_i = min(ci.end, start_date + datetime.timedelta(days=i + 1))
+                        int_dur_min = int((end_i - start_i).total_seconds() // 60)
+                        auto_cl = str(ci.automated_classification) if ci.automated_classification else 'Неопределено'
+                        auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
+
+                    if len(auto_stats) == 1:
+                        if auto_stats.get('001 - Простой'):
+                            percent_stats = 0
+                        elif auto_stats.get('000 - Оборудование работает'):
+                            percent_stats = 100
+                    elif len(auto_stats) == 2:
+                        total_dur_min = auto_stats.get('000 - Оборудование работает') + auto_stats.get('001 - Простой')
+                        percent_stats = round(100 - auto_stats.get('001 - Простой') / total_dur_min * 100, 1)
+                    # else:
+                    #     print("Нет данных")
+                    intervals_data.append(percent_stats)
+
+                sort_user_stats = sorted(user_stats.items(), key=lambda x: x[1], reverse=True)
+
+                days_stats.append({
+                    'workshop_id': Equipment.objects.filter(id=eid).values_list('workshop_id', flat=True).first(),
+                    'code': Equipment.objects.filter(id=eid).values_list('code', flat=True).first(),
+                    'model': Equipment.objects.filter(id=eid).values_list('model', flat=True).first(),
+                    'days_percent': intervals_data,
+                    'total_percent': round(mean(intervals_data), 1),
+                    'user_stats': sort_user_stats
+                })
+
+            total_workshop_percent_dict = {}
+
+            total_workshop_user_data = {}
+
+            for workshop in workshop_id:
+                total_user_stats = {}
+                total_workshop_percent = 0
+                total_workshop_count = 0
+                # Total percent for period
+                for item in days_stats:
+                    if item['workshop_id'] == workshop:
+                        total_workshop_percent += item['total_percent']
+                        total_workshop_count += 1
+                if total_workshop_percent == 0:
+                    total_workshop_percent_dict[workshop] = 0
+                else:
+                    total_workshop_percent_dict[workshop] = round(total_workshop_percent / total_workshop_count, 1)
+
+                workshop_equipment_id_list = Equipment.objects.values_list('id', flat=True).filter(problem_machine=False,
+                                                                                                   is_in_monitoring=True,
+                                                                                                   workshop_id=workshop)
+
+                for eid in workshop_equipment_id_list:
+                    intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
+                                                                  end__gte=start_date, start__lte=end_date)
+                    for ci in intervals:
+                        start_i = max(ci.start, start_date)
+                        end_i = min(ci.end, end_date)
+                        int_dur_min = int((end_i - start_i).total_seconds() // 60)
+                        user_cl = str(ci.user_classification) if ci.user_classification else '000 - Не указано'
+
+                        total_user_stats[user_cl] = total_user_stats.get(user_cl, 0) + \
+                                                    (int_dur_min if not ci.automated_classification.is_working else 0)
+
+                total_workshop_user_data[workshop] = total_user_stats
+
+            statistics['day_stats'] = days_stats
+            statistics['total_workshop_user_data'] = total_workshop_user_data
+            return statistics
 
 
 class GraphicsData(models.Model):
@@ -642,7 +925,7 @@ class Semaphore(models.Model):
     def get_locked_interval(self):
         if self.is_locked:
             delta = timezone.now() - self.locked_when
-            return int(delta.total_seconds()//60)
+            return int(delta.total_seconds() // 60)
         else:
             return 0
 
@@ -674,4 +957,4 @@ def save_user_profile(sender, instance, **kwargs):
 # Модель кода безопасности
 class Code(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
-    code=models.CharField(max_length=4)
+    code = models.CharField(max_length=4)
