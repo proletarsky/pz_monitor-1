@@ -148,18 +148,20 @@
             </thead>
             <tbody>
             {% for value in previous_week_data.workshop_sort_joined_report %}
-                <tr class="report__table-footer">
-                    <td class="report__table-cell">
-                        <b>{{ value.workshop_id }} цех</b>
-                    </td>
-                    <td class="report__table-cell report__table-cell-no-reason">
-                        {% if value.workshop_user_stats == 0 %}
-                            <b>-</b>
-                        {% else %}
-                            {{ value.workshop_user_stats|floatformat }}%
-                        {% endif %}
-                    </td>
-                </tr>
+                {% if value.workshop_id != 8 %}
+                    <tr class="report__table-footer">
+                        <td class="report__table-cell">
+                            <b>{{ value.workshop_id }} цех</b>
+                        </td>
+                        <td class="report__table-cell report__table-cell-no-reason">
+                            {% if value.workshop_user_stats == 0 %}
+                                <b>-</b>
+                            {% else %}
+                                {{ value.workshop_user_stats|floatformat }}%
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
             </tbody>
         </table>

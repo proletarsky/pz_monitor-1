@@ -1,15 +1,15 @@
 document.querySelectorAll(".report__table-header-cell-common").forEach(el => {
-    if (el.innerHTML.slice(0, -1) == 0) {
+    if (el.innerHTML.slice(0, -1) >= 0 && el.innerHTML.slice(0, -1) <= 1) {
         el.style.backgroundColor = "#F8CBAD";
-    } else if (el.innerHTML.slice(0, -1) > 0 && el.innerHTML.slice(0, -1) <= 33) {
+    } else if (el.innerHTML.slice(0, -1) > 0 && el.innerHTML.slice(0, -1) <= 32) {
         el.style.backgroundColor = "#FFF2CC";
-    } else if (el.innerHTML.slice(0, -1) > 33) {
+    } else if (el.innerHTML.slice(0, -1) > 32) {
         el.style.backgroundColor = "#ffffff";
     }
 });
 
 document.querySelectorAll(".report__table-cell-no-reason").forEach(el => {
-    if (el.innerText.slice(0, -1) > 33) {
+    if (el.innerText.slice(0, -1) >= 32) {
        el.style.color = "#ff0000"
     }
     el.style.fontWeight = "bold"
