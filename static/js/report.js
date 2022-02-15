@@ -10,14 +10,23 @@ document.querySelectorAll(".report__table-header-cell-common").forEach(el => {
 
 document.querySelectorAll(".report__table-cell-no-reason").forEach(el => {
     if (el.innerText.slice(0, -1) >= 32) {
-       el.style.color = "#ff0000"
+        el.style.color = "#ff0000"
     }
     el.style.fontWeight = "bold"
+    if (el.innerText === "") {
+        el.innerText = "0%"
+    }
 });
 
 document.querySelectorAll(".report__table-total-reason").forEach(el => {
     if (el.innerHTML.includes('не указано')) {
         el.style.color = "#ff0000"
+    }
+});
+
+document.querySelectorAll(".report__table-week-reason > .report__table-total-reason:last-child").forEach(el => {
+    if (el.innerHTML.slice(-1) === ',') {
+        el.innerHTML = el.innerHTML.slice(0, -1)
     }
 });
 

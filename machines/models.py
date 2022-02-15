@@ -323,11 +323,10 @@ class Equipment(models.Model):
                                         minute=0, tzinfo=pytz.UTC)
             starting_ = datetime.datetime(year=int(start[0:4:1]), month=int(start[5:7:1]), day=int(start[8:10:1]),
                                           hour=0, minute=0, tzinfo=pytz.UTC)
-            if start == end:
-                ending_ = starting_ + datetime.timedelta(days=1)
+
             result = {}
             hour_intervals = Hour_interval.objects.filter(equipment_id=self.id, ending__gte=starting_,
-                                                          starting__lte=ending_).order_by('id')
+                                                          starting__lte=ending_ + datetime.timedelta(days=1)).order_by('id')
             total_work = 0
             total_loss = 0
             user_reason = []
@@ -357,8 +356,6 @@ class Equipment(models.Model):
                                     minute=0, tzinfo=pytz.UTC)
         starting = datetime.datetime(year=int(start[0:4:1]), month=int(start[5:7:1]), day=int(start[8:10:1]),
                                       hour=0, minute=0, tzinfo=pytz.UTC)
-        if start == end:
-            ending = starting + datetime.timedelta(days=1)
 
         days_stats = []
         delta = ending - starting
@@ -366,7 +363,7 @@ class Equipment(models.Model):
         for eid in equipment:
             intervals_data = []
             hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
-                                                          starting__lte=ending).order_by('id')
+                                                          starting__lte=ending + datetime.timedelta(days=1)).order_by('id')
 
             user_reason = []
             for x in hour_intervals:
@@ -421,7 +418,9 @@ class Equipment(models.Model):
 
         total_workshop_user_data = {}
 
-        for workshop in workshop_id:
+        all_workshop_id = [x.workshop_number for x in Workshop.objects.all()]
+
+        for workshop in all_workshop_id:
             total_workshop_percent = 0
             total_workshop_count = 0
             # Total percent for period
@@ -433,25 +432,28 @@ class Equipment(models.Model):
                 total_workshop_percent_dict[workshop] = 0
             else:
                 total_workshop_percent_dict[workshop] = round(total_workshop_percent / total_workshop_count, 1)
+
             total_user_stats = {}
-            if Equipment.objects.filter(workshop_id=workshop, problem_machine=True, is_in_monitoring=True):
-                for eid in equipment:
-                    hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
-                                                                  starting__lte=ending).order_by('id')
 
-                    user_reason = []
-                    for x in hour_intervals:
-                        if x.work_check:
-                            continue
-                        else:
-                            user_reason.append(x.user_reason)
-                    counter = dict(Counter(user_reason))
+            all_problem_equipment = [x.id for x in Equipment.objects.filter(problem_machine=True, is_in_monitoring=True, workshop_id=workshop)]
 
-                    for x in counter:
-                        if x:
-                            total_user_stats[str(x)] = counter[x]
-                        else:
-                            total_user_stats['000 - Не указано'] = counter[x]
+            for eid in all_problem_equipment:
+                hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
+                                                              starting__lte=ending + datetime.timedelta(days=1)).order_by('id')
+                user_reason = []
+                for x in hour_intervals:
+                    if x.work_check:
+                        continue
+                    else:
+                        user_reason.append(x.user_reason)
+                counter = dict(Counter(user_reason))
+
+                for x in counter:
+
+                    if x:
+                        total_user_stats[str(x)] = counter[x]
+                    else:
+                        total_user_stats['000 - Не указано'] = counter[x]
 
             total_workshop_user_data[workshop] = total_user_stats
 
@@ -705,7 +707,7 @@ class ClassifiedInterval(models.Model):
         :return: dict of statistics
         '''
         # check dates
-        start_date = dateparse.parse_date(start);
+        start_date = dateparse.parse_date(start)
         start_date = timezone.make_aware(datetime.datetime.combine(start_date, datetime.datetime.min.time())) \
             if isinstance(start_date, datetime.date) else None
         if start_date is None:
@@ -736,20 +738,16 @@ class ClassifiedInterval(models.Model):
         # cycle to get statistics
         for eid in equipment_id_list:
             intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
-                                                          end__gte=start_date, start__lte=end_date)
-            # auto_reasons = intervals.values('automated_classification').distinct()
-            # user_reasons = intervals.values('user_classification').distinct()
-            # setup auto_stats and user_stats (fills zero)
-            # auto_stats = {str(reason['automated_classification']): 0 for reason in auto_reasons}
-            # user_stats = {str(reason['user_classification']): 0 for reason in user_reasons if reason}
+                                                          end__gte=start_date, start__lte=end_date + datetime.timedelta(days=1))
             auto_stats = {}
             user_stats = {}
             for ci in intervals:
                 start_i = max(ci.start, start_date)
-                end_i = min(ci.end, end_date)
+                end_i = min(ci.end, end_date + datetime.timedelta(days=1))
                 int_dur_min = int((end_i - start_i).total_seconds() // 60)
                 auto_cl = str(ci.automated_classification) if ci.automated_classification else 'Неопределено'
                 user_cl = str(ci.user_classification) if ci.user_classification else 'Не указано'
+
                 auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
                 user_stats[user_cl] = user_stats.get(user_cl, 0) + \
                                       (int_dur_min if not ci.automated_classification.is_working else 0)
@@ -774,9 +772,11 @@ class ClassifiedInterval(models.Model):
         :param by_workshop: if make grouping by workshop (Boolean)
         :return: dict of report
         '''
+
         equipment_id_list = [eq.id for eq in Equipment.objects.filter(problem_machine=False, is_in_monitoring=True,
                                                                       workshop__in=workshop_id).order_by(
             '-workshop', 'id')]
+
         statistics = {}
         if not equipment_id_list:
             statistics['day_stats'] = []
@@ -867,7 +867,9 @@ class ClassifiedInterval(models.Model):
 
             total_workshop_user_data = {}
 
-            for workshop in workshop_id:
+            all_workshop_id = [x.workshop_number for x in Workshop.objects.all()]
+
+            for workshop in all_workshop_id:
                 total_user_stats = {}
                 total_workshop_percent = 0
                 total_workshop_count = 0
@@ -887,10 +889,10 @@ class ClassifiedInterval(models.Model):
 
                 for eid in workshop_equipment_id_list:
                     intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
-                                                                  end__gte=start_date, start__lte=end_date)
+                                                                  end__gte=start_date, start__lte=end_date + datetime.timedelta(days=1))
                     for ci in intervals:
                         start_i = max(ci.start, start_date)
-                        end_i = min(ci.end, end_date)
+                        end_i = min(ci.end, end_date + datetime.timedelta(days=1))
                         int_dur_min = int((end_i - start_i).total_seconds() // 60)
                         user_cl = str(ci.user_classification) if ci.user_classification else '000 - Не указано'
 

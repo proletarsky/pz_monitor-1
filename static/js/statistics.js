@@ -205,8 +205,8 @@ function drawChart() {
         pieHole: 0.4,
         colors:list_color_total,
         chartArea: {
-            left: '1%',
-            right: '1%',
+            left: '5%',
+            right: '5%',
             top: '5%',
             bottom: '5%'
         }

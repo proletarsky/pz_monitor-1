@@ -50,6 +50,8 @@ def prepare_data_for_google_charts_bar(data):
 
     details_sorted = dict(collections.OrderedDict(sorted(charts_data['details'].items(),
                                                     key=lambda k: sort_order.get(k[0], 400))))
+
+    # print(details_sorted)
     charts_data['details'] = details_sorted
     return charts_data
 

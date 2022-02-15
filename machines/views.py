@@ -37,8 +37,6 @@ from django.http import JsonResponse
 from .de_facto_time_interval import get_de_facto_time, chill_days
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 from .utils.ellipsis_paginator import EllipsisPaginator
-from .utils.stats_report import get_previous_week_report
-
 
 # import logging
 #
@@ -430,10 +428,6 @@ class StatisticsView(ListView):
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
 
-        # if end_date == '':
-        #     end_date = start_date
-        #     print(end_date)
-
         context['machines'] = Equipment.objects.filter(is_in_monitoring=True).order_by("code")
         context['workshops'] = Workshop.objects.all()
         problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True, is_in_monitoring=True)]
@@ -485,13 +479,10 @@ class StatisticsView(ListView):
                 pr_machs = Equipment.objects.filter(problem_machine=True, workshop_id__in=workshop_id)
                 for x in pr_machs:
                     stat_data[str(x)] = x.problem_statistics(start_date, end_date)
-            # print(stat_data)
-            print(stat_data)
             context['statistics'] = prepare_data_for_google_charts_bar(stat_data)
             context['colors'] = [{'description': col['code'] + ' - ' + col['description'],
                                   'color': col['color'] if col['color'] else '#ff0000'}
                                  for col in Reason.objects.all().values('description', 'code', 'color')]
-        # print(context['statistics'])
         return context
 
 
@@ -1527,11 +1518,22 @@ def stats_report(request):
     problem_machines = [x.id for x in Equipment.objects.filter(problem_machine=True, is_in_monitoring=True,
                                                                workshop_id__in=workshop_id)]
 
+    # Get stat data from old and new statistics or return error
+    context['no_data'] = False
     if start_date is not None and start_date != '' and end_date is not None and end_date != '':
-        stat_data = ClassifiedInterval.get_report_data(start_date, end_date, workshop_id=workshop_id)
-
-        problem_stat_data = Equipment.report_problem_statistics(start_date, end_date, workshop_id=workshop_id,
+        try:
+            stat_data = ClassifiedInterval.get_report_data(start_date, end_date, workshop_id=workshop_id)
+        except Exception as e:
+            print(e)
+            context['no_data'] = True
+            return render(request, 'machines/stats_report.html', context)
+        try:
+            problem_stat_data = Equipment.report_problem_statistics(start_date, end_date, workshop_id=workshop_id,
                                                                 equipment=problem_machines)
+        except Exception as e:
+            print(e)
+            context['no_data'] = True
+            return render(request, 'machines/stats_report.html', context)
 
     joined_report = stat_data['day_stats'] + problem_stat_data['day_stats']
 
@@ -1576,7 +1578,7 @@ def stats_report(request):
             else:
                 total_keys_list[key] = value
 
-    total_user_stats = {}
+    total_workshop_user_data = {}
 
     # Calculation percent for reasons
     for workshop, reason in total_keys_list.items():
@@ -1586,12 +1588,14 @@ def stats_report(request):
             if v == 0:
                 continue
             else:
-                workshop_user_stats[k] = round(v / max(user_stats_value) * 100, 1)
-        total_user_stats[workshop] = sorted(workshop_user_stats.items(), key=lambda x: x[1], reverse=True)
+                workshop_user_stats[k] = round(v / max(user_stats_value) * 100, 2)
+        total_workshop_user_data[workshop] = sorted(workshop_user_stats.items(), key=lambda x: x[1], reverse=True)
+
+    total_workshop_user_data_dict = dict(sorted(total_workshop_user_data.items(), key=lambda k: dict_to_sorting[k[0]]))
 
     context['statistics'] = {
         'day_stats': workshop_sort_joined_report,
-        'total_workshop_user_data': total_user_stats
+        'total_workshop_user_data': total_workshop_user_data_dict
     }
 
     # Total workshop percent
@@ -1631,7 +1635,5 @@ def stats_report(request):
         'days_total_percent': days_total_percent,
         'total_period_percent': total_period_percent
     }
-
-    context['previous_week_data'] = get_previous_week_report(start_date, end_date)
 
     return render(request, 'machines/stats_report.html', context)

@@ -1792,7 +1792,7 @@ table {
     background: #dddddd;
 }
 
-.report__table-week-reason {
+.report__table-week-reason, .report__table-total-reason-list {
     width: 25%;
 }
 
