@@ -812,7 +812,7 @@ class ClassifiedInterval(models.Model):
 
                 for ci in user_stats_intervals:
                     start_i = max(ci.start, start_date)
-                    end_i = min(ci.end, start_date + datetime.timedelta(days=1))
+                    end_i = min(ci.end, end_date + datetime.timedelta(days=1))
                     int_dur_min = int((end_i - start_i).total_seconds() // 60)
                     user_cl = str(ci.user_classification) if ci.user_classification else '000 - Не указано'
 
