@@ -1577,7 +1577,6 @@ def stats_report(request):
                     total_keys_list[key] = t_dict
             else:
                 total_keys_list[key] = value
-
     total_workshop_user_data = {}
 
     # Calculation percent for reasons

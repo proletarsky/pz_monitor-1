@@ -706,7 +706,6 @@ class ClassifiedInterval(models.Model):
         :param equipment: filter by equipment or not (int, equipment, array)
         :return: dict of statistics
         '''
-        # check dates
         start_date = dateparse.parse_date(start)
         start_date = timezone.make_aware(datetime.datetime.combine(start_date, datetime.datetime.min.time())) \
             if isinstance(start_date, datetime.date) else None
