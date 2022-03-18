@@ -357,13 +357,14 @@ class Equipment(models.Model):
         starting = datetime.datetime(year=int(start[0:4:1]), month=int(start[5:7:1]), day=int(start[8:10:1]),
                                       hour=0, minute=0, tzinfo=pytz.UTC)
 
+
         days_stats = []
         delta = ending - starting
 
         for eid in equipment:
             intervals_data = []
             hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting,
-                                                          starting__lte=ending + datetime.timedelta(days=1)).order_by('id')
+                                                          starting__lte=ending + datetime.timedelta(days=1, hours=0)).order_by('id')
 
             user_reason = []
             for x in hour_intervals:
@@ -387,8 +388,8 @@ class Equipment(models.Model):
                     user_stats[k] = round(v / max(user_stats_value) * 100, 1)
 
             for day_count, i in enumerate(range(delta.days + 1)):
-                hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting + datetime.timedelta(days=i),
-                                                              starting__lte=starting + datetime.timedelta(days=i + 1)).order_by('id')
+                hour_intervals = Hour_interval.objects.filter(equipment_id=eid, ending__gte=starting + datetime.timedelta(days=i, hours=0, minutes=1),
+                                                              starting__lte=starting + datetime.timedelta(days=i + 1, hours=0, minutes=-1)).order_by('id')
                 total_work = 0
                 total_loss = 0
                 for x in hour_intervals:
@@ -397,7 +398,7 @@ class Equipment(models.Model):
                     else:
                         total_loss += 1
                 if total_work != 0 and total_loss != 0:
-                    intervals_data.append(round(100 - total_loss / (total_work + total_loss) * 100, 1))
+                    intervals_data.append(round(100 * total_work / 24, 1))
                 elif total_work == 0:
                     intervals_data.append(0)
                 elif total_loss == 0:
@@ -706,6 +707,7 @@ class ClassifiedInterval(models.Model):
         :param equipment: filter by equipment or not (int, equipment, array)
         :return: dict of statistics
         '''
+        # check dates
         start_date = dateparse.parse_date(start)
         start_date = timezone.make_aware(datetime.datetime.combine(start_date, datetime.datetime.min.time())) \
             if isinstance(start_date, datetime.date) else None
@@ -830,11 +832,11 @@ class ClassifiedInterval(models.Model):
                     auto_stats = {}
 
                     intervals = ClassifiedInterval.objects.filter(equipment__problem_machine=False, equipment__id=eid,
-                                                                  end__gte=start_date + datetime.timedelta(days=i),
-                                                                  start__lte=start_date + datetime.timedelta(days=i + 1))
+                                                                  end__gte=start_date + datetime.timedelta(days=i, hours=3),
+                                                                  start__lte=start_date + datetime.timedelta(days=i + 1, hours=3))
                     for c, ci in enumerate(intervals):
-                        start_i = max(ci.start, start_date + datetime.timedelta(days=i))
-                        end_i = min(ci.end, start_date + datetime.timedelta(days=i + 1))
+                        start_i = max(ci.start, start_date + datetime.timedelta(days=i, hours=3))
+                        end_i = min(ci.end, start_date + datetime.timedelta(days=i + 1, hours=3))
                         int_dur_min = int((end_i - start_i).total_seconds() // 60)
                         auto_cl = str(ci.automated_classification) if ci.automated_classification else 'Неопределено'
                         auto_stats[auto_cl] = auto_stats.get(auto_cl, 0) + int_dur_min
@@ -846,7 +848,7 @@ class ClassifiedInterval(models.Model):
                             percent_stats = 100
                     elif len(auto_stats) == 2:
                         total_dur_min = auto_stats.get('000 - Оборудование работает') + auto_stats.get('001 - Простой')
-                        percent_stats = round(100 - auto_stats.get('001 - Простой') / total_dur_min * 100, 1)
+                        percent_stats = round(100 * auto_stats.get('000 - Оборудование работает') / total_dur_min, 1)
                     # else:
                     #     print("Нет данных")
                     intervals_data.append(percent_stats)
