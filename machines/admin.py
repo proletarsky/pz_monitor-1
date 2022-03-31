@@ -39,9 +39,14 @@ class CodeAdmin(admin.ModelAdmin):
     list_display = ['user', 'code']
 
 
+class ReasonAdmin(admin.ModelAdmin):
+    list_display = ['code', 'description', 'is_working', 'is_operator', 'selectable', 'color']
+    search_fields = ['code']
+
+
 # Register your models here.
 admin.site.register(Participant)
-admin.site.register(Reason)
+admin.site.register(Reason, ReasonAdmin)
 admin.site.register(Equipment, EquipmentAdmin)
 admin.site.register(TimetableDetail)
 admin.site.register(Timetable, TimetableAdmin)
