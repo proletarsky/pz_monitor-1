@@ -213,7 +213,11 @@ class EquipmentWorksDetailView(UpdateView):
                                                                           starting__gte=start_new_limits,
                                                                           ending__lte=end_new_limits).order_by('id')
         context['new_algoritm'] = self.object.problem_machine
-        context['reason_list'] = Reason.objects.filter(is_operator=True)
+
+        if self.filter_date > datetime.date(year=2022, month=4, day=10):
+            context['reason_list'] = Reason.objects.filter(is_operator=True, selectable=True)
+        else:
+            context['reason_list'] = Reason.objects.filter(is_operator=True)
 
         if self.request.POST:
             if self.object.problem_machine:

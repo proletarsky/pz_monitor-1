@@ -49,6 +49,9 @@ class Reason(models.Model):
     selectable = models.BooleanField(verbose_name='Активность', default=False)
     color = models.CharField(max_length=7, verbose_name='Цвет в диаграммах', null=True)
 
+    class Meta:
+        ordering = ['code']
+
     def __str__(self):
         return ('{0} - {1}'.format(self.code, self.description))
 

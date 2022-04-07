@@ -1,14 +1,15 @@
+import datetime
+
 from django import forms
 from django.forms import widgets
 from django.forms.models import inlineformset_factory, modelformset_factory
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
-from .models import Reason, ClassifiedInterval, Equipment, Repair_rawdata,Area
+from .models import Reason, ClassifiedInterval, Equipment, Repair_rawdata, Area
 from django.utils import timezone
 from django.contrib.auth.models import User
 
 
 class ReasonForm(forms.ModelForm):
-
     class Meta:
         model = Reason
         exclude = ['']
@@ -42,7 +43,10 @@ class ClassifiedIntervalForm(forms.ModelForm):
         super(ClassifiedIntervalForm, self).__init__(*args, **kwargs)
         instance = getattr(self, 'instance', None)
         if instance and instance.id:
-            # self.fields['start'].widget.attrs['readonly'] = True
+            if instance.end.date() > datetime.date(year=2022, month=4, day=10):
+                self.fields['user_classification'].queryset = Reason.objects.filter(is_operator=True, selectable=True)
+            else:
+                self.fields['user_classification'].queryset = Reason.objects.filter(is_operator=True)
             if self.instance.automated_classification.is_working:
                 self.fields['user_classification'].widget.attrs['class'] = 'hidden'
 
@@ -68,7 +72,5 @@ class UserRegistrationForm(forms.ModelForm):
 
 class Repairform(forms.ModelForm):
     class Meta:
-        model=Repair_rawdata
-        fields=('id','machines_id','repair_job_status','repairer_master_reason','repair_reason','repair_comment')
-
-
+        model = Repair_rawdata
+        fields = ('id', 'machines_id', 'repair_job_status', 'repairer_master_reason', 'repair_reason', 'repair_comment')
